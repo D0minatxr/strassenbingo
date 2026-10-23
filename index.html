@@ -7,8 +7,6 @@
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
 <script src="vendor/peerjs.min.js"></script>
 <style>
-@font-face{font-family:'Bricolage Grotesque';src:url(vendor/fonts/BricolageGrotesque-Regular.ttf) format('truetype');font-weight:400 500;font-display:swap}
-@font-face{font-family:'Bricolage Grotesque';src:url(vendor/fonts/BricolageGrotesque-Bold.ttf) format('truetype');font-weight:600 900;font-display:swap}
 @font-face{font-family:'Instrument Sans';src:url(vendor/fonts/InstrumentSans-Regular.ttf) format('truetype');font-weight:400 500;font-display:swap}
 @font-face{font-family:'Instrument Sans';src:url(vendor/fonts/InstrumentSans-Bold.ttf) format('truetype');font-weight:600 900;font-display:swap}
 :root{
@@ -21,7 +19,7 @@ html,body{margin:0;min-height:100%}
 body{
   background:var(--bg); color:var(--text); font:15px/1.45 'Instrument Sans',system-ui,sans-serif;
 }
-h1,h2,h3,.display{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+h1,h2,h3,.display{font-family:var(--pxf);letter-spacing:-.01em;margin:0}
 h2{font-size:18px;margin-bottom:12px}
 a{color:var(--accent)}
 button,.btnlike{font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--line);border-radius:11px;padding:9px 14px;background:var(--panel2);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}
@@ -44,7 +42,7 @@ label>input,label>select,label>textarea{margin-top:5px;color:var(--text)}
 kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:12px}
 
 /* Logo */
-.logo{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:52px;line-height:.95;letter-spacing:-.03em}
+.logo{font-family:var(--pxf);font-weight:800;font-size:52px;line-height:.95;letter-spacing:-.03em}
 .logo span{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:0 10px;border-radius:10px;margin-left:6px;transform:rotate(-2deg)}
 .logo.sm{font-size:22px}
 .logo.sm span{padding:0 6px;border-radius:7px;margin-left:3px}
@@ -76,7 +74,7 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2p
 .col{display:grid;gap:18px}
 .teamgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .team{border:2px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 7%,var(--panel));border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:220px}
-.team-h{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--c)}
+.team-h{display:flex;align-items:center;gap:8px;font-family:var(--pxf);font-weight:800;font-size:19px;color:var(--c)}
 .team-h small{margin-left:auto;color:var(--muted);font-family:'Instrument Sans';font-size:13px;font-weight:500}
 .plist{list-style:none;margin:0;padding:0;display:grid;gap:6px;flex:1;align-content:start}
 .plist li{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.22);border-radius:10px;padding:7px 9px}
@@ -197,11 +195,11 @@ label.dim{opacity:.45}
 .phead{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 .acav.big{width:46px;height:46px}
 .pcode{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex-wrap:wrap;margin-top:2px}
-.pcode b{font-family:'Bricolage Grotesque';font-size:20px;letter-spacing:.12em;color:var(--accent)}
+.pcode b{font-family:var(--pxf);font-size:20px;letter-spacing:.12em;color:var(--accent)}
 .pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .pstat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;justify-items:start;gap:1px}
 .pstat .pi{font-size:15px}
-.pstat b{font-family:'Bricolage Grotesque';font-size:24px;line-height:1.1}
+.pstat b{font-family:var(--pxf);font-size:24px;line-height:1.1}
 .pstat small{font-size:12px;color:var(--muted)}
 .psub{font-size:14px;margin:16px 0 8px}
 .pmodes{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
@@ -266,7 +264,7 @@ label.dim{opacity:.45}
 .rqgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.rqgrid>[data-queue]{grid-column:span 2}.rqgrid>[data-queue=solo],.rqgrid>[data-queue='1v1']{grid-column:span 3}
 .rqtile{flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border-radius:12px;background:var(--panel2);text-align:left}
 .rqtile:hover:not(:disabled){border-color:var(--accent)}
-.rqname{font-family:'Bricolage Grotesque';font-size:20px;font-weight:800}
+.rqname{font-family:var(--pxf);font-size:20px;font-weight:800}
 .rqneed{font-size:12px;color:var(--muted);font-weight:500}
 .rqelo{font-size:13px;color:var(--accent)}
 .olb{border-left:1px solid var(--line);padding-left:22px}
@@ -276,11 +274,11 @@ label.dim{opacity:.45}
 .lbrank{width:26px;text-align:center;font-weight:800;color:var(--muted)}
 .lbname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .lbgames{font-size:12px}
-.lbelo{font-family:'Bricolage Grotesque';font-size:17px;min-width:44px;text-align:right}
+.lbelo{font-family:var(--pxf);font-size:17px;min-width:44px;text-align:right}
 .lbme{margin-top:10px;font-size:13px;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
 .elorow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .elochip{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:grid}
-.elochip b{font-family:'Bricolage Grotesque';font-size:22px}
+.elochip b{font-family:var(--pxf);font-size:22px}
 .elochip small{font-size:11px;color:var(--muted)}
 .search{text-align:center;display:grid;justify-items:center;gap:4px;padding:6px}
 .radar{position:relative;width:110px;height:110px;display:grid;place-items:center}
@@ -288,12 +286,12 @@ label.dim{opacity:.45}
 .radar span{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent);opacity:0;animation:radar 2.4s ease-out infinite}
 .radar span:nth-child(2){animation-delay:.8s}.radar span:nth-child(3){animation-delay:1.6s}
 @keyframes radar{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.15);opacity:0}}
-.qtime{font-family:'Bricolage Grotesque';font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.qtime{font-family:var(--pxf);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
 .found{text-align:center}
 .foundh{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ok);margin-bottom:4px}
 .found .flist li{text-align:left}
 .vsgrid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:start;text-align:left}
-.vs{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;color:var(--muted);align-self:center}
+.vs{font-family:var(--pxf);font-weight:800;font-size:22px;color:var(--muted);align-self:center}
 .rkbanner{display:grid;gap:4px;border-color:rgba(255,176,32,.45);background:color-mix(in srgb,var(--accent) 7%,var(--panel))}
 .rankedbox{text-align:center;font-size:16px}
 .rankedbox .up{color:var(--ok);font-weight:800}.rankedbox .down{color:var(--bad);font-weight:800}
@@ -323,7 +321,7 @@ label.dim{opacity:.45}
 .chat form select{width:auto}
 
 /* Game */
-.game-top .timer{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;font-variant-numeric:tabular-nums;min-width:96px}
+.game-top .timer{font-family:var(--pxf);font-weight:800;font-size:26px;font-variant-numeric:tabular-nums;min-width:96px}
 .timer.warn{color:var(--bad)}
 .scores{display:flex;gap:8px;flex-wrap:wrap;flex:1}
 .score{display:flex;align-items:center;gap:8px;border-radius:12px;padding:5px 10px;background:color-mix(in srgb,var(--c) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--c) 40%,transparent);font-size:14px}
@@ -362,7 +360,7 @@ label.dim{opacity:.45}
 .vtimer{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
 .vtimer span{display:block;height:100%;width:100%;background:var(--accent);border-radius:3px;transition:width .2s linear}
 .vtimer span.low{background:#ff5d6c}
-.cell.free{background:var(--accent);color:var(--accent-ink);font-family:'Bricolage Grotesque';font-weight:800}
+.cell.free{background:var(--accent);color:var(--accent-ink);font-family:var(--pxf);font-weight:800}
 .cell.blocked{color:rgba(34,37,44,.55);background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--c) 22%,#fffaf0) 0 6px,#fffaf0 6px 12px)}
 .cell .cnt{position:absolute;top:3px;right:3px;z-index:1;background:rgba(0,0,0,.6);color:#fff;font-size:10px;border-radius:6px;padding:0 4px;text-shadow:none}
 .cell .bad{position:absolute;top:3px;left:3px;z-index:2;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--bad);color:#fff}
@@ -411,7 +409,7 @@ label.dim{opacity:.45}
 .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .dcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;transition:border-color .15s,background .15s}
 .dcard.in{border-color:rgba(255,176,32,.6);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
-.dw{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;line-height:1.15;min-height:2.3em}
+.dw{font-family:var(--pxf);font-weight:800;font-size:17px;line-height:1.15;min-height:2.3em}
 .dmeta{display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap}
 .dscore{font-weight:800;font-size:15px;min-width:26px}
 .dscore.pos{color:var(--ok)}.dscore.neg{color:var(--bad)}
@@ -427,7 +425,7 @@ label.dim{opacity:.45}
 .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:14px}
 .rcard{border-top:4px solid var(--c)}
 .rcard .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.rcard .rank{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:var(--muted)}
+.rcard .rank{font-family:var(--pxf);font-weight:800;font-size:26px;color:var(--muted)}
 .rcard .stats{display:flex;gap:16px;margin:8px 0 12px;font-size:14px}
 .rcard .stats b{font-size:20px;display:block;color:var(--text)}
 .mini{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;background:var(--paper);padding:5px;border-radius:9px}
@@ -458,7 +456,7 @@ label.dim{opacity:.45}
 /* Toasts */
 #toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:60;display:grid;gap:8px;justify-items:center;pointer-events:none}
 .toast{background:#0b0f14;border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));padding:10px 16px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);font-weight:600;animation:tin .25s ease-out;max-width:90vw}
-.toast.big{font-size:20px;font-family:'Bricolage Grotesque';font-weight:800;padding:14px 22px}
+.toast.big{font-size:20px;font-family:var(--pxf);font-weight:800;padding:14px 22px}
 @keyframes tin{from{transform:translateY(12px);opacity:0}}
 
 /* Orte & Weltkarte */
@@ -547,7 +545,7 @@ button .ic,.btnlike .ic{margin-right:6px}
 .cbrand .logo.sm{font-size:21px;white-space:nowrap}
 /* Spielen-Knopf als gelbes Wegweiser-Schild */
 .playsign{position:relative;height:44px;padding:0 44px 0 22px;border:0;border-radius:6px 0 0 6px;background:var(--accent);color:var(--accent-ink);
-  font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.01em;
+  font-family:var(--pxf);font-size:20px;font-weight:800;letter-spacing:-.01em;
   clip-path:polygon(0 0,calc(100% - 22px) 0,100% 50%,calc(100% - 22px) 100%,0 100%);box-shadow:inset 0 0 0 3px rgba(255,255,255,.55)}
 .playsign:hover:not(:disabled){background:#ffd35e}
 .playsign.on{background:#fff;color:#14181f}
@@ -615,7 +613,7 @@ button .ic,.btnlike .ic{margin-right:6px}
 .mode-art svg{width:100%;height:100%;display:block}
 .mode.locked .mode-art{filter:saturate(.55) brightness(.8)}
 .mode-copy{padding:12px 14px 14px;display:grid;gap:4px}
-.mode-copy b{font-family:'Bricolage Grotesque',sans-serif;font-size:19px;display:flex;align-items:center;gap:8px}
+.mode-copy b{font-family:var(--pxf);font-size:19px;display:flex;align-items:center;gap:8px}
 .mode-copy small{color:var(--muted);font-size:13px;line-height:1.4}
 .soon{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#ffb020;background:rgba(255,176,32,.12);padding:2px 8px;border-radius:999px;font-family:'Instrument Sans',sans-serif}
 .soon .ic{width:12px;height:12px;margin:0}
@@ -662,6 +660,146 @@ button .ic,.btnlike .ic{margin-right:6px}
   .chip-t{display:none}
   .playsign{font-size:17px;height:40px;padding:0 38px 0 16px}
 }
+
+/* ===================== Pixel-Look ===================== */
+@font-face{font-family:'PixelUI';src:url(vendor/fonts/PixelifySans.ttf) format('truetype');font-weight:400 700;font-display:swap}
+@font-face{font-family:'PixelUI';src:url(vendor/fonts/Jersey10-Regular.ttf) format('truetype');font-weight:400 700;font-display:swap;unicode-range:U+30-39,U+25;size-adjust:128%}
+:root{--fr-panel:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%233d3670' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%2316122c' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%23241f44' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-tile:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%234a4382' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%231d1838' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%232e2854' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-btn:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%235b53a0' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%23211c40' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%233a3368' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-btnh:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%236f66b8' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%232a2450' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%23463e7c' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-btnp:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%23211c40' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%235b53a0' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%233a3368' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-pri:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%23fff2a6' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%23c47d06' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%23ffc22e' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-prih:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%23fffbd6' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%23d68f12' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%23ffd458' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");--fr-inp:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 7' width='7' height='7' shape-rendering='crispEdges'%3E%3Cpath fill='%230a0816' d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM1 1h1v1h-1zM5 1h1v1h-1zM0 2h1v1h-1zM6 2h1v1h-1zM0 3h1v1h-1zM6 3h1v1h-1zM0 4h1v1h-1zM6 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1z'/%3E%3Cpath fill='%2305040c' d='M2 1h1v1h-1zM3 1h1v1h-1zM4 1h1v1h-1zM1 2h1v1h-1zM1 3h1v1h-1zM1 4h1v1h-1z'/%3E%3Cpath fill='%232c2654' d='M5 2h1v1h-1zM5 3h1v1h-1zM5 4h1v1h-1zM2 5h1v1h-1zM3 5h1v1h-1zM4 5h1v1h-1z'/%3E%3Cpath fill='%230f0c20' d='M2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM2 3h1v1h-1zM4 3h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1z'/%3E%3C/svg%3E");
+  --bg:#17132c; --panel:#241f44; --panel2:#2e2854; --line:#0a0816; --text:#f4f1e8; --muted:#a8a2cc; --blue:#4f86ff;
+  --accent:#ffc22e; --accent-ink:#1b1206; --ok:#35c873; --bad:#ff5d6c; --r:0px; --pxf:'PixelUI','Instrument Sans',system-ui,sans-serif}
+*,*::before,*::after{border-radius:0!important}
+.spinner{border-radius:50%!important}
+body{background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' shape-rendering='crispEdges'%3E%3Crect width='48' height='48' fill='%2317132c'/%3E%3Cpath fill='%231e1938' d='M6 9h3v3h-3zM30 33h3v3h-3z'/%3E%3Cpath fill='%231b1634' d='M36 6h3v3h-3zM15 39h3v3h-3z'/%3E%3C/svg%3E");image-rendering:auto}
+svg.px{image-rendering:pixelated;display:block}
+h1,h2,h3,.display,.logo,.qtime,.timer,.vs,.rqname,.mode-copy b,.dw,.lbelo,.rcard .rank,.winner .display,.playsign,.cnav button,.tab,.hero-date,.kicker,.pname,.pcode b{font-family:var(--pxf);letter-spacing:.01em}
+h1,h2,h3{font-weight:700}
+button,.btnlike{font-family:var(--pxf);font-weight:600;letter-spacing:.02em}
+button small,.cell:not(.free),.rqneed,.mode-copy small,.fname,.flist li,.partyslots li,.invlist li{font-family:'Instrument Sans',system-ui,sans-serif;letter-spacing:0}
+/* Rahmen: 9-Slice-Pixelgrafik */
+.card,.panel,.modepanel,.modal-box,.hero,.news-item,.sgrp,.dcard,.gitem,.winner,.rcard{border:9px solid transparent;border-image:var(--fr-panel) 3 / 9px;background-clip:padding-box;background-color:var(--panel);box-shadow:none}
+.card,.panel,.modepanel{padding:12px}
+.modal-box{padding:14px;box-shadow:0 18px 0 rgba(0,0,0,.35)}
+.news-item,.sgrp,.dcard{border-image-source:var(--fr-tile);background-color:var(--panel2)}
+.rcard{border-top:9px solid transparent}
+.rcard{box-shadow:inset 0 4px 0 var(--c)}
+.gitem{border-top-width:9px;box-shadow:inset 0 3px 0 var(--c)}
+button,.btnlike{border:6px solid transparent;border-image:var(--fr-btn) 3 / 6px;background-clip:padding-box;background-color:#3a3368;padding:4px 10px;color:var(--text);transition:none}
+button:hover:not(:disabled),.btnlike:hover{border-color:transparent;border-image-source:var(--fr-btnh);background-color:#463e7c}
+button:active:not(:disabled){border-image-source:var(--fr-btnp);transform:translateY(2px)}
+.small{padding:1px 7px;font-size:13px}
+.btn-primary{border-image-source:var(--fr-pri);background-color:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover:not(:disabled){border-image-source:var(--fr-prih);background-color:#ffd458}
+input,select,textarea{border:6px solid transparent;border-image:var(--fr-inp) 3 / 6px;background-clip:padding-box;background-color:#0f0c20;padding:4px 8px}
+input:focus,select:focus,textarea:focus{outline:3px solid var(--accent);outline-offset:0}
+.seg,.tabs{border:6px solid transparent;border-image:var(--fr-inp) 3 / 6px;background-clip:padding-box;background-color:#0f0c20;padding:2px}
+.seg button,.tab,.cnav button,.iconbtn,.hdot,.strip button,.cell,.avpick,.mode,.playsign,.fnote,.flist li,.rqtile,.partyslots li{border-image:none}
+.seg button.on,.tab.on{background:var(--accent);color:var(--accent-ink);box-shadow:inset 0 -3px 0 #c47d06,inset 0 3px 0 #fff2a6}
+.iconbtn{border:0;padding:7px;background:transparent}
+.iconbtn:hover:not(:disabled){background:#2e2854;border:0}
+kbd{border-radius:0}
+/* Kopfzeile */
+.ctop{background:#0f0c20;border-bottom:0;box-shadow:0 3px 0 #0a0816,0 6px 0 #2e2854}
+.logo span{transform:none;box-shadow:inset 0 -3px 0 #c47d06,inset 0 3px 0 #fff2a6;padding:0 8px}
+.logo{letter-spacing:0}
+.playsign{font-size:22px;font-weight:700;box-shadow:none;background:var(--accent);
+  clip-path:polygon(0 4px,4px 4px,4px 0,calc(100% - 24px) 0,calc(100% - 24px) 4px,calc(100% - 20px) 4px,calc(100% - 20px) 8px,calc(100% - 16px) 8px,calc(100% - 16px) 12px,calc(100% - 12px) 12px,calc(100% - 12px) 16px,calc(100% - 8px) 16px,calc(100% - 8px) 20px,calc(100% - 4px) 20px,100% 20px,100% calc(100% - 20px),calc(100% - 8px) calc(100% - 20px),calc(100% - 8px) calc(100% - 16px),calc(100% - 12px) calc(100% - 16px),calc(100% - 12px) calc(100% - 12px),calc(100% - 16px) calc(100% - 12px),calc(100% - 16px) calc(100% - 8px),calc(100% - 20px) calc(100% - 8px),calc(100% - 20px) calc(100% - 4px),calc(100% - 24px) calc(100% - 4px),calc(100% - 24px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px));
+  background-image:linear-gradient(#fff2a6 0 4px,transparent 4px calc(100% - 5px),#c47d06 calc(100% - 5px))}
+.playsign:hover:not(:disabled){background-color:#ffd458}
+.playsign.on{background-color:#fff;color:#14121f}
+.cnav button{font-size:16px;font-weight:600}
+.cnav button.on{box-shadow:inset 0 -4px 0 var(--accent)}
+.cside{background:#130f26;border-left:0;box-shadow:inset 3px 0 0 #0a0816,inset 6px 0 0 #221d3e}
+.chip{background:#2e2854;box-shadow:inset 0 0 0 3px #0a0816}
+/* Start: Karussell */
+.hero{min-height:300px;background:#2d2350}
+.hero-art::after{background:linear-gradient(90deg,rgba(15,12,32,.94) 0%,rgba(15,12,32,.8) 36%,rgba(15,12,32,0) 66%)}
+.hero-copy h1{font-size:36px;line-height:1.05;text-shadow:3px 3px 0 #0a0816}
+.hero-date{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:1px 8px;font-size:13px}
+.hdot{width:12px;height:12px;background:rgba(255,255,255,.35)}
+.hdot.on{width:24px;background:var(--accent)}
+.panel-h h2{font-size:20px}
+/* Spielen: Modus-Karten */
+.mode{border:0;background:var(--panel);box-shadow:0 0 0 3px #0a0816,inset 0 0 0 0 transparent;padding:0}
+.mode:hover:not(:disabled){background:var(--panel);box-shadow:0 0 0 3px #0a0816,0 0 0 6px #5b53a0}
+.mode.on{box-shadow:0 0 0 3px #0a0816,0 0 0 7px var(--accent)}
+.mode-art{border-bottom:3px solid #0a0816}
+.mode-copy b{font-size:21px;font-weight:700}
+.soon{font-family:var(--pxf)}
+.rqtile{border:0;background:#2e2854;box-shadow:inset 0 0 0 3px #0a0816,inset 0 6px 0 #4a4382,inset 0 -6px 0 #1d1838;padding:14px}
+.rqtile:hover:not(:disabled){box-shadow:inset 0 0 0 3px #0a0816,inset 0 0 0 6px var(--accent)}
+.rqname{font-size:24px;font-weight:700}
+.upcoming li{background:#2e2854;box-shadow:inset 0 0 0 3px #0a0816}
+.loginnote{border:0;background:#1d2d63;box-shadow:inset 0 0 0 3px #0a0816,inset 0 0 0 6px #2f6fde}
+/* Listen */
+.lb li,.recent li,.flist li,.partyslots li,.invlist li,.plist li{background:#1b1735;box-shadow:inset 0 -3px 0 #130f26}
+.flist.side li{box-shadow:none;background:none}
+.flist.side li:hover{background:#2e2854}
+.lb li.top{background:#2e2610}
+.rk{font-family:var(--pxf);box-shadow:inset 0 -3px 0 rgba(0,0,0,.3)}
+.pres i,.pdot{border-radius:0!important}
+.pres.online i{box-shadow:0 0 0 2px rgba(53,200,115,.3)}
+/* Avatare */
+.av{border:0;box-shadow:0 0 0 3px #0a0816;background:#2e2854;font-family:var(--pxf)}
+.av.preset{box-shadow:0 0 0 3px #0a0816;background:none}
+.av.preset svg{image-rendering:pixelated}
+.avpick{padding:6px;background:transparent;border:0}
+.avpick.on{box-shadow:0 0 0 3px var(--accent)}
+/* Profil als Charakter-Bildschirm */
+.sheet{display:grid;gap:12px}
+.phead{gap:16px;margin:0;align-items:center}
+.avframe{display:inline-block;padding:6px;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,inset 0 0 0 3px #3d3670}
+.avframe .av.xl{width:96px;height:96px;font-size:40px;box-shadow:none}
+.kicker{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent)}
+.pname{font-size:28px;line-height:1.05;margin:2px 0 4px!important;overflow-wrap:anywhere}
+.pcode b{font-size:18px;color:var(--text)}
+.pbtns{gap:6px;margin-top:8px;flex-wrap:wrap}
+.hud{display:grid;gap:8px;background:#0f0c20;padding:12px;box-shadow:inset 0 0 0 3px #0a0816,inset 0 0 0 6px #221d3e}
+.hudrow{display:grid;grid-template-columns:110px 1fr 54px;gap:10px;align-items:center;font-size:13px}
+.hudrow .hl{color:var(--muted)}
+.hudrow>b{font-family:var(--pxf);font-size:17px;text-align:right}
+.pbar{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;height:14px}
+.pbar i{background:#2a2450;box-shadow:inset 0 -3px 0 #1d1838}
+.pbar i.on{background:var(--ok);box-shadow:inset 0 -3px 0 #1b7a42,inset 0 3px 0 #8af0b0}
+.hudrow+.hudrow .pbar i.on{background:#4f86ff;box-shadow:inset 0 -3px 0 #2648b0,inset 0 3px 0 #a9c6ff}
+.hudnums{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;padding-top:10px;border-top:3px dashed #2a2450}
+.hudnums div{display:grid;justify-items:center}
+.hudnums b{font-family:var(--pxf);font-size:24px;line-height:1.1;color:var(--accent)}
+.hudnums small{font-size:12px;color:var(--muted)}
+.psub{font-size:15px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.ranks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.ranks .rank{display:grid;justify-items:center;gap:1px;padding:8px 4px 6px;background:#1b1735;box-shadow:inset 0 -3px 0 #130f26;text-align:center}
+.ranks .rank.best{background:#2e2610;box-shadow:inset 0 0 0 3px var(--accent)}
+.ranks .rbadge{width:44px;height:48px;margin-bottom:4px}
+.ranks .rmode{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ranks b{font-family:var(--pxf);font-size:19px;line-height:1.1}
+.ranks small{font-size:11px;color:var(--muted)}
+.recent li{gap:8px;padding:7px 10px}
+.rres{font-family:var(--pxf);font-size:12px;padding:1px 6px;letter-spacing:.04em}
+.rres.w{background:var(--ok);color:#06210f}.rres.l{background:#5a2433;color:#ffb0b8}
+.rph,.rdt{color:var(--muted);font-size:12px}.rdt{font-family:var(--pxf);font-size:13px}
+@media (max-width:560px){.mode{min-width:0}.mode-copy b{font-size:16px!important;overflow-wrap:anywhere;hyphens:auto}.rqname{font-size:19px}.hero-copy h1{font-size:27px}.hudrow{grid-template-columns:86px 1fr 46px}.ranks{grid-template-columns:repeat(5,minmax(52px,1fr));overflow-x:auto}.avframe .av.xl{width:72px;height:72px}.pname{font-size:23px}.hudnums b{font-size:20px}}
+/* Spiel */
+.board{border-radius:0;box-shadow:0 0 0 3px #0a0816,0 8px 0 rgba(0,0,0,.35),inset 0 0 0 3px var(--paper2)}
+.cell{box-shadow:inset 0 0 0 2px rgba(0,0,0,.12),inset 0 -3px 0 rgba(0,0,0,.08)}
+.cell.free{font-family:var(--pxf)}
+.score{border:0;box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--c) 55%,#0a0816)}
+.score.me{box-shadow:inset 0 0 0 3px var(--c),0 0 0 3px #0a0816}
+.vtimer{height:10px;background:#0f0c20;box-shadow:inset 0 0 0 2px #0a0816}
+.vtimer span{transition:width .2s steps(4)}
+.toast{border:0;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,inset 6px 0 0 var(--c,var(--accent)),0 8px 0 rgba(0,0,0,.35);font-family:var(--pxf);font-weight:500}
+.invcard{border:0;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,inset 6px 0 0 #4f86ff,0 8px 0 rgba(0,0,0,.35)}
+.team{border-width:3px;box-shadow:0 0 0 3px #0a0816}
+.team-h,.rtile .rv{font-family:var(--pxf)}
+.rtile{border:0;box-shadow:inset 0 0 0 3px #0a0816,inset 0 4px 0 #4a4382}
+.top{background:#0f0c20;border-bottom:0;box-shadow:0 3px 0 #0a0816,0 6px 0 #2e2854;backdrop-filter:none}
+.codebox{border:0;background:#2e2854;box-shadow:inset 0 0 0 3px #0a0816}
+.codebox b{font-family:var(--pxf)}
+.pill{border-width:2px}
+.winner{background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,var(--panel)),var(--panel));background-clip:padding-box}
+.winner .display{font-size:52px;text-shadow:4px 4px 0 #0a0816}
+.mini,.mini span,.mini.words span.v:before{border-radius:0!important}
+.lightbox img,.vote-img,.thumb img,.capprev{border-radius:0}
+.client .foot{border-top:0;box-shadow:inset 0 3px 0 #0a0816}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -1017,69 +1155,310 @@ const ICONS = {
 };
 const ic = (n, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
-/* Avatare im Stil von Verkehrsschildern: Form + Farbe + Motiv (Wert „p:0“ … „p:23“ bleibt kompatibel) */
-const PRESETS = [
-  ['pin','#e8432e','round'],['camera','#2b5fd9','square'],['map','#1f9d6b','round'],['globe','#ffc22e','diamond'],
-  ['compass','#7a5af5','round'],['star','#ffc22e','square'],['flag','#e8432e','diamond'],['tree','#1f9d6b','square'],
-  ['mountain','#5b6f8a','round'],['anchor','#2b5fd9','diamond'],['sun','#ff8a1f','round'],['moon','#3a4a8a','square'],
-  ['bolt','#ffc22e','round'],['heart','#e8432e','square'],['key','#b07d48','diamond'],['crown','#7a5af5','square'],
-  ['car','#2b5fd9','round'],['bike','#1f9d6b','diamond'],['coffee','#8d5b3c','round'],['music','#c2408f','square'],
-  ['target','#e8432e','round'],['trophy','#ffc22e','square'],['home','#5b6f8a','diamond'],['sparkle','#22b4c3','round']
-];
-const presetSVG = i => { const [g, c, sh] = PRESETS[i]; const ink = c === '#ffc22e' || c === '#ff8a1f' ? '#1d1400' : '#fff';
-  const shape = sh === 'round' ? '<circle cx="24" cy="24" r="23"/>' : sh === 'square' ? '<rect x="1" y="1" width="46" height="46" rx="9"/>' : '<rect x="7" y="7" width="34" height="34" rx="5" transform="rotate(45 24 24)"/>';
-  return `<svg viewBox="0 0 48 48" aria-hidden="true"><g fill="${c}" stroke="rgba(255,255,255,.85)" stroke-width="2">${shape}</g><g transform="translate(12 12)" fill="none" stroke="${ink}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONS[g]}</g></svg>`; };
+/* ================= Pixel-Grafik (eigene Pixel-Art, als SVG gezeichnet) =================
+   Jedes Bild ist ein Pixelraster. Gleiche Farben einer Zeile werden zu Strecken zusammengefasst
+   und als ein <path> pro Farbe ausgegeben – klein und gestochen scharf in jeder Größe. */
+const PX = (() => {
+  function rng(seed) { let s = seed >>> 0 || 1; return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }; }
+  class Buf {
+    constructor(w, h) { this.w = w; this.h = h; this.p = new Array(w * h).fill(null); }
+    set(x, y, c) { x |= 0; y |= 0; if (c && x >= 0 && y >= 0 && x < this.w && y < this.h) this.p[y * this.w + x] = c; }
+    get(x, y) { return this.p[(y | 0) * this.w + (x | 0)]; }
+    rect(x, y, w, h, c) { for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) this.set(x + i, y + j, c); }
+    hline(x, y, w, c) { this.rect(x, y, w, 1, c); }
+    vline(x, y, h, c) { this.rect(x, y, 1, h, c); }
+    circle(cx, cy, r, c) { for (let y = -r; y <= r; y++) for (let x = -r; x <= r; x++) if (x * x + y * y <= r * r + r * .6) this.set(cx + x, cy + y, c); }
+    // Sprite aus Textzeilen; '.' = durchsichtig
+    blit(rows, pal, x, y, flip) {
+      rows.forEach((row, j) => [...row].forEach((ch, i) => { const c = pal[ch]; if (c) this.set(x + (flip ? row.length - 1 - i : i), y + j, c); }));
+    }
+    svg(cls) {
+      const byC = new Map();
+      for (let y = 0; y < this.h; y++) {
+        let x = 0;
+        while (x < this.w) {
+          const c = this.p[y * this.w + x]; if (!c) { x++; continue; }
+          let e = x + 1; while (e < this.w && this.p[y * this.w + e] === c) e++;
+          byC.set(c, (byC.get(c) || '') + `M${x} ${y}h${e - x}v1h${x - e}z`); x = e;
+        }
+      }
+      let out = ''; for (const [c, d] of byC) out += `<path fill="${c}" d="${d}"/>`;
+      return `<svg class="px ${cls || ''}" viewBox="0 0 ${this.w} ${this.h}" shape-rendering="crispEdges" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${out}</svg>`;
+    }
+  }
+  const sprite = (rows, pal, cls) => { const b = new Buf(Math.max(...rows.map(r => r.length)), rows.length); b.blit(rows, pal, 0, 0); return b.svg(cls).replace('preserveAspectRatio="xMidYMid slice"', 'preserveAspectRatio="xMidYMid meet"'); };
 
-/* Illustrationen (eigene Vektorgrafiken, keine Fremdbilder) */
-const ART = {
-  street: `<svg viewBox="0 0 640 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <defs><linearGradient id="skyA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2a4a"/><stop offset="1" stop-color="#2d3f6b"/></linearGradient>
-    <linearGradient id="roadA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3140"/><stop offset="1" stop-color="#151a23"/></linearGradient></defs>
-    <rect width="640" height="300" fill="url(#skyA)"/><circle cx="520" cy="62" r="26" fill="#ffe7a3" opacity=".9"/>
-    <g fill="#16203a"><rect x="0" y="92" width="70" height="120"/><rect x="62" y="120" width="54" height="92"/><rect x="108" y="70" width="64" height="142"/><rect x="420" y="84" width="70" height="128"/><rect x="482" y="112" width="58" height="100"/><rect x="532" y="76" width="108" height="136"/></g>
-    <g fill="#ffd36b" opacity=".75"><rect x="14" y="110" width="8" height="10"/><rect x="34" y="132" width="8" height="10"/><rect x="122" y="90" width="8" height="10"/><rect x="146" y="118" width="8" height="10"/><rect x="436" y="102" width="8" height="10"/><rect x="458" y="140" width="8" height="10"/><rect x="552" y="96" width="8" height="10"/><rect x="590" y="126" width="8" height="10"/><rect x="610" y="96" width="8" height="10"/></g>
-    <path d="M0 212h640v88H0z" fill="#0f141c"/><path d="M250 212h140l200 88H50z" fill="url(#roadA)"/>
-    <g fill="#ffc22e"><path d="M316 216h8l2 12h-12z"/><path d="M312 238h16l3 20h-22z"/><path d="M306 272h28l4 28h-36z"/></g>
-    <g stroke="#e9edf3" stroke-width="3" opacity=".6"><path d="M250 212 50 300M390 212l200 88"/></g>
-    <g transform="translate(196 104)"><rect x="-3" y="0" width="6" height="110" fill="#0b0f16"/><path d="M0 0c0-10 24-10 30-4" fill="none" stroke="#0b0f16" stroke-width="6"/><circle cx="31" cy="2" r="7" fill="#ffe7a3"/><path d="M31 9 4 108h54Z" fill="#ffe7a3" opacity=".08"/></g>
-    <g transform="translate(452 128) scale(.62)"><path d="M28 0C12 0 0 12 0 28c0 21 28 50 28 50s28-29 28-50C56 12 44 0 28 0Z" fill="#e8432e"/><circle cx="28" cy="27" r="11" fill="#fff"/></g>
-    <g transform="translate(520 150)"><rect x="-3" y="0" width="6" height="62" fill="#0b0f16"/><path d="M-36 -18h64l12 12-12 12h-64z" fill="#2b5fd9" stroke="#fff" stroke-width="2"/></g></svg>`,
-  globe: `<svg viewBox="0 0 400 240" aria-hidden="true"><rect width="400" height="240" fill="#16305f"/>
-    <circle cx="200" cy="138" r="92" fill="#2b5fd9"/><path d="M128 100c20-14 44-4 54 10s-6 30 10 38 22 28 4 40-50 4-62-18-30-50-6-70Z" fill="#1f9d6b"/><path d="M226 72c22 4 46 18 52 40s-14 22-30 18-20 16-36 6-8-30 2-44 0-22 12-20Z" fill="#1f9d6b"/>
-    <ellipse cx="200" cy="138" rx="92" ry="34" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2"/><path d="M200 46v184" stroke="#fff" stroke-opacity=".2" stroke-width="2"/>
-    <path d="M150 112C190 40 270 60 268 118" fill="none" stroke="#ffc22e" stroke-width="3" stroke-dasharray="7 7"/>
-    <g fill="#e8432e"><path d="M150 112c-9 0-16 7-16 16 0 12 16 26 16 26s16-14 16-26c0-9-7-16-16-16Z" transform="translate(0 -40)"/><path d="M268 118c-9 0-16 7-16 16 0 12 16 26 16 26s16-14 16-26c0-9-7-16-16-16Z" transform="translate(0 -40)"/></g>
-    <g fill="#fff"><circle cx="150" cy="88" r="5"/><circle cx="268" cy="94" r="5"/></g></svg>`,
-  ranked: `<svg viewBox="0 0 400 240" aria-hidden="true"><rect width="400" height="240" fill="#2a1f4f"/>
-    <g opacity=".18" stroke="#ffc22e" stroke-width="10" fill="none"><path d="M40 260 200 120l160 140"/><path d="M40 210 200 70l160 140"/></g>
-    <g transform="translate(200 122)"><path d="M0-86 70-58v44c0 52-30 86-70 102-40-16-70-50-70-102v-44Z" fill="#ffc22e"/><path d="M0-70 56-48v36C56 30 32 58 0 72-32 58-56 30-56-12v-36Z" fill="#7a5af5"/>
-    <g fill="#ffc22e"><path d="m-30 2 30-20 30 20v14L0-4l-30 20Z"/><path d="m-30 30 30-20 30 20v14L0 24l-30 20Z"/></g><circle cy="-36" r="10" fill="#fff"/></g></svg>`,
-  custom: `<svg viewBox="0 0 400 240" aria-hidden="true"><rect width="400" height="240" fill="#14453a"/>
-    <g transform="translate(200 126) rotate(-6)"><rect x="-96" y="-90" width="192" height="180" rx="14" fill="#f6efdf"/><rect x="-96" y="-90" width="192" height="38" rx="14" fill="#ffc22e"/><rect x="-96" y="-66" width="192" height="14" fill="#ffc22e"/>
-    <text x="0" y="-62" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="24" fill="#1d1400">BINGO</text>
-    <g fill="#d9cfb7">${[0, 1, 2].map(r => [0, 1, 2].map(c => `<rect x="${-84 + c * 58}" y="${-42 + r * 42}" width="52" height="36" rx="6"/>`).join('')).join('')}</g>
-    <g fill="#1f9d6b"><rect x="-84" y="-42" width="52" height="36" rx="6"/><rect x="-26" y="0" width="52" height="36" rx="6"/><rect x="32" y="42" width="52" height="36" rx="6"/></g>
-    <path d="M-80-24 32 60" stroke="#e8432e" stroke-width="6" stroke-linecap="round"/></g>
-    <g transform="translate(316 40)"><path d="M18 0C8 0 0 8 0 18c0 14 18 32 18 32s18-18 18-32C36 8 28 0 18 0Z" fill="#e8432e"/><circle cx="18" cy="17" r="7" fill="#fff"/></g></svg>`,
-  extra: `<svg viewBox="0 0 400 240" aria-hidden="true"><rect width="400" height="240" fill="#3a2a18"/>
-    <path d="M0 196h400v44H0z" fill="#2a1e12"/>
-    <g transform="translate(70 96)"><rect x="0" y="0" width="260" height="34" rx="6" fill="#fff"/><g fill="#e8432e">${[0, 1, 2, 3, 4, 5].map(i => `<path d="M${i * 48 - 6} 34 ${i * 48 + 16} 0h22L${i * 48 + 16} 34Z"/>`).join('')}</g>
-    <rect x="18" y="34" width="10" height="66" fill="#d8d0c0"/><rect x="232" y="34" width="10" height="66" fill="#d8d0c0"/></g>
-    <g transform="translate(300 128)"><path d="M18 0 40 70H-4Z" fill="#ff8a1f"/><path d="M10 26h16l4 12H6ZM4 46h28l4 12H0Z" fill="#fff"/><rect x="-10" y="68" width="56" height="8" rx="2" fill="#ff8a1f"/></g>
-    <g transform="translate(84 30)"><path d="M0 0h96l14 18-14 18H0Z" fill="#ffc22e"/><text x="44" y="24" text-anchor="middle" font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="17" fill="#1d1400">bald</text></g></svg>`,
-  signs: `<svg viewBox="0 0 640 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="640" height="300" fill="#183a33"/>
-    <g opacity=".12" fill="#fff">${Array.from({ length: 9 }, (_, i) => `<rect x="${i * 76 - 10}" y="250" width="44" height="8" rx="2"/>`).join('')}</g>
-    <rect x="316" y="40" width="8" height="240" fill="#0d1f1b"/>
-    <g font-family="Bricolage Grotesque,sans-serif" font-weight="800" font-size="22">
-    <path d="M320 54h170l22 22-22 22H320Z" fill="#2b5fd9" stroke="#fff" stroke-width="3"/><text x="410" y="84" text-anchor="middle" fill="#fff">Ranked</text>
-    <path d="M320 112H150l-22 22 22 22h170Z" fill="#ffc22e" stroke="#fff" stroke-width="3"/><text x="232" y="142" text-anchor="middle" fill="#1d1400">Freunde</text>
-    <path d="M320 170h150l22 22-22 22H320Z" fill="#1f9d6b" stroke="#fff" stroke-width="3"/><text x="400" y="200" text-anchor="middle" fill="#fff">Neu</text></g></svg>`,
-  lens: `<svg viewBox="0 0 640 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="640" height="300" fill="#3a1f2c"/>
-    <g fill="#552b3d"><rect x="40" y="120" width="90" height="180"/><rect x="140" y="80" width="70" height="220"/><rect x="430" y="100" width="80" height="200"/><rect x="520" y="140" width="100" height="160"/></g>
-    <g transform="translate(320 150)"><rect x="-120" y="-80" width="240" height="160" rx="18" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="40 160"/>
-    <circle r="56" fill="#ffc22e"/><circle r="38" fill="#1d1400"/><circle r="22" fill="#2b5fd9"/><circle cx="-10" cy="-10" r="7" fill="#fff" opacity=".8"/>
-    <rect x="-90" y="-112" width="60" height="22" rx="6" fill="#ffc22e"/></g></svg>`
+  /* ---------- Sprites ---------- */
+  const S = {
+    // Street-View-Auto mit Kamera-Mast
+    car: [
+      '..........kk..........',
+      '.........kWWk.........',
+      '.........kWWk.........',
+      '..........kk..........',
+      '..........kk..........',
+      '.....kkkkkkkkkkkk.....',
+      '....kbbbbbbbbbbbbk....',
+      '...kbllkbbbbbkllbbk...',
+      '..kbbllkbbbbbkllbbbk..',
+      '.kbbbbbbbbbbbbbbbbbbk.',
+      'kbyyBBBBBBBBBBBBBByybk',
+      'kbbbbbbbbbbbbbbbbbbbbk',
+      'kkk.kkkkkkkkkkkk.kkkkk',
+      '...kggk.......kggk....',
+      '...kggk.......kggk....',
+      '....kk.........kk.....'],
+    pin: [
+      '...kkkkk...',
+      '..krrrrrrk.',
+      '.krrrhhrrrk',
+      'krrrhWWhrrrk'.slice(0, 11),
+      'krrhWWWWhrk',
+      'krrhWWWWhrk',
+      'krrrhWWhrrk',
+      '.krrrhhrrk.',
+      '.krrrrrrrk.',
+      '..krrrrrk..',
+      '...krrrk...',
+      '....krk....',
+      '.....k.....'],
+    tree: [
+      '...gggg...',
+      '..gGGggg..',
+      '.gGGgggdg.',
+      'gGgggggddg',
+      'ggggggdddg',
+      '.gggdddddg',
+      '..gddddd..',
+      '....tt....',
+      '....tt....',
+      '....tt....'],
+    lamp: [
+      '.kkkk.',
+      'kYYYYk',
+      '.kkkk.',
+      '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '..kk..', '.kkkk.'],
+    sign: [
+      'kkkkkkkkkkkkkkk.',
+      'kWWWWWWWWWWWWWWk',
+      'kWbbbbbbbbbbbbWkk',
+      'kWbWWbWbbWbWbbWWk',
+      'kWbbbbbbbbbbbbWkk',
+      'kWWWWWWWWWWWWWWk',
+      'kkkkkkkkkkkkkkk.',
+      '.......kk.......', '.......kk.......', '.......kk.......', '.......kk.......', '.......kk.......', '.......kk.......', '.......kk.......'],
+    trophy: [
+      '..kkkkkkkkkkkkkk..',
+      'kkkYYYYYYYYYYYhkkk',
+      'kY.kYYYWYYYYYhk.Yk',
+      'kY.kYYWWYYYYYhk.Yk',
+      'kY.kYYWYYYYYYhk.Yk',
+      '.kYkYYYYYYYYYhkYk.',
+      '..kkYYYYYYYYYhkk..',
+      '....kYYYYYYYhk....',
+      '.....kYYYYYhk.....',
+      '......kkYhkk......',
+      '.......kYhk.......',
+      '.......kYhk.......',
+      '.....kkYYYhkk.....',
+      '....kOOOOOOOOk....',
+      '....kOOWOOOOOk....',
+      '....kkkkkkkkkk....'],
+    cone: [
+      '.....kk.....',
+      '....kOOk....',
+      '....kWWk....',
+      '...kOOOOk...',
+      '...kOOOOk...',
+      '..kWWWWWWk..',
+      '..kOOOOOOk..',
+      '.kOOOOOOOOk.',
+      'kkkkkkkkkkkk',
+      'kddddddddddk',
+      'kkkkkkkkkkkk'],
+    key: [
+      '.kkkk.........',
+      'kYYYYk........',
+      'kY..Ykkkkkkkkk',
+      'kY..YYYYYYYYYk',
+      'kYYYYkkkYkYkYk',
+      '.kkkk...k.k.k.'],
+    camera: [
+      '....kkkk......',
+      '.kkkWWWWkkkkk.',
+      'kGGGGGGGGGGGGk',
+      'kGGkkkkkGGGrGk',
+      'kGkbbbbbkGGGGk',
+      'kGkbhbbbkGGGGk',
+      'kGkbbbbbkGGGGk',
+      'kGGkkkkkGGGGGk',
+      '.kkkkkkkkkkkk.'],
+    star: ['.Y.', 'YWY', '.Y.'],
+    bird: ['k.k', '.k.'],
+  };
+  const PAL = {
+    k: '#14121f', W: '#f4f1e8', b: '#2f6fde', B: '#1b4fb0', l: '#a9d4ff', y: '#ffd23f', g: '#2a2f3a', r: '#e8432e', h: '#ff8a6b',
+    G: '#59606e', d: '#1f7a4a', t: '#6b4426', Y: '#ffc22e', O: '#ff7a1f'
+  };
+  PAL.gT = '#3bb36a';
+
+  /* ---------- Szenen ---------- */
+  // Himmel mit Farbbändern und Schachbrett-Rasterung an den Übergängen (klassisches Dithering)
+  function sky(b, cols, top, bottom) {
+    const n = cols.length, H = bottom - top;
+    for (let y = top; y < bottom; y++) {
+      const t = (y - top) / H * (n - 1), i = Math.floor(t), f = t - i;
+      for (let x = 0; x < b.w; x++) {
+        const dither = f > .5 ? ((x + y) % 2 === 0 || f > .8) : (f > .25 && (x + y) % 4 === 0);
+        b.set(x, y, cols[Math.min(n - 1, i + (dither ? 1 : 0))]);
+      }
+    }
+  }
+  function skyline(b, R, base, minH, maxH, col, winCol, winRate, roofCol) {
+    let x = -2;
+    while (x < b.w) {
+      const w = 6 + Math.floor(R() * 10), h = minH + Math.floor(R() * (maxH - minH));
+      b.rect(x, base - h, w, h, col);
+      if (roofCol && R() < .4) { b.rect(x + 1, base - h - 2, w - 2, 2, col); if (R() < .5) b.vline(x + (w >> 1), base - h - 6, 4, col); }
+      if (winCol) for (let wy = base - h + 2; wy < base - 2; wy += 3) for (let wx = x + 1; wx < x + w - 1; wx += 2) if (R() < winRate) b.set(wx, wy, winCol);
+      x += w + (R() < .3 ? 1 : 0);
+    }
+  }
+  function street(b, y, theme) {
+    b.rect(0, y, b.w, 3, theme.walk); b.hline(0, y, b.w, theme.walkHi);
+    b.rect(0, y + 3, b.w, b.h - y - 3, theme.road);
+    const mid = y + 3 + ((b.h - y - 3) >> 1);
+    for (let x = 2; x < b.w; x += 12) b.rect(x, mid, 6, 1, theme.mark);
+  }
+  function scene(kind, w, h) {
+    const T = {
+      night: { sky: ['#191536', '#241f4f', '#33306e', '#4a3f86', '#6b4c94'], far: '#2b2752', mid: '#1d1a3c', win: '#ffd23f', walk: '#3a3654', walkHi: '#57527a', road: '#26233b', mark: '#ffc22e', stars: true, moon: '#fff1c4' },
+      day: { sky: ['#6fb6ff', '#8cc6ff', '#a9d6ff', '#c8e6ff'], far: '#7fa7c9', mid: '#5b6f8a', win: '#d9ecff', walk: '#b9b3a3', walkHi: '#d8d2c2', road: '#5d6170', mark: '#ffffff', sun: '#fff2a8', clouds: true },
+      dusk: { sky: ['#2d2350', '#5a3570', '#a2487a', '#ec7a5c', '#ffb36b'], far: '#5a3a6e', mid: '#2e2445', win: '#ffd23f', walk: '#4a3a52', walkHi: '#6b5872', road: '#2c2436', mark: '#ffc22e', sun: '#ffe07a' }
+    }[kind];
+    const b = new Buf(w, h), R = rng(kind === 'night' ? 7 : kind === 'day' ? 11 : 23);
+    const ground = h - 16;
+    sky(b, T.sky, 0, ground);
+    if (T.stars) for (let i = 0; i < w * h / 90; i++) { const x = R() * w | 0, y = R() * (ground - 20) | 0; b.set(x, y, R() < .2 ? '#ffffff' : '#9d97d6'); }
+    if (T.moon) { b.circle(w - 30, 14, 7, T.moon); b.circle(w - 27, 12, 6, T.sky[0]); }
+    if (T.sun) { b.circle(w - 34, kind === 'dusk' ? ground - 26 : 14, kind === 'dusk' ? 10 : 7, T.sun); }
+    if (T.clouds) for (let i = 0; i < 5; i++) { const cx = R() * w | 0, cy = 6 + R() * 18 | 0; b.rect(cx, cy, 14, 3, '#ffffff'); b.rect(cx + 3, cy - 2, 8, 2, '#ffffff'); b.rect(cx + 1, cy + 3, 12, 1, '#e3f1ff'); }
+    if (kind === 'night') for (let i = 0; i < 3; i++) b.blit(S.bird, { k: '#5b5590' }, 30 + i * 9, 18 + (i % 2) * 3);
+    skyline(b, R, ground, 14, 34, T.far, kind === 'day' ? null : T.mid, .0, true);
+    skyline(b, R, ground, 8, 26, T.mid, T.win, kind === 'day' ? 0 : .35, false);
+    street(b, ground, T);
+    // Bäume, Laternen, Schild
+    for (let x = 6; x < w; x += 34 + (R() * 10 | 0)) b.blit(S.tree, { g: kind === 'night' ? '#235c3c' : '#2f9d5a', G: kind === 'night' ? '#2f7a4c' : '#5cc77e', d: kind === 'night' ? '#173f2a' : '#1f7a4a', t: '#5a3a24' }, x, ground - 10);
+    for (let x = 22; x < w; x += 46) b.blit(S.lamp, { k: '#14121f', Y: kind === 'day' ? '#cfd6e0' : '#ffe58a' }, x, ground - 15);
+    if (kind !== 'day') for (let x = 22; x < w; x += 46) { b.set(x + 2, ground - 12, '#ffe58a33'); b.set(x + 3, ground - 12, '#ffe58a33'); }
+    b.blit(S.sign, PAL, w - 46, ground - 14);
+    b.blit(S.car, { ...PAL, g: '#1d1d24', B: '#174a9e' }, (w >> 1) - 11, ground);
+    b.blit(S.pin, PAL, (w >> 1) - 5, ground - 34);
+    return b;
+  }
+
+  /* ---------- Modus-Bilder (80×48) ---------- */
+  function modeArt(kind) {
+    const b = new Buf(80, 48), R = rng(kind.length * 97);
+    if (kind === 'casual') {
+      sky(b, ['#14204a', '#1a2b63', '#22377a'], 0, 48);
+      for (let i = 0; i < 40; i++) b.set(R() * 80 | 0, R() * 48 | 0, R() < .3 ? '#ffffff' : '#6d7fc9');
+      b.circle(40, 26, 17, '#0f1530'); b.circle(40, 26, 16, '#2f6fde');
+      // Kontinente
+      const land = ['....gg.........', '...gggg....g...', '..ggggg...ggg..', '...gggg..ggggg.', '....gg....gggg.', '.....g.....gg..', '...........g...', '..gg...........', '.gggg......gg..', '..ggg.....gggg.', '...g.......gg..'];
+      b.blit(land, { g: '#3bb36a' }, 29, 15);
+      for (let y = 10; y < 43; y++) for (let x = 24; x < 57; x++) if (b.get(x, y) === '#2f6fde' && (x - 40) * (x - 40) + (y - 26) * (y - 26) > 150 && (x + y) % 2) b.set(x, y, '#2458b8');
+      b.blit(S.pin, PAL, 27, 6); b.blit(S.pin, { ...PAL, r: '#ffc22e', h: '#ffe59a' }, 46, 12);
+      for (let i = 0; i < 9; i++) b.set(37 + i * 1.2, 8 + Math.sin(i / 2.5) * 2 + i * .2, '#ffffff');
+    } else if (kind === 'ranked') {
+      sky(b, ['#2a1650', '#3a1f6b', '#4d2a86'], 0, 48);
+      for (let i = 0; i < 12; i++) { const x = R() * 80 | 0; for (let y = 0; y < 48; y++) if ((y + i) % 7 === 0 && R() < .6) b.set(x + (y >> 3), y, '#5d3a9c'); }
+      for (let i = 0; i < 26; i++) b.rect(R() * 80 | 0, R() * 30 | 0, 1, 2, ['#ffc22e', '#e8432e', '#3bb36a', '#4fa3ff', '#ffffff'][i % 5]);
+      b.rect(20, 38, 40, 10, '#8a5cff'); b.rect(30, 34, 20, 14, '#a57cff'); b.hline(30, 34, 20, '#c7aaff'); b.hline(20, 38, 10, '#b495ff'); b.hline(50, 38, 10, '#b495ff');
+      b.blit(['.kk.', 'kWWk', '..Wk', '.Wk.', 'kWWk'].map(r => r), { k: '#5a2fb3', W: '#ffffff' }, 38, 40);
+      b.blit(S.trophy, PAL, 31, 17);
+    } else if (kind === 'custom') {
+      sky(b, ['#123d33', '#17493d', '#1d5a4a'], 0, 48);
+      for (let y = 0; y < 48; y += 4) for (let x = (y / 4 % 2) * 4; x < 80; x += 8) b.set(x, y, '#226b57');
+      // Bingo-Karte
+      b.rect(19, 7, 36, 37, '#14121f'); b.rect(20, 8, 34, 35, '#fff8e6'); b.rect(20, 8, 34, 7, '#ffc22e');
+      b.blit(['kkk.k.k..k..kk..kk.', 'k.k.k.kk.k.k...k..k', 'kkk.k.k.kk.k.k.k..k', 'k.k.k.k..k.k.k.k..k', 'kkk.k.k..k..kk..kk.'], { k: '#14121f' }, 27, 9);
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+        const on = (r === c) || (r === 0 && c === 2);
+        b.rect(23 + c * 10, 18 + r * 8, 8, 6, on ? '#3bb36a' : '#e7dcc0');
+        if (on) { b.set(25 + c * 10, 21 + r * 8, '#ffffff'); b.set(26 + c * 10, 22 + r * 8, '#ffffff'); b.set(27 + c * 10, 21 + r * 8, '#ffffff'); b.set(28 + c * 10, 20 + r * 8, '#ffffff'); }
+      }
+      for (let i = 0; i < 26; i++) b.set(24 + i, 20 + i * .95, '#e8432e');
+      b.blit(S.key, PAL, 56, 34);
+      b.blit(S.camera, PAL, 59, 9);
+    } else {
+      sky(b, ['#3a2a18', '#4a3520', '#5a4128'], 0, 36); b.rect(0, 36, 80, 12, '#2a1e12'); b.hline(0, 36, 80, '#6b5235');
+      for (let x = 2; x < 80; x += 10) b.rect(x, 42, 5, 1, '#ffc22e');
+      // Absperrung
+      b.rect(10, 18, 52, 7, '#14121f');
+      for (let x = 11; x < 61; x++) for (let y = 19; y < 24; y++) b.set(x, y, Math.floor((x + y) / 4) % 2 ? '#ffffff' : '#e8432e');
+      b.rect(14, 25, 2, 12, '#cfc6b4'); b.rect(56, 25, 2, 12, '#cfc6b4'); b.rect(12, 36, 6, 1, '#14121f'); b.rect(54, 36, 6, 1, '#14121f');
+      b.blit(S.cone, PAL, 62, 26); b.blit(S.cone, PAL, 2, 26);
+      // Schild „BALD“
+      b.rect(26, 5, 28, 10, '#14121f'); b.rect(27, 6, 26, 8, '#ffc22e');
+      b.blit(['kk..kk..k...kk.', 'k.k.k.k.k...k.k', 'kk..kkk.k...k.k', 'k.k.k.k.k...k.k', 'kk..k.k.kkk.kk.'], { k: '#14121f' }, 33, 7);
+      b.set(18, 16, '#ffd23f'); b.set(60, 15, '#ffd23f'); b.set(59, 16, '#ff7a1f'); // Warnlichter
+    }
+    return b;
+  }
+
+  /* ---------- Avatare: kleine Pixel-Figuren (16×16), 24 Varianten ---------- */
+  const SKIN = ['#f6d3b3', '#e8b48a', '#c98a5e', '#9a6440', '#6b4229'];
+  const HAIR = ['#2a1d14', '#5a3a24', '#c7883a', '#e8c46a', '#b23a2a', '#e8eef5', '#3d5aa8', '#d45aa0'];
+  const BG = ['#2f6fde', '#3bb36a', '#e8432e', '#ffc22e', '#8a5cff', '#22b4c3', '#ff7a1f', '#d45aa0'];
+  const SHIRT = ['#e8432e', '#2f6fde', '#3bb36a', '#ffc22e', '#14121f', '#f4f1e8', '#8a5cff', '#ff7a1f'];
+  const HAIRS = [
+    ['....hhhhhh....', '...hhhhhhhh...', '..hhhhhhhhhh..', '..hh......hh..'],               // kurz
+    ['....hhhhhh....', '..hhhhhhhhhh..', '.hhhhhhhhhhhh.', '.hh........hh.', '.hh........hh.', '.hh........hh.', '.h..........h.'], // lang
+    ['.....h.h.h....', '....hhhhhh....', '...hhhhhhhh...', '..hhh....hhh..'],               // stachelig
+    ['...cccccccc...', '..cccccccccc..', '..CCCCCCCCCCCC', '..hh......hh..'],               // Kappe
+    ['...bbbbbbbb...', '..bBbBbBbBbb..', '..bbbbbbbbbb..', '..bh......hb..'],               // Mütze
+    ['..............', '....hhhhhh....', '...hh....hh...', '..............'],               // Glatze-ish
+  ];
+  function mix(a, b, t) { const h = c => [1, 3, 5].map(i => parseInt(c.substr(i, 2), 16)); const A = h(a), B = h(b); return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, '0')).join(''); }
+  function avatar(i) {
+    const b = new Buf(16, 16);
+    const bg = BG[i % BG.length], skin = SKIN[(i * 3 + 1) % SKIN.length], hair = HAIR[(i * 5 + 2) % HAIR.length], shirt = SHIRT[(i * 3 + 4) % SHIRT.length];
+    const style = (i * 7 + 3) % HAIRS.length, glasses = i % 4 === 1, phones = i % 5 === 3;
+    const bgHi = mix(bg, '#ffffff', .18), bgLo = mix(bg, '#000000', .25), skinLo = mix(skin, '#000000', .18), cheek = mix(skin, '#e8432e', .35);
+    b.rect(0, 0, 16, 16, bg);
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if ((x + y) % 6 === 0) b.set(x, y, bgHi);
+    b.rect(0, 15, 16, 1, bgLo);
+    // Körper
+    b.rect(3, 13, 10, 3, shirt); b.rect(2, 14, 12, 2, shirt); b.hline(4, 13, 8, mix(shirt, '#ffffff', .2)); b.rect(7, 12, 2, 2, skinLo);
+    // Kopf
+    b.rect(4, 4, 8, 8, skin); b.rect(3, 5, 1, 6, skin); b.rect(12, 5, 1, 6, skin); b.hline(5, 11, 6, skinLo); b.vline(12, 6, 4, skinLo);
+    // Gesicht
+    if (glasses) { b.rect(4, 7, 3, 2, '#14121f'); b.rect(9, 7, 3, 2, '#14121f'); b.hline(7, 7, 2, '#14121f'); b.set(5, 7, '#7fb8ff'); b.set(10, 7, '#7fb8ff'); }
+    else { b.rect(6, 7, 1, 2, '#14121f'); b.rect(9, 7, 1, 2, '#14121f'); b.set(4, 9, cheek); b.set(11, 9, cheek); }
+    if (i % 3 === 0) { b.rect(6, 10, 4, 1, '#14121f'); b.rect(7, 10, 2, 1, '#e8432e'); }
+    else { b.set(6, 10, '#7a2a22'); b.set(9, 10, '#7a2a22'); b.rect(7, 10, 2, 1, '#7a2a22'); }
+    // Haare / Kopfbedeckung
+    const hs = HAIRS[style], cap = style === 3, beanie = style === 4;
+    b.blit(hs, { h: hair, c: cap ? SHIRT[(i + 2) % SHIRT.length] : hair, C: cap ? '#14121f' : hair, b: beanie ? BG[(i + 3) % BG.length] : hair, B: beanie ? '#ffffff' : hair }, 1, 1);
+    if (phones) { b.rect(2, 6, 2, 4, '#14121f'); b.rect(12, 6, 2, 4, '#14121f'); b.hline(3, 2, 10, '#14121f'); b.set(2, 7, '#e8432e'); b.set(13, 7, '#e8432e'); }
+    return b;
+  }
+
+  return { Buf, mix, sprite, scene, modeArt, avatar, S, PAL, rng };
+})();
+
+/* Avatare: 24 kleine Pixel-Figuren (Wert „p:0“ … „p:23“ bleibt kompatibel) */
+const PRESETS = Array.from({ length: 24 }, (_, i) => i);
+const AV_CACHE = {};
+const presetSVG = i => AV_CACHE[i] || (AV_CACHE[i] = PX.avatar(i).svg('pxav').replace('xMidYMid slice', 'xMidYMid meet'));
+
+/* Illustrationen: eigene Pixel-Art, erst beim ersten Gebrauch gezeichnet */
+const ART_MAKE = {
+  street: () => PX.scene('dusk', 240, 80).svg(), signs: () => PX.scene('day', 240, 80).svg(), lens: () => PX.scene('night', 240, 80).svg(),
+  globe: () => PX.modeArt('casual').svg(), ranked: () => PX.modeArt('ranked').svg(), custom: () => PX.modeArt('custom').svg(), extra: () => PX.modeArt('extra').svg()
 };
+const ART = new Proxy({}, { get: (c, k) => c[k] || (ART_MAKE[k] ? (c[k] = ART_MAKE[k]()) : '') });
 
 /* Emojis in der Oberfläche werden automatisch durch passende Icons ersetzt (einheitlicher Look).
    Ausnahmen: Eingabefelder und Chat-Nachrichten von Spielern – die bleiben, wie sie geschrieben wurden. */
@@ -1126,7 +1505,9 @@ const okAvatar = u => typeof u === 'string' && ((/^p:\d{1,2}$/.test(u) && PRESET
 function avatarHTML(url, name, cls) {
   const u = okAvatar(url);
   if (u && u.startsWith('p:')) return `<span class="av preset ${cls || ''}">${presetSVG(+u.slice(2))}</span>`;
-  return u ? `<img class="av ${cls || ''}" src="${esc(u)}" alt="" loading="lazy">` : `<span class="av ${cls || ''}">${esc(((name || '?').trim()[0] || '?').toUpperCase())}</span>`;
+  if (u) return `<img class="av ${cls || ''}" src="${esc(u)}" alt="" loading="lazy">`;
+  let h = 7; for (const ch of String(name || '?')) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return `<span class="av preset ${cls || ''}">${presetSVG(h % PRESETS.length)}</span>`;
 }
 function myAvatar() { return PROF.me && okAvatar(PROF.me.avatar_url); }
 /* Bild quadratisch zuschneiden und auf 256×256 JPEG verkleinern */
@@ -1219,17 +1600,30 @@ async function loadProfile() {
   renderProfileCard(); renderOnlineCard();
 }
 const pct = (a, b) => b ? Math.round(a / b * 100) + ' %' : '–';
+/* Rang-Stufen pro Modus (nur Anzeige, die Elo selbst bleibt die Grundlage) */
+const TIERS = [
+  [0, 'Bronze', '#c7834a', '#f0b27a', '#7a4a24'], [200, 'Silber', '#aeb9c7', '#e6edf5', '#66717f'], [400, 'Gold', '#ffc22e', '#fff09a', '#b07a10'],
+  [700, 'Platin', '#3fd0c0', '#b4fff4', '#1d7c74'], [1000, 'Diamant', '#7aa8ff', '#e0ecff', '#3550b8']
+];
+const tierOf = (elo, games) => games ? TIERS.filter(t => elo >= t[0]).pop() : [0, 'Ohne Rang', '#59606e', '#8a93a3', '#343a46'];
+const BADGE = ['.kkkkkkkkkkk.', 'kHHHHHHHHHHMk', 'kHMMMMWMMMMDk', 'kHMMMWWWMMMDk', 'kHWWWWWWWWWDk', 'kHMWWWWWWWMDk', 'kHMMWWWWWMMDk', 'kHMWWMMMWWMDk', '.kMMMMMMMMMk.', '.kDMMMMMMMDk.', '..kDMMMMMDk..', '...kDDDDDk...', '....kkkkk....'];
+const badgeSVG = t => PX.sprite(BADGE, { k: '#14121f', M: t[2], H: t[3], D: t[4], W: t[1] === 'Ohne Rang' ? t[4] : '#ffffff' }, 'rbadge');
+function rankRow(rt, best) {
+  return `<div class="ranks">${['solo', '1v1', '2v2', '3v3', '4v4'].map(m => { const r = (rt || {})[m] || { elo:0, games:0 }; const t = tierOf(r.elo, r.games);
+    return `<div class="rank ${best === m ? 'best' : ''}" title="${esc(t[1])}">${badgeSVG(t)}<span class="rmode">${m === 'solo' ? 'Solo' : m}</span><b>${r.games ? r.elo : '–'}</b><small>${esc(t[1])}</small></div>`; }).join('')}</div>`;
+}
+const pbar = (a, b) => { const n = b ? Math.round(a / b * 10) : 0; return `<span class="pbar" aria-hidden="true">${Array.from({ length: 10 }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`; };
 function statTiles(st) {
-  return [
-    ['🎮', 'Matches', st.matches], ['🏆', 'Siege', st.wins], ['📈', 'Siegquote', pct(st.wins, st.matches)],
-    ['🎯', 'Bingos', st.lines], ['📸', 'Fotos', st.photos], ['✅', 'Gültige Fotos', pct(st.valid_photos, st.photos)]
-  ].map(([i, l, v]) => `<div class="pstat"><span class="pi">${i}</span><b>${esc(String(v))}</b><small>${l}</small></div>`).join('');
+  return `<div class="hud">
+    <div class="hudrow"><span class="hl">Siegquote</span>${pbar(st.wins, st.matches)}<b>${pct(st.wins, st.matches)}</b></div>
+    <div class="hudrow"><span class="hl">Gültige Fotos</span>${pbar(st.valid_photos, st.photos)}<b>${pct(st.valid_photos, st.photos)}</b></div>
+    <div class="hudnums">${[['Matches', st.matches], ['Siege', st.wins], ['Bingos', st.lines], ['Fotos', st.photos]].map(([l, v]) => `<div><b>${esc(String(v))}</b><small>${l}</small></div>`).join('')}</div></div>`;
 }
 function recentHTML(list, max) {
   if (!list || !list.length) return '<div class="muted" style="font-size:13px">Noch keine Matches – spiel eine Runde mit Konto, dann erscheinen sie hier.</div>';
-  return `<ul class="recent">${list.slice(0, max).map(m => `<li><span class="rres ${m.won ? 'w' : 'l'}">${m.won ? 'Sieg' : 'Niederlage'}</span>
+  return `<ul class="recent">${list.slice(0, max).map(m => `<li><span class="rres ${m.won ? 'w' : 'l'}">${m.won ? 'Sieg' : 'Niederl.'}</span>
     <span class="grow">${m.mode === 'team' ? 'Team' : 'Solo'} · ${m.size}×${m.size} · ${m.players} Spieler</span>
-    <span class="muted">${m.valid_photos}/${m.photos} 📸 · ${new Date(m.played_at).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit' })}</span></li>`).join('')}</ul>`;
+    <span class="rph">${m.valid_photos}/${m.photos} 📸</span><span class="rdt">${new Date(m.played_at).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit' })}</span></li>`).join('')}</ul>`;
 }
 function renderProfileCard() {
   renderSocial();
@@ -1248,12 +1642,12 @@ function renderProfileCard() {
   if (!me) { box.innerHTML = `<div class="muted" style="padding:6px">${PROF.err ? 'Profil konnte nicht geladen werden: ' + esc(PROF.err) : 'Profil wird geladen …'}</div>`; return; }
   const rt = me.ratings || {};
   const best = ['solo', '1v1', '2v2', '3v3', '4v4'].map(m => [m, rt[m]]).filter(x => x[1] && x[1].games).sort((a, b) => b[1].elo - a[1].elo)[0];
-  box.innerHTML = `<div class="phead">${avatarHTML(me.avatar_url, me.name, 'big')}
-      <div class="grow"><h2 style="margin:0">${esc(me.name || acc.uname || 'Spieler')}</h2>
-        <div class="pcode">Freundescode <b>${fmtCode(me.friend_code)}</b><button class="iconbtn sm" id="pcCopy" title="Freundescode kopieren" aria-label="Freundescode kopieren">${ic('copy')}</button></div></div>
-      <div class="row" style="gap:6px"><button class="small" id="pcEdit">${ic('pencil')}Bearbeiten</button><button class="small" id="pcFull">${ic('user')}Ganzes Profil</button></div></div>
-    <div class="pstats">${statTiles(me.stats)}</div>
-    <div class="elorow">${['solo', '1v1', '2v2', '3v3', '4v4'].map(m => { const r = rt[m] || { elo:0, games:0 }; return `<div class="elochip ${best && best[0] === m ? 'best' : ''}"><small>${m === 'solo' ? 'Solo' : m}</small><b>${r.elo}</b><small>${r.games} Spiele</small></div>`; }).join('')}</div>
+  box.innerHTML = `<div class="sheet"><div class="phead"><span class="avframe">${avatarHTML(me.avatar_url, me.name, 'xl')}</span>
+      <div class="grow"><span class="kicker">Spielerprofil</span><h2 class="pname">${esc(me.name || acc.uname || 'Spieler')}</h2>
+        <div class="pcode">Freundescode <b>${fmtCode(me.friend_code)}</b><button class="iconbtn sm" id="pcCopy" title="Freundescode kopieren" aria-label="Freundescode kopieren">${ic('copy')}</button></div>
+        <div class="row pbtns"><button class="small" id="pcEdit">${ic('pencil')}Bearbeiten</button><button class="small" id="pcFull">${ic('user')}Ganzes Profil</button></div></div></div>
+    ${statTiles(me.stats)}</div>
+    <h3 class="psub">Ränge</h3>${rankRow(rt, best && best[0])}
     <h3 class="psub">Letzte Matches</h3>${recentHTML(me.recent, 3)}`;
   $('#pcCopy').onclick = async () => { try { await navigator.clipboard.writeText(me.friend_code); toast('Freundescode ' + fmtCode(me.friend_code) + ' kopiert'); } catch { prompt('Freundescode:', me.friend_code); } };
   $('#pcFull').onclick = () => openProfile(null);
@@ -1266,8 +1660,8 @@ async function openProfile(uid) {
     const s = p.stats;
     $('#modal .modal-box').innerHTML = `<div class="row" style="margin-bottom:12px">${avatarHTML(p.avatar_url, p.name, 'big')}<h2 class="grow" style="margin:0">${esc(p.name || 'Spieler')}</h2><button class="small" id="prClose" aria-label="Schließen">✕</button></div>
       <div class="pcode" style="margin-bottom:14px">${p.is_me ? `Dein Freundescode <b>${fmtCode(p.friend_code)}</b>` : presenceHTML(p)}<span class="muted">· dabei seit ${new Date(p.since).toLocaleDateString('de-DE')}</span></div>
-      <div class="pstats">${statTiles(s)}</div>
-      <h3 class="psub">🏆 Ranked-Elo</h3><div class="elorow">${['solo', '1v1', '2v2', '3v3', '4v4'].map(m => { const r = (p.ratings || {})[m] || { elo:0, games:0 }; return `<div class="elochip"><small>${RANKED_NAMES[m]}</small><b>${r.elo}</b><small>${r.games} Spiele</small></div>`; }).join('')}</div>
+      ${statTiles(s)}
+      <h3 class="psub">Ränge</h3>${rankRow(p.ratings)}
       <div class="pmodes"><div><b>Team</b> ${s.team_wins} / ${s.team_matches} Siegen</div><div><b>Solo</b> ${s.solo_wins} / ${s.solo_matches} Siegen</div><div><b>Felder</b> ${s.cells} gefunden</div></div>
       <h3 class="psub">Letzte Matches</h3>${recentHTML(p.recent, 10)}`;
     $('#prClose').onclick = closeModal;
@@ -1764,6 +2158,11 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-pixel', date:'23.10.2026', title:'Neuer Look: Pixel-Art', items:[
+    'Die ganze Oberfläche ist jetzt im Pixel-Stil: neue Schrift, Pixel-Rahmen und Knöpfe.',
+    'Neue Pixel-Bilder für Startseite und Spielmodi – und 24 neue Pixel-Avatare.',
+    'Das Profil ist jetzt ein Spieler-Bildschirm mit Fortschrittsbalken und Rang-Abzeichen pro Modus (Bronze bis Diamant).'
+  ] },
   { id:'2026-10-23-bingocheck', date:'23.10.2026', title:'Bingo-Check, Klänge & bessere Ergebnisse', items:[
     'Neue Fotos sind erst vorläufig und zählen erst, wenn sie geprüft sind. Wäre damit ein Bingo erreicht, startet ein Bingo-Check – werden die Fotos angenommen, gibt es einen Gewinner, sonst geht es weiter.',
     'Geprüfte Felder haben einen durchgehenden Rahmen mit Haken, vorläufige einen gestrichelten Rahmen.',
@@ -3515,7 +3914,7 @@ function openCapture(cell) {
 
 /* ---------- Wort-Draft ---------- */
 MOUNT.draft = () => {
-  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">🗳 Wort-Draft</h2><div id="dTimer" class="timer" style="font-family:'Bricolage Grotesque';font-weight:800;font-size:24px"></div>
+  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">🗳 Wort-Draft</h2><div id="dTimer" class="timer" style="font-family:var(--pxf);font-weight:800;font-size:24px"></div>
     <span class="grow"></span><span class="muted" id="dReadyInfo"></span><button id="dReady">Fertig ✓</button><span id="dHost"></span></header>
     <main class="draft">
       <div class="draft-intro"><div><b id="dNeed"></b> <span class="muted" id="dSub"></span></div>
