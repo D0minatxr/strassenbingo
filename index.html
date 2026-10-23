@@ -183,6 +183,10 @@ label.dim{opacity:.45}
 .lgi{display:inline-grid;place-items:center}
 .lgform{display:grid;gap:10px}
 
+.foot{grid-column:1/-1;display:flex;gap:8px;justify-content:center;font-size:13px;color:var(--muted)}
+.foot a{color:var(--muted)}
+.foot a:hover{color:var(--text)}
+
 /* Neuigkeiten */
 .newsbtn{position:relative}
 .ndot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--bg)}
@@ -617,7 +621,8 @@ function openLogin() {
       <label><span class="lbl">Passwort <small class="muted" id="lgPwHint"></small></span><input id="lgPw" type="password" autocomplete="current-password" minlength="6" required></label>
       <div class="err" id="lgErr"></div>
       <button class="btn-primary" id="lgSubmit">Anmelden</button>
-    </form></div></div>`);
+    </form></div>
+    <p class="hint" style="margin:14px 0 0;text-align:center">Mit der Anmeldung gilt unsere <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p></div>`);
   $('#modal .modal-box').style.width = 'min(440px,100%)';
   $('#lgClose').onclick = closeModal;
   $$('[data-prov]').forEach(b => b.onclick = () => { b.disabled = true; loginWith(b.dataset.prov); });
@@ -1425,6 +1430,7 @@ MOUNT.home = () => {
       <div class="row" style="margin-bottom:6px"><h2 class="grow" style="margin:0">📰 Neuigkeiten</h2><button class="small" id="allNews">Alle anzeigen</button></div>
       <div class="news-list news-short">${newsHTML(CHANGELOG.slice(0, 2), store.get('newsSeen', ''))}</div>
     </section>
+    <footer class="foot"><a href="datenschutz.html">Datenschutz</a><span>·</span><span>Ein privates Hobbyprojekt</span></footer>
   </div>`;
   $('#allNews').onclick = openNews;
   bindAccount();
