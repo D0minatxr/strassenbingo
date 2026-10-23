@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-iau3+AFN3/L2Rg5KBPYJ2/0U+s68VF2Cr8vYWy9mptc='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-y7L29BoUzzBrZc9zreQp9q009ElPObdAFJl1B7VfGa0='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -2236,6 +2236,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-majority', date:'23.10.2026', title:'Lockout-Mehrheit & fairere Zwischenrunde', items:[
+    'Lockout mit „Meiste Felder“: Wer mehr als die Hälfte aller Felder geprüft hat, ist uneinholbar und gewinnt sofort. Mit noch ungeprüften Fotos startet vorher ein Mehrheits-Check.',
+    'Gelöschte oder ersetzte Fotos zählen nicht mehr zu den Fotos, nach denen die Zwischenrunde startet.'
+  ] },
   { id:'2026-10-23-prep', date:'23.10.2026', title:'60 Sekunden Vorbereitung', items:[
     'Vor jeder Runde – in allen Modi – gibt es jetzt 60 Sekunden Vorbereitung: Du siehst die Bingo-Karte und deine möglichen Startorte und kannst deinen Startort schon auswählen.',
     'Die Spielzeit startet erst danach. Sind alle vorher bereit, geht es sofort los.'
@@ -2724,11 +2728,10 @@ function hostHandle(cid, msg) {
       S.images[fid] = img;
       S.net.broadcast({t:'img', fid, data:img});
       H.findings[fid] = { pid, side, cell, ts:Date.now() };
-      H.sinceReview++;
       const sd = sideInfo(H, side);
       announce((H.settings.mode === 'team' ? p.name + ' (' + sd.name + ')' : p.name) + ' hat „' + H.board[cell] + '“ gefunden – wird noch geprüft', sd.color, false, 'found');
       hostCheckLines();
-      if (H.phase === 'game' && H.settings.voting && H.settings.interEvery && H.sinceReview >= H.settings.interEvery) return hostIntermission();
+      if (H.phase === 'game' && H.settings.voting && H.settings.interEvery && unreviewed().length >= H.settings.interEvery) return hostIntermission(); // gelöschte/ersetzte Fotos zählen nicht
       commit(); return;
     }
     case 'remove': {
@@ -2814,7 +2817,19 @@ function hostCheckLines() {
     }
     if (win === 'full' && prov.size === n) return hostIntermission('bingo', sd);
   }
+  // Lockout + „Meiste Felder“: Wer mehr als die Hälfte aller Felder hat, ist nicht mehr einzuholen und gewinnt sofort
+  if (lockMajority(H)) {
+    const half = fieldTotal(H) / 2;
+    for (const sd of sides(H)) {
+      const c = fieldCount(H, sd.id, 'confirmed'), pv = fieldCount(H, sd.id, true);
+      if (c > half) return hostEnd(sd.name + ' hat mehr als die Hälfte der Felder – uneinholbar!', sd.color);
+      if (vote && pv > half) return hostIntermission('bingo', sd, 'major');
+    }
+  }
 }
+const lockMajority = st => !!(st.settings.lockout && (st.settings.win === 'most' || st.settings.bingoBonus));
+const fieldTotal = st => st.board.length - (st.free != null ? 1 : 0);
+const fieldCount = (st, side, mode) => claimed(st, side, mode).size - (st.free != null ? 1 : 0);
 
 /* ---------- Wort-Draft ---------- */
 const hasFree = () => false; // kein Freifeld – jedes Feld ist ein Begriff
@@ -2914,12 +2929,13 @@ function hostVoteTick() {
   else hostVoteFinish();
 }
 setInterval(hostVoteTick, 250);
-function hostIntermission(kind, sd) {
+function hostIntermission(kind, sd, why) {
   const order = unreviewed(); H.sinceReview = 0;
   if (!order.length) return commit();
   H.phase = 'intermission'; H.pausedAt = Date.now(); H.voteOrder = order; hostSetVoteIdx(0);
-  H.checkKind = kind === 'bingo' ? 'bingo' : 'check'; H.checkSide = sd ? sd.id : null;
-  if (H.checkKind === 'bingo') announce('Mögliches Bingo von ' + sd.name + '! Prüft jetzt die Fotos – zählen sie, ist das Spiel gewonnen.', sd.color, true, 'maybe');
+  H.checkKind = kind === 'bingo' ? 'bingo' : 'check'; H.checkSide = sd ? sd.id : null; H.checkWhy = why || null;
+  if (H.checkKind === 'bingo' && why === 'major') announce('Mögliche Mehrheit für ' + sd.name + '! Prüft jetzt die Fotos – zählen sie, hat ' + sd.name + ' mehr als die Hälfte der Felder und gewinnt.', sd.color, true, 'maybe');
+  else if (H.checkKind === 'bingo') announce('Mögliches Bingo von ' + sd.name + '! Prüft jetzt die Fotos – zählen sie, ist das Spiel gewonnen.', sd.color, true, 'maybe');
   else announce('⏸ Zwischenrunde! Prüft die neuen Fotos.', '#ffb020', true, 'check');
   commit();
 }
@@ -2930,7 +2946,7 @@ function hostResume() {
   if (H.nextLocAt) H.nextLocAt += d;
   const checked = H.voteOrder.slice();
   H.voteOrder.forEach(f => H.reviewed[f] = true);
-  const kind = H.checkKind; H.checkKind = null; H.checkSide = null;
+  const kind = H.checkKind, why = H.checkWhy; H.checkKind = null; H.checkSide = null; H.checkWhy = null;
   H.phase = 'game'; H.pausedAt = 0; H.voteOrder = []; H.voteIdx = 0; H.voteEndsAt = 0;
   const size = Math.round(Math.sqrt(H.board.length)), n = H.board.length, win = H.settings.win;
   // Abgelehnte Fotos werden entfernt – das Feld ist wieder frei für ein neues Foto
@@ -2946,6 +2962,10 @@ function hostResume() {
   const res = sides(H).map(sd => { const c = claimed(H, sd.id, 'confirmed'); return { sd, c, lc: lineInfo(size, c, layoutOf(H, sd.id)).count }; });
   H.pLineCount = {};
   const winners = win === 'line' ? res.filter(r => r.lc > 0) : win === 'full' ? res.filter(r => r.c.size === n) : [];
+  if (lockMajority(H)) {
+    const major = sides(H).find(sd => fieldCount(H, sd.id, 'confirmed') > fieldTotal(H) / 2);
+    if (major) { res.forEach(r => { H.lineCount[r.sd.id] = r.lc; H.pLineCount[r.sd.id] = r.lc; }); return hostEnd('Bestätigt! ' + major.name + ' hat mehr als die Hälfte der Felder – uneinholbar!', major.color); }
+  }
   if (winners.length) {
     res.forEach(r => { H.lineCount[r.sd.id] = r.lc; H.pLineCount[r.sd.id] = r.lc; });
     const names = winners.map(r => r.sd.name).join(' & ');
@@ -2956,7 +2976,8 @@ function hostResume() {
     if (r.lc > (H.lineCount[r.sd.id] || 0)) bingoMsg = 'BINGO bestätigt für ' + r.sd.name + '! ';
     H.lineCount[r.sd.id] = r.lc; H.pLineCount[r.sd.id] = r.lc;
   }
-  if (kind === 'bingo') announce('Kein Bingo – ' + (rejTxt || 'die Reihe ist nicht vollständig.') + ' Weiter geht’s!', '#ff5d6c', true, 'nope');
+  if (kind === 'bingo' && why === 'major') announce('Keine Mehrheit – ' + (rejTxt || 'es fehlen noch Felder.') + ' Weiter geht’s!', '#ff5d6c', true, 'nope');
+  else if (kind === 'bingo') announce('Kein Bingo – ' + (rejTxt || 'die Reihe ist nicht vollständig.') + ' Weiter geht’s!', '#ff5d6c', true, 'nope');
   else announce(bingoMsg + '▶ Weiter geht’s!' + (rejTxt ? ' ' + rejTxt : ''), '#ffb020', true, bingoMsg ? 'bingo' : 'resume');
   commit();
 }
@@ -3374,7 +3395,7 @@ function ruleTiles(s) {
     { k:'mode', i:'👥', l:'Modus', v: team ? 'Team gegen Team' : 'Jeder für sich', sub: team ? `${s.teamNames[0]} vs. ${s.teamNames[1]}` : 'Jeder hat eine eigene Karte' },
     { k:'size', i:'🔲', l:'Bingo-Karte', v: `${s.size} × ${s.size}`, sub: `${s.size * s.size} Begriffe · eigene Anordnung pro ${team ? 'Team' : 'Spieler'}` },
     { k:'time', i:'⏱️', l:'Zeit', v: s.minutes ? s.minutes + ' Minuten' : 'Ohne Limit', sub: s.minutes ? 'pro Runde' : 'bis jemand gewinnt' },
-    { k:'win', i:'🏆', l:'Sieg', v: s.bingoBonus ? 'Meiste Punkte' : WIN_SHORT[s.win], sub: s.bingoBonus ? `1 Punkt pro Feld, +${BINGO_BONUS} pro Bingo` : s.win === 'line' ? 'Reihe, Spalte oder Diagonale' : s.win === 'full' ? 'alle Felder gefunden' : 'wer bei Zeitende vorne liegt' },
+    { k:'win', i:'🏆', l:'Sieg', v: s.bingoBonus ? 'Meiste Punkte' : WIN_SHORT[s.win], sub: s.lockout && (s.bingoBonus || s.win === 'most') ? 'oder sofort mit mehr als der Hälfte der Felder' : s.bingoBonus ? `1 Punkt pro Feld, +${BINGO_BONUS} pro Bingo` : s.win === 'line' ? 'Reihe, Spalte oder Diagonale' : s.win === 'full' ? 'alle Felder gefunden' : 'wer bei Zeitende vorne liegt' },
     { k:'draft', i:'🗳️', l:'Wort-Draft', v: s.draft ? 'An' : 'Aus', sub: s.draft ? (s.draftTime ? s.draftTime + ' Sek. zum Abstimmen' : 'bis alle fertig sind') : 'Begriffe werden zufällig gezogen', off: !s.draft },
     { k:'words', i:'📝', l:'Begriffe', v: words, sub: customN ? customN + ' eigene Begriffe' : WORDS.length + ' Begriffe im Topf' },
     { k:'locs', i:'🗺️', l:'Orte', v: `1 aus ${s.locCount} wählen`, sub: s.maxLocs === 1 ? 'ein Ort für die ganze Runde' : `alle ${s.locEvery} Min. ein weiterer · max. ${s.maxLocs || '∞'}` },
@@ -4016,7 +4037,7 @@ UPDATE.game = () => {
     if (S.lastPhase !== 'intermission') { closeModal(); }
     inter.classList.remove('hidden'); renderVote(true);
     const bc = st.checkKind === 'bingo', cs = bc && st.checkSide ? sideInfo(st, st.checkSide) : null;
-    $('#interTitle').textContent = bc ? 'Bingo-Check' + (cs ? ' – ' + cs.name : '') : '⏸ Zwischenrunde';
+    $('#interTitle').textContent = bc ? (st.checkWhy === 'major' ? 'Mehrheits-Check' : 'Bingo-Check') + (cs ? ' – ' + cs.name : '') : '⏸ Zwischenrunde';
     $('#interInfo').textContent = bc ? 'Zählen alle Fotos, ist das Spiel gewonnen – sonst geht es weiter. Die Zeit ist pausiert.' : 'Die Zeit ist pausiert.';
   } else inter.classList.add('hidden');
   S.lastPhase = st.phase;
