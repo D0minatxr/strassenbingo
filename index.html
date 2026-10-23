@@ -102,6 +102,67 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2p
 .startArea{margin-top:16px;display:grid;gap:8px}
 .startArea .btn-primary{padding:14px;font-size:17px}
 
+/* Lobby: Reiter, Gruppen, Regel-Kacheln */
+.lobby{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.panel-h{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.panel-h h2{margin:0}
+.panel-h .muted{font-size:13px}
+.tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px}
+.tab{flex:1;border:0;background:transparent;color:var(--muted);padding:10px 12px;border-radius:10px}
+.tab:hover:not(:disabled){background:var(--panel2);color:var(--text)}
+.tab.on{background:var(--accent);color:var(--accent-ink)}
+.tcount{display:inline-grid;place-items:center;min-width:22px;height:20px;border-radius:999px;background:rgba(0,0,0,.25);font-size:12px;padding:0 6px}
+.tab:not(.on) .tcount{background:var(--panel2);color:var(--text)}
+.sset{display:grid;gap:14px}
+.sgrp{border:1px solid var(--line);border-radius:14px;padding:14px;background:rgba(0,0,0,.14)}
+.sgrp h3{font-size:15px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.sgrp h3 span{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--panel2);font-size:15px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sgrid .full{grid-column:1/-1}
+.lbl{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);font-weight:500;margin-bottom:5px}
+.lbl .dot{width:8px;height:8px}
+label .lbl+input,label .lbl+select,label .lbl+textarea{margin-top:0}
+label.dim{opacity:.45}
+.seg.big button{padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2}
+.seg.big button small{font-size:11px;font-weight:500;color:var(--muted)}
+.seg.big button.on small{color:var(--text)}
+.sw{display:flex;align-items:center;gap:12px;cursor:pointer;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--text)}
+.sw b{display:block;font-size:14px}
+.sw small{display:block;color:var(--muted);font-size:12px}
+.sw input{appearance:none;-webkit-appearance:none;flex:none;width:40px;height:23px;border-radius:999px;background:#334152;position:relative;cursor:pointer;margin:0;padding:0;border:0;transition:background .15s}
+.sw input:after{content:"";position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw input:checked{background:var(--ok)}
+.sw input:checked:after{transform:translateX(17px)}
+.sw input:focus-visible{outline:2px solid rgba(255,176,32,.6);outline-offset:2px}
+.rtiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:8px}
+.rtile{display:flex;gap:10px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px}
+.rtile .ri{flex:none;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,176,32,.12);font-size:17px}
+.rtile .rl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.rtile .rv{font-weight:700;font-size:15px;line-height:1.25}
+.rtile .rs{font-size:12px;color:var(--muted);line-height:1.3;margin-top:1px}
+.rtile.off{opacity:.55}
+.rtile.off .ri{background:rgba(255,255,255,.05);filter:grayscale(1)}
+.rtile.changed{animation:rflash 1.6s ease-out}
+@keyframes rflash{0%{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,176,32,.35)}100%{border-color:var(--line);box-shadow:none}}
+.warnline{font-size:13px;color:var(--accent)}
+.waiting{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--muted);padding:10px;border:1px dashed var(--line);border-radius:12px}
+.wdots{display:inline-flex;gap:4px}
+.wdots i{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:wd 1.2s infinite ease-in-out}
+.wdots i:nth-child(2){animation-delay:.15s}.wdots i:nth-child(3){animation-delay:.3s}
+@keyframes wd{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+/* Neuigkeiten */
+.newsbtn{position:relative}
+.ndot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--bg)}
+.news-card{grid-column:1/-1}
+.news-list{display:grid;gap:10px}
+.news-short{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.news-item{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.news-item h3{font-size:16px;margin:2px 0 6px}
+.news-item ul{margin:0;padding-left:18px;color:#c4cdd8;font-size:14px;display:grid;gap:3px}
+.news-meta{display:flex;gap:8px;align-items:center}
+.news-date{font-size:12px;color:var(--muted);font-weight:700}
+.news-new{font-size:10px;font-weight:800;text-transform:uppercase;border-radius:5px;padding:1px 6px;background:var(--ok);color:#06210f}
+
 /* Chat */
 .chat{display:flex;flex-direction:column;min-height:0}
 .log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:5px;min-height:120px;max-height:260px;padding-right:4px;margin-bottom:10px}
@@ -291,7 +352,7 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2p
   .maplist{border-left:0;border-top:1px solid var(--line);max-height:42%}
   .game{grid-template-columns:1fr;height:auto}
   .viewer{height:62vh;min-height:360px}
-  .settings{grid-template-columns:1fr}
+  .settings,.sgrid{grid-template-columns:1fr}
   .logo{font-size:40px}
 }
 @media (max-width:560px){
@@ -410,6 +471,50 @@ const DEFAULT_SETTINGS = {
   locCount:3, locEvery:3, maxLocs:4, interEvery:6, jokers:0, draft:true, draftTime:90, tpRadius:1
 };
 const WIN_NAMES = {line:'Erste Reihe (Bingo)', full:'Volle Karte', most:'Meiste Felder bei Zeitende'};
+const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'};
+
+/* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
+const CHANGELOG = [
+  { id:'2026-10-23-lobby', date:'23.10.2026', title:'Neue Lobby & Neuigkeiten', items:[
+    'Die Lobby ist neu gestaltet: Der Host hat einen eigenen Reiter für die Einstellungen.',
+    'Alle anderen sehen die Regeln der Runde als übersichtliche Kacheln – Änderungen leuchten kurz auf.',
+    'Neu: dieser Update-Feed. Hier steht ab jetzt, was sich am Spiel geändert hat.' ]},
+  { id:'2026-10-23-online', date:'23.10.2026', title:'Online spielen & eigene Karten', items:[
+    'Straßenbingo ist jetzt online – Freunde brauchen nur noch den Link.',
+    'Jedes Team (bzw. jeder Einzelspieler) bekommt eine eigene, zufällige Anordnung der Begriffe.',
+    'Die Weltkarte füllt das ganze Fenster und Markierungen lassen sich leichter anklicken.' ]},
+  { id:'2026-10-23-draft', date:'23.10.2026', title:'Wort-Draft, Teleport & neue Weltkarte', items:[
+    'Vor jeder Runde stimmen alle per 👍/👎 ab, welche Begriffe auf die Karte kommen.',
+    'Kein Freifeld mehr – jedes Feld ist ein Begriff (9, 16 oder 25).',
+    '🎯 Teleport: Wer feststeckt, springt an einen zufälligen Punkt in der Nähe des Startpunkts.',
+    'Die Weltkarte ist nicht mehr verzerrt und braucht keinen Schlüssel.' ]},
+  { id:'2026-10-23-orte', date:'23.10.2026', title:'Orte wählen & Zwischenrunden', items:[
+    'Du wählst 1 aus mehreren Orten auf der Weltkarte – er bleibt die ganze Runde.',
+    'Alle paar Minuten darfst du einen weiteren Ort wählen; beim Wechseln bleibt dein Standort erhalten.',
+    'Nach einigen Fotos gibt es eine Zwischenrunde, in der die Fotos geprüft werden (die Zeit pausiert).',
+    '„Code kopieren“ kopiert nur noch den Lobby-Code.' ]},
+  { id:'2026-10-22-start', date:'22.10.2026', title:'Erste Version', items:[
+    'Lobby mit Code, Team-Modus mit gemeinsamer Bingo-Karte, Fotos aus Street View, Abstimmung und Ergebnis.' ]}
+];
+const newsUnseen = () => store.get('newsSeen', '') !== CHANGELOG[0].id;
+function newsHTML(entries, seenId) {
+  // Einträge, die neuer sind als der zuletzt gesehene, bekommen ein „neu“ (beim allerersten Besuch keiner)
+  let isNew = !!seenId && CHANGELOG.some(e => e.id === seenId);
+  return entries.map(e => {
+    if (e.id === seenId) isNew = false;
+    return `<article class="news-item">
+      <div class="news-meta"><span class="news-date">${e.date}</span>${isNew ? '<span class="news-new">neu</span>' : ''}</div>
+      <h3>${esc(e.title)}</h3><ul>${e.items.map(i => `<li>${esc(i)}</li>`).join('')}</ul></article>`;
+  }).join('');
+}
+function openNews() {
+  const seen = store.get('newsSeen', '');
+  openModal(`<div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">📰 Neuigkeiten</h2><button class="small" id="newsClose">Schließen</button></div>
+    <div class="news-list">${newsHTML(CHANGELOG, seen)}</div>`);
+  $('#newsClose').onclick = closeModal;
+  store.set('newsSeen', CHANGELOG[0].id);
+  const d = $('#newsDot'); if (d) d.classList.add('hidden');
+}
 
 /* ---------------- Globaler Zustand ---------------- */
 const S = {
@@ -1022,7 +1127,13 @@ MOUNT.home = () => {
       <div class="row"><input id="code" placeholder="CODE" maxlength="5" value="${esc(hashCode)}"><button id="join">Beitreten</button></div>
       <div class="err" id="homeErr"></div>
     </div>
+    <section class="card news-card">
+      <div class="row" style="margin-bottom:6px"><h2 class="grow" style="margin:0">📰 Neuigkeiten</h2><button class="small" id="allNews">Alle anzeigen</button></div>
+      <div class="news-list news-short">${newsHTML(CHANGELOG.slice(0, 2), store.get('newsSeen', ''))}</div>
+    </section>
   </div>`;
+  $('#allNews').onclick = openNews;
+  store.set('newsSeen', CHANGELOG[0].id);
   $('#nm').value = S.me.name || '';
   const getName = () => { const n = $('#nm').value.trim(); if (!n) { S.err = 'Bitte gib einen Namen ein.'; UPDATE.home(); $('#nm').focus(); return null; } return n; };
   $('#create').onclick = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } startHost(n); };
@@ -1060,24 +1171,51 @@ function bindCopy() {
 
 /* ---------- Lobby ---------- */
 MOUNT.lobby = () => {
-  app.innerHTML = topBar(`<span class="grow"></span><span id="meBadge"></span>`) + `
+  const host = amHost();
+  S.lobbyTab = S.lobbyTab || 'players'; S.prevRules = null;
+  app.innerHTML = topBar(`<span class="grow"></span><button class="small newsbtn" id="newsBtn">📰 Neuigkeiten<span class="ndot ${newsUnseen() ? '' : 'hidden'}" id="newsDot"></span></button><span id="meBadge"></span>`) + `
   <main class="lobby">
-    <section class="col"><div class="card"><h2>Spieler</h2><div id="teams"></div></div></section>
     <section class="col">
-      <div class="card"><h2>Einstellungen</h2><div id="settings"></div><div class="startArea" id="startArea"></div></div>
+      ${host ? `<div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="players">👥 Spieler &amp; Teams <span class="tcount" id="pCount"></span></button>
+        <button class="tab" role="tab" data-tab="settings">⚙️ Einstellungen</button></div>` : ''}
+      <div class="card tabpanel" id="panelPlayers"><div class="panel-h"><h2>Spieler</h2><span class="muted" id="pInfo"></span></div><div id="teams"></div></div>
+      ${host ? `<div class="card tabpanel" id="panelSettings"><div class="panel-h"><h2>Einstellungen</h2><span class="muted">Änderungen sehen alle sofort</span></div><div id="settings"></div></div>` : ''}
+    </section>
+    <section class="col">
+      <div class="card rules">
+        <div class="panel-h"><h2>Regeln dieser Runde</h2><span class="muted" id="rulesBy"></span></div>
+        <div id="rules" class="rtiles"></div>
+        <div class="startArea" id="startArea"></div>
+      </div>
       ${chatHTML(false)}
     </section>
   </main>`;
   bindCopy(); bindChat();
-  if (amHost()) mountSettingsForm();
+  $('#newsBtn').onclick = openNews;
+  if (host) {
+    mountSettingsForm();
+    $$('[data-tab]').forEach(b => b.onclick = () => { S.lobbyTab = b.dataset.tab; showLobbyTab(); });
+    showLobbyTab();
+  }
 };
+function showLobbyTab() {
+  $$('[data-tab]').forEach(b => { const on = b.dataset.tab === S.lobbyTab; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  $('#panelPlayers').classList.toggle('hidden', S.lobbyTab !== 'players');
+  $('#panelSettings').classList.toggle('hidden', S.lobbyTab !== 'settings');
+}
 UPDATE.lobby = () => {
   const st = S.state;
   $('#meBadge').innerHTML = `<span class="muted">Du bist</span> <b>${esc(S.me.name)}</b>${amHost() ? ' <span class="tag you">Host</span>' : ''}`;
+  const n = Object.keys(st.players).length;
+  if ($('#pCount')) $('#pCount').textContent = n;
+  $('#pInfo').textContent = `${n} ${n === 1 ? 'Spieler' : 'Spieler'} in der Lobby`;
   $('#teams').innerHTML = teamsHTML(st);
   bindTeams();
-  if (!amHost()) $('#settings').innerHTML = settingsSummary(st.settings);
-  else syncSettingsForm();
+  if (amHost()) syncSettingsForm();
+  renderRules(st);
+  const hostName = st.players[st.hostPid]?.name || 'Host';
+  $('#rulesBy').textContent = amHost() ? 'So sehen es die anderen' : 'festgelegt von ' + hostName;
   const sa = $('#startArea');
   if (amHost()) {
     const ps = Object.values(st.players);
@@ -1086,18 +1224,59 @@ UPDATE.lobby = () => {
     let warn = '';
     if (noTeam) warn = `${noTeam} Spieler ${noTeam === 1 ? 'hat' : 'haben'} noch kein Team.`;
     else if (st.settings.wordMode === 'custom' && pool < need) warn = `Nur ${pool} eigene Begriffe – der Rest wird mit Standardbegriffen aufgefüllt.`;
-    sa.innerHTML = `<button class="btn-primary" id="startBtn" ${noTeam ? 'disabled' : ''}>${st.settings.draft ? 'Wort-Draft starten' : 'Spiel starten'}</button>
-      ${st.settings.mode === 'team' ? '<button id="shuffleBtn">Teams zufällig mischen</button>' : ''}
-      ${warn ? `<div class="muted" style="font-size:13px">${esc(warn)}</div>` : ''}`;
+    sa.innerHTML = `<button class="btn-primary" id="startBtn" ${noTeam ? 'disabled' : ''}>${st.settings.draft ? '🗳 Wort-Draft starten' : '▶ Spiel starten'}</button>
+      ${st.settings.mode === 'team' ? '<button id="shuffleBtn">🔀 Teams zufällig mischen</button>' : ''}
+      ${warn ? `<div class="warnline">⚠️ ${esc(warn)}</div>` : ''}`;
     $('#startBtn').onclick = hostStart;
     if ($('#shuffleBtn')) $('#shuffleBtn').onclick = () => {
       shuffle(Object.keys(H.players)).forEach((p, i) => H.players[p].team = i % 2); commit();
     };
   } else {
-    sa.innerHTML = `<div class="muted" style="text-align:center;padding:8px">Warte darauf, dass der Host das Spiel startet …</div>`;
+    sa.innerHTML = `<div class="waiting"><span class="wdots"><i></i><i></i><i></i></span>Warte darauf, dass ${esc(hostName)} das Spiel startet</div>`;
   }
   renderChat();
 };
+
+/* Regeln als Kacheln – für alle Spieler */
+function ruleTiles(s) {
+  const team = s.mode === 'team';
+  const words = s.wordMode === 'std' ? 'Standard' : s.wordMode === 'custom' ? 'Eigene Liste' : 'Standard + eigene';
+  const customN = s.wordMode === 'std' ? 0 : wordPool({...s, wordMode:'custom'}).length;
+  const inter = s.voting && s.interEvery;
+  return [
+    { k:'mode', i:'👥', l:'Modus', v: team ? 'Team gegen Team' : 'Jeder für sich', sub: team ? `${s.teamNames[0]} vs. ${s.teamNames[1]}` : 'Jeder hat eine eigene Karte' },
+    { k:'size', i:'🔲', l:'Bingo-Karte', v: `${s.size} × ${s.size}`, sub: `${s.size * s.size} Begriffe · eigene Anordnung pro ${team ? 'Team' : 'Spieler'}` },
+    { k:'time', i:'⏱️', l:'Zeit', v: s.minutes ? s.minutes + ' Minuten' : 'Ohne Limit', sub: s.minutes ? 'pro Runde' : 'bis jemand gewinnt' },
+    { k:'win', i:'🏆', l:'Sieg', v: WIN_SHORT[s.win], sub: s.win === 'line' ? 'Reihe, Spalte oder Diagonale' : s.win === 'full' ? 'alle Felder gefunden' : 'wer bei Zeitende vorne liegt' },
+    { k:'draft', i:'🗳️', l:'Wort-Draft', v: s.draft ? 'An' : 'Aus', sub: s.draft ? (s.draftTime ? s.draftTime + ' Sek. zum Abstimmen' : 'bis alle fertig sind') : 'Begriffe werden zufällig gezogen', off: !s.draft },
+    { k:'words', i:'📝', l:'Begriffe', v: words, sub: customN ? customN + ' eigene Begriffe' : WORDS.length + ' Begriffe im Topf' },
+    { k:'locs', i:'🗺️', l:'Orte', v: `1 aus ${s.locCount} wählen`, sub: s.maxLocs === 1 ? 'ein Ort für die ganze Runde' : `alle ${s.locEvery} Min. ein weiterer · max. ${s.maxLocs || '∞'}` },
+    { k:'region', i:'🌍', l:'Gebiet', v: REGION_NAMES[s.region], sub: regionLocs(s.region).length + ' mögliche Orte' },
+    { k:'tp', i:'🎯', l:'Teleport', v: s.tpRadius ? String(s.tpRadius).replace('.', ',') + ' km' : 'Aus', sub: s.tpRadius ? 'Umkreis um den Startpunkt' : 'kein Springen möglich', off: !s.tpRadius },
+    { k:'vote', i:'✅', l:'Fotos prüfen', v: s.voting ? 'An' : 'Aus', sub: s.voting ? 'die Gegner stimmen ab' : 'alle Fotos zählen', off: !s.voting },
+    { k:'inter', i:'⏸️', l:'Zwischenrunde', v: inter ? `nach ${s.interEvery} Fotos` : 'Aus', sub: inter ? 'Zeit pausiert beim Prüfen' : 'nur am Ende prüfen', off: !inter },
+    { k:'lock', i:'🔒', l:'Lockout', v: s.lockout ? 'An' : 'Aus', sub: s.lockout ? 'jedes Feld nur einmal' : 'alle Felder für alle offen', off: !s.lockout }
+  ];
+}
+function renderRules(st) {
+  const tiles = ruleTiles(st.settings);
+  const box = $('#rules'); const prev = S.prevRules; const now = {};
+  const inner = t => `<div class="ri" aria-hidden="true">${t.i}</div>
+      <div class="rt"><div class="rl">${esc(t.l)}</div><div class="rv">${esc(t.v)}</div><div class="rs">${esc(t.sub || '')}</div></div>`;
+  if (!prev || box.children.length !== tiles.length) {
+    box.innerHTML = tiles.map(t => `<div class="rtile ${t.off ? 'off' : ''}" data-k="${t.k}">${inner(t)}</div>`).join('');
+  } else {
+    // Kacheln an Ort und Stelle aktualisieren, damit das Aufleuchten nicht abbricht
+    tiles.forEach((t, i) => {
+      const el = box.children[i]; const sig = t.v + '|' + t.sub;
+      if (prev[t.k] === sig) return;
+      el.innerHTML = inner(t); el.classList.toggle('off', !!t.off);
+      el.classList.remove('changed'); void el.offsetWidth; el.classList.add('changed');
+    });
+  }
+  tiles.forEach(t => now[t.k] = t.v + '|' + t.sub);
+  S.prevRules = now;
+}
 
 function playerLi(st, pid, moveTo) {
   const p = st.players[pid]; const isMe = pid === S.me.pid;
@@ -1134,51 +1313,55 @@ function bindTeams() {
   $$('[data-kick]').forEach(b => b.onclick = () => { if (confirm('Spieler wirklich entfernen?')) hostKick(b.dataset.kick); });
 }
 
-function settingsSummary(s) {
-  return `<dl class="summary">
-    <dt>Modus</dt><dd>${s.mode === 'team' ? 'Team gegen Team' : 'Jeder für sich'}</dd>
-    <dt>Karte</dt><dd>${s.size} × ${s.size} (${s.size * s.size} Begriffe)</dd>
-    <dt>Zeit</dt><dd>${s.minutes ? s.minutes + ' Minuten' : 'Ohne Limit'}</dd>
-    <dt>Sieg</dt><dd>${WIN_NAMES[s.win]}</dd>
-    <dt>Lockout</dt><dd>${s.lockout ? 'An – ein Feld kann nur einer holen' : 'Aus'}</dd>
-    <dt>Abstimmung</dt><dd>${s.voting ? 'An' : 'Aus'}</dd>
-    <dt>Orte</dt><dd>1 aus ${s.locCount} wählen${s.locEvery && s.maxLocs !== 1 ? ', alle ' + s.locEvery + ' Min. ein weiterer (max. ' + (s.maxLocs || '∞') + ')' : ''}</dd>
-    <dt>Zwischenrunde</dt><dd>${s.voting && s.interEvery ? 'nach je ' + s.interEvery + ' Fotos' : 'Aus'}</dd>
-    <dt>Teleport</dt><dd>${s.tpRadius ? 'Im Umkreis von ' + String(s.tpRadius).replace('.', ',') + ' km' : 'Aus'}</dd>
-    <dt>Wort-Draft</dt><dd>${s.draft ? 'An' + (s.draftTime ? ' (' + s.draftTime + ' Sek.)' : '') : 'Aus'}</dd>
-    <dt>Gebiet</dt><dd>${REGION_NAMES[s.region]}</dd>
-    <dt>Begriffe</dt><dd>${s.wordMode === 'std' ? 'Standard' : s.wordMode === 'custom' ? 'Eigene Liste' : 'Standard + eigene'}</dd>
-  </dl>`;
-}
 function mountSettingsForm() {
-  $('#settings').innerHTML = `<div class="settings">
-    <div class="full"><label>Modus</label><div class="seg" id="sMode"><button data-v="team">Team gegen Team</button><button data-v="solo">Jeder für sich</button></div></div>
-    <label id="tn0w">Name Team 1<input id="sTn0" maxlength="20"></label>
-    <label id="tn1w">Name Team 2<input id="sTn1" maxlength="20"></label>
-    <label>Kartengröße<select id="sSize"><option value="3">3 × 3</option><option value="4">4 × 4</option><option value="5">5 × 5</option></select></label>
-    <label>Zeitlimit<select id="sMin">${[3,5,8,10,15,20,30,45,0].map(m => `<option value="${m}">${m ? m + ' Minuten' : 'Ohne Limit'}</option>`).join('')}</select></label>
-    <label>Siegbedingung<select id="sWin">${Object.entries(WIN_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
-    <label>Orte zur Auswahl<select id="sLocN">${[2,3,4,5,6].map(n => `<option value="${n}">1 aus ${n} wählen</option>`).join('')}</select></label>
-    <label>Weiterer Ort alle<select id="sLocE">${[1,2,3,4,5,10].map(m => `<option value="${m}">${m} Minuten</option>`).join('')}</select></label>
-    <label>Max. Orte pro Spieler<select id="sLocMax">${[1,2,3,4,5,6,0].map(n => `<option value="${n}">${n ? n + (n === 1 ? ' Ort (ganze Runde)' : ' Orte') : 'Unbegrenzt'}</option>`).join('')}</select></label>
-    <label>Zwischenrunde nach<select id="sInter">${[0,3,4,5,6,8,10,12].map(n => `<option value="${n}">${n ? n + ' Fotos' : 'Aus'}</option>`).join('')}</select></label>
-    <label>Teleport-Radius<select id="sTp">${[0,0.5,1,2,5].map(n => `<option value="${n}">${n ? String(n).replace('.', ',') + ' km um den Startpunkt' : 'Aus'}</option>`).join('')}</select></label>
-    <label>Gebiet der Orte<select id="sReg">${Object.entries(REGION_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
-    <div class="full" style="display:grid;gap:8px">
-      <label class="chk"><input type="checkbox" id="sLock"> Lockout – ein Feld kann nur ein Team / Spieler holen</label>
-      <label class="chk"><input type="checkbox" id="sVote"> Abstimmung am Ende (Fotos prüfen)</label>
-      <label class="chk"><input type="checkbox" id="sDraft"> Wort-Draft vor der Runde (alle stimmen über die Begriffe ab)</label>
-    </div>
-    <label id="sDtW">Zeit für den Draft<select id="sDt">${[30,45,60,90,120,180,0].map(n => `<option value="${n}">${n ? (n < 60 ? n + ' Sekunden' : n / 60 + ' Min.') : 'Bis alle fertig sind'}</option>`).join('')}</select></label>
-    <label class="full">Begriffe<select id="sWm"><option value="std">Standardliste (${WORDS.length} Begriffe)</option><option value="mix">Standard + eigene</option><option value="custom">Nur eigene</option></select></label>
-    <label class="full" id="customW">Eigene Begriffe (einer pro Zeile oder mit Komma getrennt)<textarea id="sCustom" placeholder="z. B. Pinguin, Rote Telefonzelle, Leuchtreklame"></textarea></label>
+  const sel = (id, opts) => `<select id="${id}">${opts.map(([v, t]) => `<option value="${v}">${t}</option>`).join('')}</select>`;
+  $('#settings').innerHTML = `<div class="sset">
+    <section class="sgrp"><h3><span>🎮</span>Spielmodus</h3>
+      <div class="seg big" id="sMode"><button data-v="team">👥 Team gegen Team</button><button data-v="solo">🙋 Jeder für sich</button></div>
+      <div class="sgrid" style="margin-top:10px">
+        <label id="tn0w"><span class="lbl"><i class="dot" style="--c:${TEAMC[0]}"></i>Name Team 1</span><input id="sTn0" maxlength="20"></label>
+        <label id="tn1w"><span class="lbl"><i class="dot" style="--c:${TEAMC[1]}"></i>Name Team 2</span><input id="sTn1" maxlength="20"></label>
+      </div>
+    </section>
+    <section class="sgrp"><h3><span>🔲</span>Karte &amp; Begriffe</h3>
+      <div class="lbl">Kartengröße</div>
+      <div class="seg big" id="sSize"><button data-v="3">3 × 3<small>9 Begriffe</small></button><button data-v="4">4 × 4<small>16 Begriffe</small></button><button data-v="5">5 × 5<small>25 Begriffe</small></button></div>
+      <div class="sgrid" style="margin-top:10px">
+        <label class="full"><span class="lbl">Begriffe</span>${sel('sWm', [['std', `Standardliste (${WORDS.length} Begriffe)`], ['mix', 'Standard + eigene'], ['custom', 'Nur eigene']])}</label>
+        <label class="full" id="customW"><span class="lbl">Eigene Begriffe (einer pro Zeile oder mit Komma getrennt)</span><textarea id="sCustom" placeholder="z. B. Pinguin, Rote Telefonzelle, Leuchtreklame"></textarea></label>
+        <label class="sw full"><input type="checkbox" id="sDraft"><span><b>Wort-Draft</b><small>Vor der Runde stimmen alle über die Begriffe ab</small></span></label>
+        <label id="sDtW"><span class="lbl">Zeit für den Draft</span>${sel('sDt', [30,45,60,90,120,180,0].map(n => [n, n ? (n < 60 ? n + ' Sekunden' : n / 60 + ' Min.') : 'Bis alle fertig sind']))}</label>
+      </div>
+    </section>
+    <section class="sgrp"><h3><span>⏱️</span>Zeit &amp; Sieg</h3>
+      <div class="sgrid">
+        <label><span class="lbl">Zeitlimit</span>${sel('sMin', [3,5,8,10,15,20,30,45,0].map(m => [m, m ? m + ' Minuten' : 'Ohne Limit']))}</label>
+        <label><span class="lbl">Siegbedingung</span>${sel('sWin', Object.entries(WIN_NAMES))}</label>
+        <label class="sw full"><input type="checkbox" id="sLock"><span><b>Lockout</b><small>Ein Feld kann nur von einem Team / Spieler geholt werden</small></span></label>
+      </div>
+    </section>
+    <section class="sgrp"><h3><span>🗺️</span>Orte &amp; Street View</h3>
+      <div class="sgrid">
+        <label><span class="lbl">Orte zur Auswahl</span>${sel('sLocN', [2,3,4,5,6].map(n => [n, `1 aus ${n} wählen`]))}</label>
+        <label><span class="lbl">Weiterer Ort alle</span>${sel('sLocE', [1,2,3,4,5,10].map(m => [m, m + ' Minuten']))}</label>
+        <label><span class="lbl">Max. Orte pro Spieler</span>${sel('sLocMax', [1,2,3,4,5,6,0].map(n => [n, n ? n + (n === 1 ? ' Ort (ganze Runde)' : ' Orte') : 'Unbegrenzt']))}</label>
+        <label><span class="lbl">Gebiet</span>${sel('sReg', Object.entries(REGION_NAMES))}</label>
+        <label class="full"><span class="lbl">🎯 Teleport-Radius</span>${sel('sTp', [0,0.5,1,2,5].map(n => [n, n ? String(n).replace('.', ',') + ' km um den Startpunkt' : 'Aus']))}</label>
+      </div>
+    </section>
+    <section class="sgrp"><h3><span>✅</span>Fotos prüfen</h3>
+      <div class="sgrid">
+        <label class="sw full"><input type="checkbox" id="sVote"><span><b>Abstimmung</b><small>Die Gegner bewerten, ob ein Foto zählt</small></span></label>
+        <label class="full"><span class="lbl">⏸️ Zwischenrunde</span>${sel('sInter', [0,3,4,5,6,8,10,12].map(n => [n, n ? 'nach je ' + n + ' Fotos' : 'Aus']))}</label>
+      </div>
+    </section>
   </div>`;
   const s = () => H.settings;
   const save = (soon) => { store.set('settings', H.settings); soon ? commitSoon() : commit(); };
   $$('#sMode button').forEach(b => b.onclick = () => { s().mode = b.dataset.v; save(); });
   $('#sTn0').oninput = e => { s().teamNames[0] = e.target.value.slice(0, 20) || 'Team 1'; save(true); };
   $('#sTn1').oninput = e => { s().teamNames[1] = e.target.value.slice(0, 20) || 'Team 2'; save(true); };
-  $('#sSize').onchange = e => { s().size = +e.target.value; save(); };
+  $$('#sSize button').forEach(b => b.onclick = () => { s().size = +b.dataset.v; save(); });
   $('#sMin').onchange = e => { s().minutes = +e.target.value; if (!s().minutes && s().win === 'most') { s().win = 'line'; toast('„Meiste Felder“ braucht ein Zeitlimit – Siegbedingung auf Bingo gestellt.'); } save(); };
   $('#sWin').onchange = e => { s().win = e.target.value; if (s().win === 'most' && !s().minutes) s().minutes = 10; save(); };
   $('#sReg').onchange = e => { s().region = e.target.value; save(); };
@@ -1200,9 +1383,12 @@ function syncSettingsForm() {
   $('#tn0w').classList.toggle('hidden', s.mode !== 'team'); $('#tn1w').classList.toggle('hidden', s.mode !== 'team');
   const setv = (id, v, prop = 'value') => { const el = $('#' + id); if (el !== a && el[prop] !== v) el[prop] = v; };
   setv('sTn0', s.teamNames[0]); setv('sTn1', s.teamNames[1]);
-  setv('sSize', String(s.size)); setv('sMin', String(s.minutes)); setv('sWin', s.win); setv('sReg', s.region);
+  $$('#sSize button').forEach(b => b.classList.toggle('on', +b.dataset.v === s.size));
+  setv('sMin', String(s.minutes)); setv('sWin', s.win); setv('sReg', s.region);
   setv('sLocN', String(s.locCount)); setv('sLocE', String(s.locEvery || 3)); setv('sLocMax', String(s.maxLocs ?? 4)); $('#sLocE').disabled = s.maxLocs === 1; setv('sInter', String(s.interEvery));
   $('#sInter').disabled = !s.voting;
+  $('#sInter').closest('label').classList.toggle('dim', !s.voting);
+  $('#sLocE').closest('label').classList.toggle('dim', s.maxLocs === 1);
   setv('sTp', String(s.tpRadius ?? 1)); setv('sDraft', s.draft, 'checked'); setv('sDt', String(s.draftTime));
   $('#sDtW').classList.toggle('hidden', !s.draft);
   setv('sLock', s.lockout, 'checked'); setv('sVote', s.voting, 'checked');
