@@ -1,0 +1,1803 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Straßenbingo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+:root{
+  --bg:#0e1217; --panel:#161c24; --panel2:#1f2833; --line:#2a3542; --text:#e8edf3; --muted:#8e9bab;
+  --accent:#ffb020; --accent-ink:#1d1400; --paper:#f6efdf; --paper2:#ebe2cc; --ink:#22252c;
+  --t0:#ff5d4f; --t1:#22b4c3; --ok:#35c873; --bad:#ff5d6c; --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--bg); color:var(--text); font:15px/1.45 'DM Sans',system-ui,sans-serif;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:44px 44px;
+}
+h1,h2,h3,.display{font-family:'Bricolage Grotesque',system-ui,sans-serif;letter-spacing:-.01em;margin:0}
+h2{font-size:18px;margin-bottom:12px}
+a{color:var(--accent)}
+button,.btnlike{font:inherit;font-weight:700;cursor:pointer;border:1px solid var(--line);border-radius:11px;padding:9px 14px;background:var(--panel2);color:var(--text);display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;white-space:nowrap}
+button:hover:not(:disabled),.btnlike:hover{border-color:#3b4a5c;background:#26313e}
+button:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover:not(:disabled){background:#ffc04a;border-color:#ffc04a}
+.danger{color:var(--bad)}
+.small{padding:5px 9px;font-size:13px;border-radius:9px}
+input,select,textarea{font:inherit;background:#0b0f14;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:9px 11px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(255,176,32,.5);outline-offset:0;border-color:var(--accent)}
+textarea{resize:vertical;min-height:80px}
+label{display:block;font-size:13px;color:var(--muted);font-weight:500}
+label>input,label>select,label>textarea{margin-top:5px;color:var(--text)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.muted{color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center}
+.grow{flex:1}
+.hidden{display:none!important}
+kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:0 5px;font-size:12px}
+
+/* Logo */
+.logo{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:52px;line-height:.95;letter-spacing:-.03em}
+.logo span{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:0 10px;border-radius:10px;margin-left:6px;transform:rotate(-2deg)}
+.logo.sm{font-size:22px}
+.logo.sm span{padding:0 6px;border-radius:7px;margin-left:3px}
+
+/* Home */
+.home{max-width:980px;margin:0 auto;padding:56px 20px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center}
+.hero p{font-size:18px;color:#c4cdd8;max-width:30em;margin:20px 0 26px}
+.how{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.how li{display:flex;gap:12px;align-items:flex-start;color:#c4cdd8}
+.how b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font-size:13px;color:var(--accent)}
+.home-card{display:grid;gap:14px;padding:22px}
+.home-card .big{padding:14px;font-size:16px}
+.or{text-align:center;color:var(--muted);font-size:13px;position:relative}
+.or:before,.or:after{content:"";position:absolute;top:50%;width:28%;height:1px;background:var(--line)}
+.or:before{left:0}.or:after{right:0}
+#code{text-transform:uppercase;letter-spacing:.2em;font-weight:700;text-align:center}
+.err{color:var(--bad);font-size:14px;min-height:1em}
+.localnote{background:rgba(255,176,32,.12);border:1px dashed var(--accent);color:var(--accent);padding:6px 10px;border-radius:10px;font-size:13px}
+
+/* Top bar */
+.top{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:rgba(14,18,23,.9);position:sticky;top:0;z-index:5;backdrop-filter:blur(6px);flex-wrap:wrap}
+.codebox{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px 6px 5px 12px;font-size:13px;color:var(--muted)}
+.codebox b{font-size:18px;letter-spacing:.18em;color:var(--text)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:700;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--c);display:inline-block;flex:none}
+
+/* Lobby */
+.lobby{max-width:1180px;margin:0 auto;padding:22px 20px;display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+.col{display:grid;gap:18px}
+.teamgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.team{border:2px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 7%,var(--panel));border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:220px}
+.team-h{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--c)}
+.team-h small{margin-left:auto;color:var(--muted);font-family:'DM Sans';font-size:13px;font-weight:500}
+.plist{list-style:none;margin:0;padding:0;display:grid;gap:6px;flex:1;align-content:start}
+.plist li{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.22);border-radius:10px;padding:7px 9px}
+.plist li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.plist li.off .nm{opacity:.45}
+.tag{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:1px 5px}
+.tag.you{color:var(--accent);border-color:rgba(255,176,32,.5)}
+.unassigned{margin-top:12px;padding:10px;border:1px dashed var(--line);border-radius:12px}
+.unassigned .plist{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.empty{color:var(--muted);font-size:13px;font-style:italic;padding:6px 2px}
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.settings .full{grid-column:1/-1}
+.seg{display:flex;background:#0b0f14;border:1px solid var(--line);border-radius:11px;padding:3px;margin-top:5px}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:7px 8px}
+.seg button.on{background:var(--panel2);color:var(--text);box-shadow:0 0 0 1px var(--line)}
+.chk{display:flex;align-items:center;gap:8px;color:var(--text);font-size:14px;cursor:pointer}
+.chk input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+.summary{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.summary dt{color:var(--muted)}
+.summary dd{margin:0;font-weight:600}
+.startArea{margin-top:16px;display:grid;gap:8px}
+.startArea .btn-primary{padding:14px;font-size:17px}
+
+/* Chat */
+.chat{display:flex;flex-direction:column;min-height:0}
+.log{flex:1;overflow:auto;display:flex;flex-direction:column;gap:5px;min-height:120px;max-height:260px;padding-right:4px;margin-bottom:10px}
+.msg{font-size:14px;line-height:1.35}
+.msg b{color:var(--c)}
+.msg .sc{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.msg.sys{color:var(--muted);font-style:italic}
+.chat form{display:flex;gap:6px}
+.chat form select{width:auto}
+
+/* Game */
+.game-top .timer{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;font-variant-numeric:tabular-nums;min-width:96px}
+.timer.warn{color:var(--bad)}
+.scores{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.score{display:flex;align-items:center;gap:8px;border-radius:12px;padding:5px 10px;background:color-mix(in srgb,var(--c) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--c) 40%,transparent);font-size:14px}
+.score b{color:var(--c)}
+.score .bingo{background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:11px;border-radius:6px;padding:1px 6px}
+.score.me{box-shadow:0 0 0 2px var(--c)}
+.game{display:grid;grid-template-columns:minmax(0,1fr) 450px;gap:14px;padding:14px;height:calc(100vh - 63px);min-height:560px}
+.viewer{padding:0;display:flex;flex-direction:column;overflow:hidden}
+.vtools{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.vtools select{width:auto;max-width:210px}
+.vtools input{flex:1;min-width:180px}
+.svwrap{flex:1;position:relative;background:#05080b}
+.svwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vhint{padding:8px 12px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}
+.sidebar{display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto}
+.boardhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.boardhead h2{margin:0}
+.board{--n:5;display:grid;grid-template-columns:repeat(var(--n),1fr);gap:5px;background:var(--paper);padding:8px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 0 3px var(--paper2)}
+.cell{aspect-ratio:1;border:0;border-radius:8px;background:#fffaf0;color:var(--ink);padding:4px;font-weight:700;font-size:var(--fs,12px);line-height:1.1;text-align:center;position:relative;overflow:hidden;background-size:cover;background-position:center;white-space:normal;word-break:break-word;hyphens:auto;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);transition:transform .08s}
+.cell:hover:not(:disabled){transform:scale(1.04);z-index:1;background-color:#fff}
+.cell .w{position:relative;z-index:1}
+.cell.got{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.cell.got:before{content:"";position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--c) 55%,transparent),color-mix(in srgb,var(--c) 80%,transparent))}
+.cell.line{box-shadow:inset 0 0 0 3px var(--accent)}
+.cell.free{background:var(--accent);color:var(--accent-ink);font-family:'Bricolage Grotesque';font-weight:800}
+.cell.blocked{color:rgba(34,37,44,.55);background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--c) 22%,#fffaf0) 0 6px,#fffaf0 6px 12px)}
+.cell .cnt{position:absolute;top:3px;right:3px;z-index:1;background:rgba(0,0,0,.6);color:#fff;font-size:10px;border-radius:6px;padding:0 4px;text-shadow:none}
+.cell .bad{position:absolute;top:3px;left:3px;z-index:2;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:var(--bad);color:#fff}
+.myprog{margin-left:auto;font-size:13px;color:var(--muted)}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(5,8,11,.72);z-index:50;display:grid;place-items:center;padding:16px;backdrop-filter:blur(3px)}
+.modal-box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;width:min(620px,100%);max-height:92vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.modal-box h2{font-size:24px}
+.cap{display:grid;gap:12px}
+.capprev{aspect-ratio:16/9;background:#05080b;border:1px dashed var(--line);border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.capprev img{width:100%;height:100%;object-fit:contain}
+.capprev .ph{color:var(--muted);font-size:14px;text-align:center;padding:10px}
+.caprow{display:flex;gap:8px;flex-wrap:wrap}
+.capfoot{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.thumb{width:110px;cursor:zoom-in}
+.thumb img{width:110px;height:70px;object-fit:cover;border-radius:8px;display:block;border:2px solid var(--c,var(--line))}
+.thumb div{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lightbox img{max-width:100%;max-height:78vh;border-radius:12px;display:block;margin:0 auto}
+.teampick{position:fixed;inset:0;z-index:40;background:rgba(5,8,11,.8);display:grid;place-items:center}
+.teampick .card{display:grid;gap:14px;text-align:center;padding:26px}
+
+/* Vote */
+.vote{max-width:1100px;margin:0 auto;padding:20px;display:grid;gap:14px}
+.vote-main{display:grid;gap:14px}
+.vote-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.vote-head h2{font-size:30px;margin:0}
+.vote-img{width:100%;max-height:58vh;object-fit:contain;background:#05080b;border-radius:12px;cursor:zoom-in}
+.vote-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.vote-bar .yes,.vote-bar .no{padding:13px 22px;font-size:16px}
+.vote-bar .yes.on{background:var(--ok);border-color:var(--ok);color:#06210f}
+.vote-bar .no.on{background:var(--bad);border-color:var(--bad);color:#2a0509}
+.tally{display:flex;gap:14px;font-weight:700;font-size:15px}
+.tally .y{color:var(--ok)}.tally .n{color:var(--bad)}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.strip button{padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;flex:none;position:relative;background:#05080b}
+.strip button.cur{border-color:var(--accent)}
+.strip img{width:92px;height:58px;object-fit:cover;display:block}
+.strip .st{position:absolute;bottom:3px;right:3px;font-size:12px;border-radius:5px;padding:0 4px;background:rgba(0,0,0,.7)}
+
+/* Draft */
+.draft{max-width:1180px;margin:0 auto;padding:20px;display:grid;gap:16px}
+.draft-intro{display:grid;gap:6px}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.dcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px;transition:border-color .15s,background .15s}
+.dcard.in{border-color:rgba(255,176,32,.6);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.dw{font-family:'Bricolage Grotesque';font-weight:800;font-size:17px;line-height:1.15;min-height:2.3em}
+.dmeta{display:flex;align-items:center;gap:8px;font-size:12px;flex-wrap:wrap}
+.dscore{font-weight:800;font-size:15px;min-width:26px}
+.dscore.pos{color:var(--ok)}.dscore.neg{color:var(--bad)}
+.din{margin-left:auto;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--accent)}
+.dbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dbtns .up.on{background:var(--ok);border-color:var(--ok)}
+.dbtns .down.on{background:var(--bad);border-color:var(--bad)}
+
+/* Results */
+.results{max-width:1180px;margin:0 auto;padding:22px 20px;display:grid;gap:20px}
+.winner{text-align:center;padding:26px;border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,var(--c) 50%,transparent)}
+.winner .display{font-size:44px;font-weight:800;color:var(--c)}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.rcard{border-top:4px solid var(--c)}
+.rcard .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.rcard .rank{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:var(--muted)}
+.rcard .stats{display:flex;gap:16px;margin:8px 0 12px;font-size:14px}
+.rcard .stats b{font-size:20px;display:block;color:var(--text)}
+.mini{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;background:var(--paper);padding:5px;border-radius:9px}
+.mini span{aspect-ratio:1;border-radius:4px;background:#fffaf0;position:relative}
+.mini span.v{background:var(--c)}
+.mini span.x{background:repeating-linear-gradient(45deg,#ffd5d8 0 3px,#fffaf0 3px 6px)}
+.mini span.f{background:var(--accent)}
+.mini span.l{box-shadow:inset 0 0 0 2px var(--accent-ink)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.gitem{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:zoom-in;border-top:3px solid var(--c)}
+.gitem img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.gitem .gi{padding:7px 9px;font-size:13px;display:flex;gap:6px;align-items:center}
+.gitem .gi b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gitem.rej img{filter:grayscale(1) opacity(.55)}
+
+/* Status screens */
+.center{min-height:80vh;display:grid;place-items:center;text-align:center;padding:20px}
+.spinner{width:42px;height:42px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--accent);animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Toasts */
+#toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:60;display:grid;gap:8px;justify-items:center;pointer-events:none}
+.toast{background:#0b0f14;border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));padding:10px 16px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);font-weight:600;animation:tin .25s ease-out;max-width:90vw}
+.toast.big{font-size:20px;font-family:'Bricolage Grotesque';font-weight:800;padding:14px 22px}
+@keyframes tin{from{transform:translateY(12px);opacity:0}}
+
+/* Orte & Weltkarte */
+.vtools{align-items:center}
+.chips{display:flex;gap:6px;overflow-x:auto;min-width:0;flex:1;padding:3px}
+.chip{padding:5px 11px 5px 6px;font-size:13px;border-radius:999px;position:relative;flex:none}
+.chip .n,.locbtn .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#0b0f14;font-size:11px;flex:none}
+.chip.cur{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip.cur .n{background:rgba(0,0,0,.18)}
+.chip.new:after{content:"";position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--panel)}
+.nextloc{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.nextloc b{color:var(--text)}
+.svwrap iframe.off{visibility:hidden;pointer-events:none}
+.svempty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);text-align:center;padding:20px}
+.mapov{position:absolute;inset:0;z-index:5;background:var(--bg);display:grid;grid-template-columns:minmax(0,1fr) 270px}
+.mapbox{position:relative;min-height:0}
+#wmap{position:absolute;inset:0;background:var(--bg);overflow:hidden}
+#wmap svg{display:block;touch-action:none;cursor:grab}
+#wmap svg:active{cursor:grabbing}
+.wsphere{fill:#10233a}
+.wgrat{fill:none;stroke:rgba(255,255,255,.07);stroke-width:.6;vector-effect:non-scaling-stroke}
+.wland{fill:#2c3d50;stroke:#55697f;stroke-width:.6;vector-effect:non-scaling-stroke}
+.wland:hover{fill:#354a60}
+.mkg{cursor:pointer}
+.mkg circle{fill:#1f2833;stroke:#fff;stroke-width:2;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.mkg.cur circle{fill:var(--accent)}
+.mkg.new circle{fill:var(--ok);animation:mkp 1.4s ease-in-out infinite}
+@keyframes mkp{50%{stroke:#35c873;stroke-width:7;stroke-opacity:.6}}
+.mkn{fill:#fff;font:700 12px 'DM Sans',sans-serif;text-anchor:middle;pointer-events:none}
+.mkg.cur .mkn{fill:var(--accent-ink)}
+.mkg.new .mkn{fill:#06210f}
+.mkl{fill:#fff;font:700 12px 'DM Sans',sans-serif;paint-order:stroke;stroke:#0e1217;stroke-width:3px;stroke-linejoin:round;pointer-events:auto}
+.wzoom{position:absolute;right:10px;top:10px;display:grid;gap:4px;z-index:2}
+.wzoom button{width:34px;height:34px;padding:0;font-size:18px}
+.wattr{position:absolute;left:8px;bottom:6px;font-size:10px;color:var(--muted)}
+.mapfb{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);padding:20px;text-align:center;background:#0b1622}
+.maplist{border-left:1px solid var(--line);padding:14px;overflow:auto;display:flex;flex-direction:column;gap:6px;background:var(--panel)}
+.maplist h3{font-size:17px}
+.locbtn{justify-content:flex-start;text-align:left;white-space:normal;gap:10px;padding:8px 10px;flex:none}
+.locbtn .n{width:26px;height:26px;font-size:12px}
+.locbtn small{display:block;color:var(--muted);font-weight:500}
+.locbtn.cur{border-color:var(--accent)}
+.locbtn.cur .n{background:var(--accent);color:var(--accent-ink)}
+.badge{font-size:10px;font-weight:800;text-transform:uppercase;border-radius:5px;padding:1px 5px;background:var(--ok);color:#06210f;margin-left:auto;flex:none}
+.batchh{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:6px}
+.mk{width:28px;height:28px;border-radius:50%;background:#1f2833;border:2px solid #fff;color:#fff;display:grid;place-items:center;font:700 12px 'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer}
+.mk.cur{background:var(--accent);color:var(--accent-ink);transform:scale(1.2)}
+.mk.new{background:var(--ok);color:#06210f;animation:pulse 1.4s ease-in-out infinite}
+.locbtn.opt{border-color:rgba(53,200,115,.45)}
+.locbtn.opt .n{background:var(--ok);color:#06210f}
+.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(53,200,115,.35)}}
+.vhint{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.inter{position:fixed;inset:0;z-index:30;background:rgba(14,18,23,.97);overflow:auto}
+.timer.paused{color:var(--muted)}
+
+@media (max-width:960px){
+  .home,.lobby{grid-template-columns:1fr}
+  .mapov{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .maplist{border-left:0;border-top:1px solid var(--line);max-height:42%}
+  .game{grid-template-columns:1fr;height:auto}
+  .viewer{height:62vh;min-height:360px}
+  .settings{grid-template-columns:1fr}
+  .logo{font-size:40px}
+}
+@media (max-width:560px){
+  .teamgrid{grid-template-columns:1fr}
+  .top{padding:10px 12px;gap:10px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts"></div>
+<div id="modal" class="modal hidden"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   Straßenbingo – Street-View-Bingo mit Team-Modus
+   Peer-to-Peer über PeerJS (WebRTC). Der Browser des Hosts ist der Spielserver.
+   Testmodus ohne Internet: ?local an die URL hängen (mehrere Tabs im selben Browser).
+   ============================================================ */
+
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = (n = 12) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+const genCode = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const store = {
+  get(k, d, ses) { try { const v = (ses ? sessionStorage : localStorage).getItem('sb_' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v, ses) { try { (ses ? sessionStorage : localStorage).setItem('sb_' + k, JSON.stringify(v)); } catch {} }
+};
+const LOCAL = new URLSearchParams(location.search).has('local');
+const PREFIX = 'strassenbingo-v1-';
+const TEAMC = ['#ff5d4f', '#22b4c3'];
+const SOLOC = ['#ff5d4f', '#22b4c3', '#ffb020', '#a184ff', '#35c873', '#ff7ac8', '#5b8cff', '#c9d44a', '#ff9a52', '#7fe0d0'];
+
+/* ---------------- Begriffe ---------------- */
+const WORDS = [
+  'Kirche','Ampel','Bus','Fahrrad','Hund','Rotes Auto','Gelbes Auto','Polizeiauto','Taxi','Brücke','Fluss','Strand','Berg','Palme',
+  'Kuh','Pferd','Schaf','Ziege','Huhn','Tankstelle','Supermarkt','Briefkasten','Stoppschild','Zebrastreifen','Kreisverkehr','Baustelle',
+  'Kran','LKW','Motorrad','Traktor','Zug','Bahnübergang','Flagge','Statue','Brunnen','Graffiti','Friedhof','Leuchtturm','Windrad',
+  'Solaranlage','Schule','Krankenhaus','Apotheke','Spielplatz','Fußballplatz','Schwimmbad','Boot','Hafen','Flugzeug','Hotel',
+  'Parkhaus','Feuerwehrauto','Krankenwagen','Wohnmobil','Schnee','Kaktus','Esel','Mülltonne','Parkbank','Uhr','Werbetafel',
+  'Pizzeria','Café','Bäckerei','Regenschirm','Kinderwagen','Radweg','Tunnel','Autobahn','Schranke','Wegweiser','Zahl 7','Moschee',
+  'Tempel','Burg','Denkmal','Markt','Gelbes Haus','Blaue Tür','Wäscheleine','Roller','Bushaltestelle','Hochhaus','Holzhaus',
+  'Reetdach','Bahnhof','Ampelmännchen','Satellitenschüssel','Gewächshaus','Weinberg','Sonnenblume','Container','Hängebrücke',
+  'Seilbahn','Wasserturm','Strommast','Bauernhof','Heuballen','Person mit Hut','Jogger','Sonnenschirm','Pick-up','Oldtimer',
+  'Wohnwagen','Fahrradständer','Rolltreppe','Tor','Zaun','Mauer','Palast','Schild mit Pfeil','Kreuz','Glocke','Telefonzelle',
+  'Geldautomat','Imbiss','Eisdiele','Feuerhydrant','Ruine','See','Wasserfall','Wüste','Reisfeld','Steg','Gondel','Straßenbahn'
+];
+
+/* ---------------- Orte (keine API nötig) ---------------- */
+// [Region, Land, Ort, Breite, Länge]
+const LOCS = [
+  ['de','Deutschland','Berlin',52.5170,13.3889],['de','Deutschland','Hamburg',53.5527,9.9925],['de','Deutschland','München',48.1374,11.5755],
+  ['de','Deutschland','Köln',50.9413,6.9583],['de','Deutschland','Frankfurt',50.1146,8.6845],['de','Deutschland','Stuttgart',48.7784,9.1800],
+  ['de','Deutschland','Leipzig',51.3397,12.3747],['de','Deutschland','Dresden',51.0500,13.7383],['de','Deutschland','Nürnberg',49.4540,11.0775],
+  ['de','Deutschland','Bremen',53.0758,8.8072],['de','Deutschland','Freiburg',47.9952,7.8494],['de','Deutschland','Rostock',54.0887,12.1405],
+  ['de','Deutschland','Garmisch-Partenkirchen',47.4925,11.0955],['de','Deutschland','Westerland (Sylt)',54.9079,8.3105],['de','Deutschland','Heidelberg',49.4106,8.6981],
+  ['de','Deutschland','Münster',51.9625,7.6280],['de','Deutschland','Lübeck',53.8670,10.6850],['de','Deutschland','Görlitz',51.1550,14.9890],
+  ['de','Deutschland','Trier',49.7560,6.6410],['de','Deutschland','Konstanz',47.6600,9.1750],['de','Deutschland','Bamberg',49.8916,10.8870],
+  ['de','Deutschland','Kiel',54.3230,10.1350],['de','Deutschland','Erfurt',50.9780,11.0290],
+  ['eu','Frankreich','Paris',48.8566,2.3522],['eu','Frankreich','Lyon',45.7640,4.8357],['eu','Frankreich','Marseille',43.2965,5.3698],['eu','Frankreich','Nizza',43.6960,7.2700],
+  ['eu','Vereinigtes Königreich','London',51.5080,-0.1281],['eu','Vereinigtes Königreich','Manchester',53.4808,-2.2426],['eu','Vereinigtes Königreich','Edinburgh',55.9520,-3.1960],
+  ['eu','Irland','Dublin',53.3498,-6.2603],['eu','Irland','Galway',53.2720,-9.0530],['eu','Niederlande','Amsterdam',52.3702,4.8952],
+  ['eu','Belgien','Brüssel',50.8467,4.3525],['eu','Belgien','Brügge',51.2093,3.2247],['eu','Österreich','Wien',48.2082,16.3738],
+  ['eu','Österreich','Salzburg',47.8000,13.0440],['eu','Schweiz','Zürich',47.3769,8.5417],['eu','Schweiz','Luzern',47.0502,8.3093],
+  ['eu','Italien','Rom',41.9028,12.4964],['eu','Italien','Florenz',43.7700,11.2550],['eu','Italien','Neapel',40.8518,14.2681],['eu','Italien','Palermo',38.1157,13.3615],
+  ['eu','Spanien','Barcelona',41.3874,2.1686],['eu','Spanien','Madrid',40.4168,-3.7038],['eu','Spanien','Sevilla',37.3891,-5.9845],['eu','Spanien','Valencia',39.4699,-0.3763],
+  ['eu','Portugal','Lissabon',38.7110,-9.1390],['eu','Portugal','Porto',41.1496,-8.6110],['eu','Dänemark','Kopenhagen',55.6761,12.5683],
+  ['eu','Schweden','Stockholm',59.3326,18.0649],['eu','Norwegen','Oslo',59.9139,10.7522],['eu','Norwegen','Bergen',60.3929,5.3241],
+  ['eu','Finnland','Helsinki',60.1699,24.9384],['eu','Island','Reykjavík',64.1466,-21.9426],['eu','Estland','Tallinn',59.4370,24.7536],
+  ['eu','Lettland','Riga',56.9496,24.1052],['eu','Litauen','Vilnius',54.6872,25.2797],['eu','Tschechien','Prag',50.0755,14.4378],
+  ['eu','Polen','Krakau',50.0614,19.9366],['eu','Polen','Warschau',52.2297,21.0122],['eu','Ungarn','Budapest',47.4979,19.0402],
+  ['eu','Slowakei','Bratislava',48.1486,17.1077],['eu','Slowenien','Ljubljana',46.0511,14.5051],['eu','Kroatien','Zagreb',45.8150,15.9819],
+  ['eu','Kroatien','Split',43.5081,16.4402],['eu','Serbien','Belgrad',44.8176,20.4569],['eu','Bulgarien','Sofia',42.6977,23.3219],
+  ['eu','Rumänien','Bukarest',44.4268,26.1025],['eu','Griechenland','Athen',37.9838,23.7275],['eu','Griechenland','Thessaloniki',40.6401,22.9444],
+  ['eu','Ukraine','Lwiw',49.8397,24.0297],['eu','Malta','Valletta',35.8989,14.5146],
+  ['world','USA','New York',40.7580,-73.9855],['world','USA','Los Angeles',34.0522,-118.2437],['world','USA','Chicago',41.8781,-87.6298],
+  ['world','USA','Miami',25.7617,-80.1918],['world','USA','San Francisco',37.7749,-122.4194],['world','USA','Seattle',47.6062,-122.3321],
+  ['world','USA','New Orleans',29.9511,-90.0715],['world','USA','Las Vegas',36.1147,-115.1728],['world','USA','Boston',42.3601,-71.0589],
+  ['world','USA','Austin',30.2672,-97.7431],['world','USA','Denver',39.7392,-104.9903],['world','USA','Nashville',36.1627,-86.7816],
+  ['world','USA','Honolulu',21.2793,-157.8292],['world','USA','Anchorage',61.2181,-149.9003],
+  ['world','Kanada','Toronto',43.6532,-79.3832],['world','Kanada','Vancouver',49.2827,-123.1207],['world','Kanada','Montréal',45.5017,-73.5673],['world','Kanada','Québec',46.8139,-71.2080],
+  ['world','Mexiko','Mexiko-Stadt',19.4326,-99.1332],['world','Mexiko','Guadalajara',20.6767,-103.3475],['world','Mexiko','Oaxaca',17.0654,-96.7237],
+  ['world','Guatemala','Antigua',14.5586,-90.7295],['world','Costa Rica','San José',9.9325,-84.0796],
+  ['world','Brasilien','Rio de Janeiro',-22.9711,-43.1822],['world','Brasilien','São Paulo',-23.5505,-46.6333],['world','Brasilien','Salvador',-12.9714,-38.5014],
+  ['world','Argentinien','Buenos Aires',-34.6037,-58.3816],['world','Argentinien','Mendoza',-32.8895,-68.8458],['world','Argentinien','Ushuaia',-54.8019,-68.3030],
+  ['world','Chile','Santiago',-33.4489,-70.6693],['world','Chile','Valparaíso',-33.0472,-71.6127],['world','Peru','Lima',-12.0464,-77.0428],
+  ['world','Peru','Cusco',-13.5170,-71.9785],['world','Kolumbien','Bogotá',4.5981,-74.0758],['world','Kolumbien','Medellín',6.2442,-75.5812],
+  ['world','Kolumbien','Cartagena',10.4236,-75.5478],['world','Ecuador','Quito',-0.2200,-78.5120],['world','Uruguay','Montevideo',-34.9060,-56.1913],
+  ['world','Bolivien','La Paz',-16.4955,-68.1336],
+  ['world','Japan','Tokio',35.6595,139.7005],['world','Japan','Kyoto',35.0036,135.7681],['world','Japan','Osaka',34.6687,135.5013],
+  ['world','Japan','Sapporo',43.0621,141.3544],['world','Japan','Hiroshima',34.3955,132.4596],['world','Taiwan','Taipeh',25.0330,121.5654],
+  ['world','Thailand','Bangkok',13.7563,100.5018],['world','Thailand','Chiang Mai',18.7883,98.9853],['world','Malaysia','Kuala Lumpur',3.1478,101.6953],
+  ['world','Singapur','Singapur',1.2840,103.8510],['world','Indonesien','Jakarta',-6.1754,106.8272],['world','Indonesien','Ubud (Bali)',-8.5069,115.2625],
+  ['world','Philippinen','Manila',14.5995,120.9842],['world','Sri Lanka','Colombo',6.9271,79.8612],['world','Indien','Mumbai',18.9220,72.8347],
+  ['world','Mongolei','Ulaanbaatar',47.9184,106.9177],['world','Kirgisistan','Bischkek',42.8746,74.6122],['world','Israel','Tel Aviv',32.0853,34.7818],
+  ['world','Israel','Jerusalem',31.7767,35.2345],['world','Jordanien','Amman',31.9539,35.9106],['world','Türkei','Istanbul',41.0082,28.9784],
+  ['world','Türkei','Ankara',39.9208,32.8541],['world','VAE','Dubai',25.2048,55.2708],['world','Russland','Moskau',55.7558,37.6173],
+  ['world','Russland','Sankt Petersburg',59.9343,30.3351],
+  ['world','Südafrika','Kapstadt',-33.9249,18.4241],['world','Südafrika','Johannesburg',-26.2041,28.0473],['world','Südafrika','Durban',-29.8587,31.0218],
+  ['world','Kenia','Nairobi',-1.2864,36.8172],['world','Uganda','Kampala',0.3136,32.5811],['world','Ghana','Accra',5.5600,-0.2057],
+  ['world','Nigeria','Lagos',6.4541,3.3947],['world','Senegal','Dakar',14.6928,-17.4467],['world','Botswana','Gaborone',-24.6282,25.9231],
+  ['world','Namibia','Windhuk',-22.5609,17.0658],['world','Tunesien','Tunis',36.8065,10.1815],
+  ['world','Australien','Sydney',-33.8688,151.2093],['world','Australien','Melbourne',-37.8136,144.9631],['world','Australien','Perth',-31.9523,115.8613],
+  ['world','Australien','Brisbane',-27.4698,153.0251],['world','Australien','Hobart',-42.8821,147.3272],['world','Neuseeland','Auckland',-36.8485,174.7633],
+  ['world','Neuseeland','Wellington',-41.2865,174.7762],['world','Neuseeland','Queenstown',-45.0312,168.6626]
+];
+const REGION_NAMES = {world:'Ganze Welt', eu:'Europa', de:'Deutschland'};
+const regionLocs = r => LOCS.filter(l => r === 'world' || (r === 'eu' ? l[0] !== 'world' : l[0] === 'de'));
+
+const DEFAULT_SETTINGS = {
+  mode:'team', teamNames:['Team Rot','Team Blau'], size:5, free:false, minutes:10, win:'line',
+  voting:true, lockout:false, region:'world', wordMode:'std', custom:'',
+  locCount:3, locEvery:3, maxLocs:4, interEvery:6, jokers:0, draft:true, draftTime:90, tpRadius:1
+};
+const WIN_NAMES = {line:'Erste Reihe (Bingo)', full:'Volle Karte', most:'Meiste Felder bei Zeitende'};
+
+/* ---------------- Globaler Zustand ---------------- */
+const S = {
+  view:'home', mounted:null, me:{ pid: store.get('pid', null, true) || uid(), name: store.get('name', '') },
+  isHost:false, code:null, state:null, images:{}, chat:[], net:null, offset:0, pos:null, chatScope:'team', err:''
+};
+store.set('pid', S.me.pid, true);
+let H = null;            // Host: autoritativer Spielstand
+let hostChat = [];       // Host: Chatverlauf
+const connPid = {};      // Host: Verbindung -> Spieler
+
+/* ============================================================
+   Netzwerk
+   ============================================================ */
+function loadPeer() {
+  return new Promise((res, rej) => {
+    if (window.Peer) return res();
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.onload = () => window.Peer ? res() : rej(new Error('PeerJS fehlt'));
+    s.onerror = () => rej(new Error('PeerJS konnte nicht geladen werden'));
+    document.head.appendChild(s);
+  });
+}
+
+function createHostNet(code, h) {
+  if (LOCAL) {
+    const bc = new BroadcastChannel('sb-' + code); const conns = new Set();
+    bc.onmessage = e => {
+      const d = e.data; if (d.to !== 'host') return;
+      if (d.k === 'open') { conns.add(d.from); bc.postMessage({to:d.from, k:'opened'}); h.onConn(d.from); }
+      else if (d.k === 'close') { conns.delete(d.from); h.onClose(d.from); }
+      else if (d.k === 'msg') h.onMsg(d.from, d.msg);
+    };
+    addEventListener('beforeunload', () => conns.forEach(c => bc.postMessage({to:c, k:'kill'})));
+    setTimeout(h.onReady, 0);
+    return {
+      send(cid, msg) { if (conns.has(cid)) bc.postMessage({to:cid, k:'msg', msg}); },
+      broadcast(msg) { conns.forEach(c => bc.postMessage({to:c, k:'msg', msg})); },
+      close(cid) { bc.postMessage({to:cid, k:'kill'}); conns.delete(cid); }
+    };
+  }
+  const peer = new Peer(PREFIX + code, {debug:0});
+  const conns = new Map();
+  peer.on('open', () => h.onReady());
+  peer.on('error', e => h.onError(e));
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch {} });
+  peer.on('connection', conn => {
+    const cid = conn.connectionId;
+    conn.on('open', () => { conns.set(cid, conn); h.onConn(cid); });
+    conn.on('data', d => h.onMsg(cid, d));
+    conn.on('close', () => { if (conns.delete(cid)) h.onClose(cid); });
+    conn.on('error', () => { if (conns.delete(cid)) h.onClose(cid); });
+  });
+  return {
+    send(cid, msg) { const c = conns.get(cid); if (c && c.open) try { c.send(msg); } catch (e) { console.warn(e); } },
+    broadcast(msg) { conns.forEach((c, cid) => this.send(cid, msg)); },
+    close(cid) { const c = conns.get(cid); conns.delete(cid); if (c) setTimeout(() => c.close(), 300); }
+  };
+}
+
+function createClientNet(code, h) {
+  let done = false;
+  const timer = setTimeout(() => { if (!done) h.onError('Lobby nicht gefunden. Stimmt der Code?'); }, LOCAL ? 2500 : 15000);
+  if (LOCAL) {
+    const id = uid(); const bc = new BroadcastChannel('sb-' + code);
+    bc.onmessage = e => {
+      const d = e.data; if (d.to !== id) return;
+      if (d.k === 'opened') { done = true; clearTimeout(timer); h.onOpen(); }
+      else if (d.k === 'msg') h.onMsg(d.msg);
+      else if (d.k === 'kill') h.onClose();
+    };
+    bc.postMessage({to:'host', from:id, k:'open'});
+    addEventListener('beforeunload', () => bc.postMessage({to:'host', from:id, k:'close'}));
+    return { send(msg) { bc.postMessage({to:'host', from:id, k:'msg', msg}); } };
+  }
+  const peer = new Peer({debug:0}); let conn = null;
+  peer.on('open', () => {
+    conn = peer.connect(PREFIX + code, {reliable:true});
+    conn.on('open', () => { done = true; clearTimeout(timer); h.onOpen(); });
+    conn.on('data', d => h.onMsg(d));
+    conn.on('close', () => h.onClose());
+    conn.on('error', () => h.onClose());
+  });
+  peer.on('error', e => {
+    if (done) return;
+    done = true; clearTimeout(timer);
+    h.onError(e.type === 'peer-unavailable' ? 'Lobby nicht gefunden. Stimmt der Code?' : 'Verbindung fehlgeschlagen (' + (e.type || e.message) + ').');
+  });
+  return { send(msg) { if (conn && conn.open) try { conn.send(msg); } catch (e) { console.warn(e); } } };
+}
+
+/* Spieleraktion: Host verarbeitet direkt, Clients senden an den Host */
+function act(msg) {
+  if (S.isHost) hostHandle('self', msg);
+  else if (S.net) S.net.send(msg);
+}
+
+/* ============================================================
+   Spiellogik (gemeinsam)
+   ============================================================ */
+function sides(st) {
+  if (st.settings.mode === 'team') {
+    return [0, 1].map(i => ({
+      id:'t' + i, name: st.settings.teamNames[i] || ('Team ' + (i + 1)), color: TEAMC[i],
+      members: Object.keys(st.players).filter(p => st.players[p].team === i)
+    }));
+  }
+  return Object.keys(st.players).map((p, i) => ({ id:'p:' + p, name: st.players[p].name, color: SOLOC[(st.players[p].ci ?? i) % SOLOC.length], members:[p] }));
+}
+function sideOf(st, pid) {
+  const p = st.players[pid]; if (!p) return null;
+  if (st.settings.mode === 'team') return p.team == null ? null : 't' + p.team;
+  return 'p:' + pid;
+}
+function sideInfo(st, sideId) {
+  const s = sides(st).find(x => x.id === sideId);
+  if (s) return s;
+  return { id: sideId, name: '?', color: '#888', members: [] };
+}
+function isValid(st, fid) {
+  if (!st.settings.voting) return true;
+  if ((st.phase === 'game' || st.phase === 'intermission') && !(st.reviewed || {})[fid]) return true; // noch nicht geprüft
+  if (st.phase === 'lobby') return true;
+  const v = st.votes[fid] || {}; let y = 0, n = 0;
+  for (const x of Object.values(v)) x > 0 ? y++ : n++;
+  return n <= y;
+}
+function claimed(st, sideId, validOnly) {
+  const set = new Set(); if (st.free != null) set.add(st.free);
+  for (const [fid, f] of Object.entries(st.findings)) if (f.side === sideId && (!validOnly || isValid(st, fid))) set.add(f.cell);
+  return set;
+}
+function boardLines(size) {
+  const L = [];
+  for (let r = 0; r < size; r++) L.push([...Array(size)].map((_, c) => r * size + c));
+  for (let c = 0; c < size; c++) L.push([...Array(size)].map((_, r) => r * size + c));
+  L.push([...Array(size)].map((_, i) => i * size + i));
+  L.push([...Array(size)].map((_, i) => i * size + (size - 1 - i)));
+  return L;
+}
+function lineInfo(size, set) {
+  const full = boardLines(size).filter(l => l.every(i => set.has(i)));
+  return { count: full.length, cells: new Set(full.flat()) };
+}
+function standings(st) {
+  const n = st.board.length, size = Math.round(Math.sqrt(n));
+  const cmp = (a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i]; return 0; };
+  const res = sides(st).map(sd => {
+    const set = claimed(st, sd.id, true); const li = lineInfo(size, set);
+    const cells = set.size - (st.free != null ? 1 : 0);
+    return { ...sd, set, lines: li.count, lineCells: li.cells, cells, full: set.size === n };
+  });
+  const w = st.settings.win;
+  res.forEach(r => r.key = w === 'line' ? [r.lines > 0 ? 1 : 0, r.lines, r.cells] : w === 'full' ? [r.full ? 1 : 0, r.cells, r.lines] : [r.cells, r.lines]);
+  res.sort((a, b) => cmp(b.key, a.key));
+  const top = res[0];
+  res.forEach((r, i) => { r.rank = 1 + res.findIndex(x => cmp(x.key, r.key) === 0); r.win = !!top && cmp(r.key, top.key) === 0 && top.cells > 0; });
+  return res;
+}
+function eligibleVoters(st, f) {
+  const online = Object.keys(st.players).filter(p => st.players[p].online);
+  const opp = online.filter(p => sideOf(st, p) !== f.side);
+  return opp.length ? opp : online;
+}
+function wordPool(s) {
+  const custom = [...new Set(s.custom.split(/[\n,;]+/).map(w => w.trim()).filter(Boolean).map(w => w.slice(0, 40)))];
+  if (s.wordMode === 'custom') return custom;
+  if (s.wordMode === 'mix') return [...new Set([...custom, ...WORDS])];
+  return WORDS.slice();
+}
+
+/* ============================================================
+   Host
+   ============================================================ */
+function startHost(name) {
+  S.me.name = name; store.set('name', name);
+  S.isHost = true; S.view = 'connecting'; render();
+  const tryCode = (attempt) => {
+    const code = genCode();
+    H = {
+      phase:'lobby', code, hostPid:S.me.pid, settings:{...DEFAULT_SETTINGS, ...store.get('settings', {}), teamNames:[...(store.get('settings', {}).teamNames || DEFAULT_SETTINGS.teamNames)]},
+      players:{}, board:[], free:null, findings:{}, votes:{}, voteOrder:[], voteIdx:0, endsAt:0, startedAt:0, endReason:'', round:0, lineCount:{}, nextCi:0,
+      locs:{}, locBatch:0, nextLocAt:0, reviewed:{}, sinceReview:0, pausedAt:0, jokers:{}
+    };
+    H.players[S.me.pid] = { name, team:null, online:true, ci: H.nextCi++ };
+    connPid.self = S.me.pid;
+    S.net = createHostNet(code, {
+      onReady() { S.code = code; S.state = H; location.hash = code; render(); },
+      onError(e) {
+        if (e && e.type === 'unavailable-id' && attempt < 3) return tryCode(attempt + 1);
+        if (S.state) { if (e && e.type === 'network') toast('Netzwerkproblem – versuche neu zu verbinden …', '#ff5d6c'); return; }
+        S.isHost = false; S.view = 'home'; S.err = 'Lobby konnte nicht erstellt werden (' + (e && (e.type || e.message)) + ').'; render();
+      },
+      onConn() {},
+      onMsg: hostHandle,
+      onClose(cid) {
+        const pid = connPid[cid]; delete connPid[cid]; if (!pid || !H.players[pid]) return;
+        if (Object.values(connPid).includes(pid)) return; // noch anders verbunden
+        if (H.phase === 'lobby') delete H.players[pid]; else H.players[pid].online = false;
+        commit();
+      }
+    });
+  };
+  tryCode(0);
+}
+
+function hostSendTo(pid, msg) {
+  if (pid === S.me.pid) return clientMsg(msg);
+  for (const [cid, p] of Object.entries(connPid)) if (p === pid && cid !== 'self') S.net.send(cid, msg);
+}
+function hostBroadcast(msg) { S.net.broadcast(msg); clientMsg(msg); }
+let commitTimer = null;
+function commit() {
+  clearTimeout(commitTimer); commitTimer = null;
+  S.net.broadcast({t:'state', state:H, now:Date.now()});
+  S.state = H; render();
+}
+function commitSoon() { if (!commitTimer) commitTimer = setTimeout(commit, 150); }
+function announce(text, color, big) { hostBroadcast({t:'event', text, color, big}); }
+
+function chatTargets(scope) {
+  if (scope === 'all') return Object.keys(H.players);
+  const t = +scope.slice(1); return Object.keys(H.players).filter(p => H.players[p].team === t);
+}
+function hostChatPush(entry) {
+  hostChat.push(entry); if (hostChat.length > 200) hostChat.shift();
+  chatTargets(entry.scope).forEach(p => hostSendTo(p, {t:'chat', m:entry}));
+}
+
+function hostHandle(cid, msg) {
+  if (!H || !msg || typeof msg !== 'object') return;
+  let pid = connPid[cid];
+  if (msg.t === 'hello') {
+    pid = String(msg.pid || '').slice(0, 24) || uid();
+    const name = String(msg.name || 'Gast').trim().slice(0, 20) || 'Gast';
+    connPid[cid] = pid;
+    let p = H.players[pid];
+    if (!p) {
+      p = H.players[pid] = { name, team:null, online:true, ci: H.nextCi++ };
+      if (H.phase !== 'lobby' && H.settings.mode === 'team') {
+        const c = [0, 1].map(i => Object.values(H.players).filter(x => x.team === i).length);
+        p.team = c[0] <= c[1] ? 0 : 1;
+      }
+    }
+    p.name = name; p.online = true;
+    if ((H.phase === 'game' || H.phase === 'intermission') && !(H.locs[pid] || []).length) {
+      for (let b = 0; b < Math.max(1, H.locBatch); b++) H.locs[pid] = (H.locs[pid] || []).concat(pickLocs(pid, H.settings.locCount, b));
+    }
+    S.net.send(cid, {t:'welcome', code:H.code});
+    for (const fid of Object.keys(H.findings)) if (S.images[fid]) S.net.send(cid, {t:'img', fid, data:S.images[fid]});
+    const t = p.team;
+    S.net.send(cid, {t:'chathist', list: hostChat.filter(m => m.scope === 'all' || (t != null && m.scope === 't' + t))});
+    hostChatPush({scope:'all', sys:true, text: name + ' ist beigetreten', ts:Date.now()});
+    commit(); return;
+  }
+  if (!pid || !H.players[pid]) return;
+  const p = H.players[pid];
+  switch (msg.t) {
+    case 'team': {
+      if (H.settings.mode !== 'team') return;
+      const team = msg.team === 0 || msg.team === 1 ? msg.team : null;
+      if (H.phase === 'lobby' || (H.phase === 'game' && p.team == null && team != null)) { p.team = team; commit(); }
+      return;
+    }
+    case 'chat': {
+      const text = String(msg.text || '').trim().slice(0, 300); if (!text) return;
+      let scope = 'all';
+      if (msg.scope === 'team' && H.settings.mode === 'team' && p.team != null) scope = 't' + p.team;
+      const sd = sideOf(H, pid);
+      hostChatPush({scope, name:p.name, color: sd ? sideInfo(H, sd).color : '#8e9bab', text, ts:Date.now()});
+      return;
+    }
+    case 'capture': {
+      if (H.phase !== 'game') return hostSendTo(pid, {t:'toast', text:'Das Spiel läuft gerade nicht.'});
+      const cell = msg.cell | 0; const side = sideOf(H, pid);
+      if (!side) return hostSendTo(pid, {t:'toast', text:'Wähle zuerst ein Team.'});
+      if (cell < 0 || cell >= H.board.length || cell === H.free) return;
+      const img = String(msg.img || '');
+      if (!/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 600000) return hostSendTo(pid, {t:'toast', text:'Bild ungültig oder zu groß.'});
+      if (H.settings.lockout) {
+        const other = Object.entries(H.findings).map(([id, f]) => isValid(H, id) && f).find(f => f && f.cell === cell && f.side !== side);
+        if (other) return hostSendTo(pid, {t:'toast', text:'Zu spät – dieses Feld hat schon ' + sideInfo(H, other.side).name + '.'});
+      }
+      for (const [fid, f] of Object.entries(H.findings)) if (f.pid === pid && f.cell === cell) { delete H.findings[fid]; delete S.images[fid]; }
+      const fid = uid(10);
+      S.images[fid] = img;
+      S.net.broadcast({t:'img', fid, data:img});
+      H.findings[fid] = { pid, side, cell, ts:Date.now() };
+      H.sinceReview++;
+      const sd = sideInfo(H, side);
+      announce((H.settings.mode === 'team' ? p.name + ' (' + sd.name + ')' : p.name) + ' hat „' + H.board[cell] + '“ gefunden', sd.color);
+      hostCheckLines();
+      if (H.phase === 'game' && H.settings.voting && H.settings.interEvery && H.sinceReview >= H.settings.interEvery) return hostIntermission();
+      commit(); return;
+    }
+    case 'remove': {
+      if (H.phase !== 'game') return;
+      const f = H.findings[msg.fid]; if (!f || f.pid !== pid) return;
+      delete H.findings[msg.fid]; H.lineCount[f.side] = Math.min(H.lineCount[f.side] || 0, lineInfo(Math.round(Math.sqrt(H.board.length)), claimed(H, f.side, true)).count);
+      commit(); return;
+    }
+    case 'choose': {
+      if (H.phase !== 'game') return;
+      const list = H.locs[pid] || []; const l = list.find(x => x.id === msg.id);
+      if (!l || l.ch || list.some(x => x.b === l.b && x.ch)) return;
+      l.ch = true;
+      H.locs[pid] = list.filter(x => x.b !== l.b || x.ch); // die anderen Vorschläge verschwinden
+      commit(); return;
+    }
+    case 'joker': {
+      if (H.phase !== 'game') return;
+      const left = H.settings.jokers - (H.jokers[pid] || 0);
+      const list = H.locs[pid] || []; const i = list.findIndex(l => l.id === msg.id && l.ch);
+      if (left <= 0 || i < 0) return;
+      const repl = pickLocs(pid, 1, list[i].b)[0]; if (!repl) return;
+      repl.ch = true; list[i] = repl; H.jokers[pid] = (H.jokers[pid] || 0) + 1;
+      hostSendTo(pid, {t:'joker', from:msg.id, to:repl.id});
+      commit(); return;
+    }
+    case 'dvote': {
+      if (H.phase !== 'draft') return;
+      const i = msg.i | 0; if (i < 0 || i >= H.draftWords.length) return;
+      H.draftVotes[i] = H.draftVotes[i] || {};
+      if (msg.v === 1 || msg.v === -1) H.draftVotes[i][pid] = msg.v; else delete H.draftVotes[i][pid];
+      commitSoon(); return;
+    }
+    case 'dready': {
+      if (H.phase !== 'draft') return;
+      if (msg.r) H.draftReady[pid] = true; else delete H.draftReady[pid];
+      const online = Object.keys(H.players).filter(p => H.players[p].online);
+      if (online.length && online.every(p => H.draftReady[p])) return hostFinishDraft();
+      commit(); return;
+    }
+    case 'vote': {
+      if (H.phase !== 'vote' && H.phase !== 'intermission') return;
+      const f = H.findings[msg.fid]; if (!f || !H.voteOrder.includes(msg.fid)) return;
+      if (!eligibleVoters(H, f).includes(pid)) return;
+      H.votes[msg.fid] = H.votes[msg.fid] || {};
+      if (msg.v === 1 || msg.v === -1) H.votes[msg.fid][pid] = msg.v; else delete H.votes[msg.fid][pid];
+      commit(); return;
+    }
+  }
+}
+
+function hostCheckLines() {
+  const size = Math.round(Math.sqrt(H.board.length));
+  for (const sd of sides(H)) {
+    const set = claimed(H, sd.id, true); const li = lineInfo(size, set);
+    const prev = H.lineCount[sd.id] || 0;
+    if (li.count > prev) {
+      H.lineCount[sd.id] = li.count;
+      if (H.settings.win === 'line') return hostEnd('BINGO! ' + sd.name + ' hat eine volle Reihe!', sd.color);
+      announce('BINGO! ' + sd.name + ' hat ' + (li.count === 1 ? 'eine Reihe' : li.count + ' Reihen') + '!', sd.color, true);
+    }
+    if (H.settings.win === 'full' && set.size === H.board.length) return hostEnd(sd.name + ' hat die volle Karte!', sd.color);
+  }
+}
+
+/* ---------- Wort-Draft ---------- */
+const hasFree = () => false; // kein Freifeld – jedes Feld ist ein Begriff
+const wordsNeeded = s => s.size * s.size - (hasFree(s) ? 1 : 0);
+function draftRanking(st) {
+  // Punkte = Upvotes − Downvotes; bei Gleichstand entscheidet die (zufällige) Reihenfolge der Liste
+  return st.draftWords.map((w, i) => {
+    const v = Object.values(st.draftVotes[i] || {});
+    return { w, i, up: v.filter(x => x > 0).length, down: v.filter(x => x < 0).length };
+  }).map(r => ({ ...r, score: r.up - r.down }))
+    .sort((a, b) => b.score - a.score || a.i - b.i);
+}
+function hostStart() {
+  const s = H.settings; const need = wordsNeeded(s);
+  let pool = shuffle(wordPool(s));
+  if (pool.length < need) pool = [...pool, ...shuffle(WORDS.filter(w => !pool.includes(w)))];
+  if (!s.draft) return hostBeginGame(pool.slice(0, need));
+  for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
+  let cands = pool.slice(0, need * 2);
+  if (cands.length < need * 2) cands = [...cands, ...shuffle(WORDS.filter(w => !cands.includes(w)))].slice(0, need * 2);
+  H.phase = 'draft'; H.draftWords = cands; H.draftVotes = {}; H.draftReady = {};
+  H.draftEnds = s.draftTime ? Date.now() + s.draftTime * 1000 : 0;
+  hostBroadcast({t:'reset'});
+  announce('🗳 Wort-Draft! Stimmt ab, welche Begriffe auf die Karte kommen.', '#ffb020', true);
+  commit();
+}
+function hostFinishDraft() {
+  if (H.phase !== 'draft') return;
+  const need = wordsNeeded(H.settings);
+  hostBeginGame(draftRanking(H).slice(0, need).map(r => r.w));
+}
+function hostBeginGame(words) {
+  const s = H.settings; const n = s.size * s.size;
+  H.board = shuffle(words).slice(0, n);
+  H.free = hasFree(s) ? Math.floor(n / 2) : null;
+  if (H.free != null) H.board.splice(H.free, 0, 'FREI');
+  H.board = H.board.slice(0, n);
+  H.draftWords = []; H.draftVotes = {}; H.draftReady = {}; H.draftEnds = 0;
+  H.findings = {}; H.votes = {}; H.voteOrder = []; H.voteIdx = 0; H.lineCount = {}; H.endReason = '';
+  H.reviewed = {}; H.sinceReview = 0; H.pausedAt = 0; H.jokers = {}; H.locs = {}; H.locBatch = 0;
+  S.images = {};
+  for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
+  H.phase = 'game'; H.round++; H.startedAt = Date.now();
+  H.endsAt = s.minutes ? Date.now() + s.minutes * 60000 : 0;
+  giveBatch();
+  H.nextLocAt = s.locEvery && s.maxLocs !== 1 ? Date.now() + s.locEvery * 60000 : 0;
+  if (H.endsAt && H.nextLocAt >= H.endsAt) H.nextLocAt = 0;
+  hostBroadcast({t:'reset'});
+  announce('Los geht’s! Wähle auf der Weltkarte einen deiner Orte.', '#ffb020', true);
+  commit();
+}
+
+/* Zufällige Orte für einen Spieler (ohne Wiederholung, solange möglich) */
+function pickLocs(pid, n, batch) {
+  const pool = regionLocs(H.settings.region);
+  const used = new Set((H.locs[pid] || []).map(l => l.n));
+  let avail = pool.filter(l => !used.has(l[2]));
+  if (avail.length < n) avail = pool;
+  const j = () => (Math.random() - .5) * 0.003;
+  return shuffle(avail).slice(0, n).map(l => ({
+    id: uid(8), c: l[1], n: l[2], lat: +(l[3] + j()).toFixed(6), lng: +(l[4] + j()).toFixed(6), h: Math.floor(Math.random() * 360), b: batch
+  }));
+}
+function giveBatch() {
+  if (H.settings.maxLocs && H.locBatch >= H.settings.maxLocs) return;
+  H.jokers = {}; // Joker füllen sich mit jeder neuen Auswahl wieder auf
+  for (const pid of Object.keys(H.players)) H.locs[pid] = (H.locs[pid] || []).concat(pickLocs(pid, H.settings.locCount, H.locBatch));
+  H.locBatch++;
+}
+
+/* Zwischenrunde: neue Fotos prüfen, Zeit pausiert */
+function unreviewed() {
+  return Object.keys(H.findings).filter(f => !H.reviewed[f])
+    .sort((a, b) => H.findings[a].cell - H.findings[b].cell || H.findings[a].side.localeCompare(H.findings[b].side) || H.findings[a].ts - H.findings[b].ts);
+}
+function hostIntermission() {
+  const order = unreviewed(); H.sinceReview = 0;
+  if (!order.length) return commit();
+  H.phase = 'intermission'; H.pausedAt = Date.now(); H.voteOrder = order; H.voteIdx = 0;
+  announce('⏸ Zwischenrunde! Prüft die neuen Fotos.', '#ffb020', true);
+  commit();
+}
+function hostResume() {
+  if (H.phase !== 'intermission') return;
+  const d = Date.now() - H.pausedAt;
+  if (H.endsAt) H.endsAt += d;
+  if (H.nextLocAt) H.nextLocAt += d;
+  H.voteOrder.forEach(f => H.reviewed[f] = true);
+  H.phase = 'game'; H.pausedAt = 0; H.voteOrder = []; H.voteIdx = 0;
+  const size = Math.round(Math.sqrt(H.board.length));
+  const rejected = Object.keys(H.reviewed).filter(f => H.findings[f] && !isValid(H, f)).length;
+  for (const sd of sides(H)) H.lineCount[sd.id] = lineInfo(size, claimed(H, sd.id, true)).count;
+  announce('▶ Weiter geht’s!' + (rejected ? ' ' + rejected + ' Foto' + (rejected === 1 ? ' wurde' : 's wurden') + ' abgelehnt.' : ''), '#ffb020', true);
+  commit();
+}
+
+function hostEnd(reason, color) {
+  if (H.phase !== 'game' && H.phase !== 'intermission') return;
+  if (H.phase === 'intermission' && H.endsAt) H.endsAt += Date.now() - H.pausedAt;
+  H.endReason = reason; H.pausedAt = 0;
+  const fids = H.settings.voting ? unreviewed() : [];
+  H.voteOrder = fids; H.voteIdx = 0;
+  H.phase = fids.length ? 'vote' : 'results';
+  announce(reason, color || '#ffb020', true);
+  commit();
+}
+
+function hostToLobby() {
+  H.phase = 'lobby'; H.findings = {}; H.votes = {}; H.board = []; H.voteOrder = []; H.voteIdx = 0; H.free = null;
+  H.locs = {}; H.reviewed = {}; H.locBatch = 0; H.nextLocAt = 0;
+  for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
+  S.images = {};
+  hostBroadcast({t:'reset'});
+  commit();
+}
+
+function hostKick(pid) {
+  if (pid === S.me.pid) return;
+  for (const [cid, p] of Object.entries(connPid)) if (p === pid && cid !== 'self') { S.net.send(cid, {t:'kicked'}); S.net.close(cid); delete connPid[cid]; }
+  delete H.players[pid]; commit();
+}
+
+setInterval(() => {
+  if (S.isHost && H && H.phase === 'draft' && H.draftEnds && Date.now() >= H.draftEnds) return hostFinishDraft();
+  if (!S.isHost || !H || H.phase !== 'game') return;
+  if (H.endsAt && Date.now() >= H.endsAt) return hostEnd('⏰ Die Zeit ist abgelaufen!');
+  if (H.nextLocAt && Date.now() >= H.nextLocAt) {
+    giveBatch();
+    H.nextLocAt += H.settings.locEvery * 60000;
+    if ((H.endsAt && H.nextLocAt >= H.endsAt) || (H.settings.maxLocs && H.locBatch >= H.settings.maxLocs)) H.nextLocAt = 0;
+    announce('🗺 Neue Auswahl: Wähle deinen ' + H.locBatch + '. Ort!', '#35c873', true);
+    commit();
+  }
+}, 500);
+
+/* ============================================================
+   Client
+   ============================================================ */
+function joinGame(code, name) {
+  code = code.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (code.length !== 5) { S.err = 'Der Code hat 5 Zeichen.'; return render(); }
+  S.me.name = name; store.set('name', name);
+  S.isHost = false; S.code = code; S.view = 'connecting'; S.err = ''; render();
+  S.net = createClientNet(code, {
+    onOpen() { S.net.send({t:'hello', pid:S.me.pid, name}); location.hash = code; },
+    onMsg: clientMsg,
+    onClose() { if (S.view === 'kicked') return; S.state = null; S.view = 'lost'; render(); },
+    onError(e) { S.state = null; S.view = 'home'; S.err = e; render(); }
+  });
+}
+
+function clientMsg(msg) {
+  if (!msg || typeof msg !== 'object') return;
+  switch (msg.t) {
+    case 'state':
+      S.offset = msg.now - Date.now(); S.state = msg.state; render(); break;
+    case 'img':
+      S.images[msg.fid] = msg.data; if (S.state) render(); break;
+    case 'reset':
+      if (!S.isHost) S.images = {}; break;
+    case 'chat':
+      S.chat.push(msg.m); if (S.chat.length > 200) S.chat.shift(); renderChat(); break;
+    case 'chathist':
+      S.chat = msg.list || []; renderChat(); break;
+    case 'event':
+      toast(msg.text, msg.color, msg.big); break;
+    case 'toast':
+      toast(msg.text, '#ff5d6c'); break;
+    case 'kicked':
+      S.state = null; S.view = 'kicked'; render(); break;
+    case 'joker':
+      S.jokerSwap = msg; break;
+  }
+}
+
+/* ============================================================
+   Rendering
+   ============================================================ */
+const app = $('#app');
+function phaseKey() { return S.state ? (S.state.phase === 'intermission' ? 'game' : S.state.phase) : S.view; }
+function render() {
+  const key = phaseKey();
+  if (key !== S.mounted) { closeModal(); S.mounted = key; (MOUNT[key] || (() => {}))(); }
+  (UPDATE[key] || (() => {}))();
+}
+const me = () => S.state && S.state.players[S.me.pid];
+const mySide = () => S.state ? sideOf(S.state, S.me.pid) : null;
+const amHost = () => S.isHost;
+const logoHTML = (sm) => `<div class="logo ${sm ? 'sm' : ''}">STRASSEN<span>BINGO</span></div>`;
+
+function toast(text, color, big) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (big ? ' big' : ''); el.style.setProperty('--c', color || '#ffb020'); el.textContent = text;
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), big ? 5000 : 3500);
+  while ($('#toasts').children.length > 4) $('#toasts').firstChild.remove();
+}
+
+let modalCleanup = null;
+function openModal(html, cls) {
+  closeModal();
+  const m = $('#modal'); m.innerHTML = `<div class="modal-box ${cls || ''}">${html}</div>`; m.classList.remove('hidden');
+  m.onclick = e => { if (e.target === m) closeModal(); };
+  return m.firstChild;
+}
+function closeModal() {
+  if (modalCleanup) { modalCleanup(); modalCleanup = null; }
+  const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = '';
+}
+addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+function lightbox(fid) {
+  const st = S.state; const f = st.findings[fid]; const src = S.images[fid]; if (!src) return;
+  const sd = sideInfo(st, f.side);
+  openModal(`<div class="lightbox"><div class="row" style="margin-bottom:10px"><span class="pill" style="--c:${sd.color}">${esc(sd.name)}</span><h2 class="grow" style="margin:0">„${esc(st.board[f.cell])}“</h2><span class="muted">${esc(st.players[f.pid]?.name || '?')}</span></div><img src="${src}" alt=""></div>`, 'wide');
+  $('#modal .modal-box').style.width = 'min(1100px,100%)';
+}
+
+/* ---------- Home ---------- */
+const MOUNT = {}, UPDATE = {};
+MOUNT.home = () => {
+  const hashCode = location.hash.slice(1).toUpperCase();
+  app.innerHTML = `
+  <div class="home">
+    <div class="hero">
+      ${logoHTML()}
+      <p>Erkundet die Welt in Street View, findet die Begriffe auf eurer Bingo-Karte und haltet sie als Foto fest. Allein oder im Team – wer zuerst eine Reihe hat, gewinnt.</p>
+      <ol class="how">
+        <li><b>1</b><span>Lobby erstellen und den Link an Freunde schicken.</span></li>
+        <li><b>2</b><span>Team wählen – im Team teilt ihr euch eine Karte, jeder steuert eigene Fotos bei.</span></li>
+        <li><b>3</b><span>Begriff entdeckt? Feld anklicken, Foto aufnehmen, abschicken.</span></li>
+        <li><b>4</b><span>Am Ende stimmt ihr ab, welche Fotos wirklich zählen.</span></li>
+      </ol>
+    </div>
+    <div class="card home-card">
+      ${LOCAL ? '<div class="localnote">Testmodus (?local): Spieler verbinden sich nur zwischen Tabs dieses Browsers.</div>' : ''}
+      <label>Dein Name<input id="nm" maxlength="20" placeholder="z. B. Domi" autocomplete="nickname"></label>
+      <button class="btn-primary big" id="create">Lobby erstellen</button>
+      <div class="or">oder beitreten</div>
+      <div class="row"><input id="code" placeholder="CODE" maxlength="5" value="${esc(hashCode)}"><button id="join">Beitreten</button></div>
+      <div class="err" id="homeErr"></div>
+    </div>
+  </div>`;
+  $('#nm').value = S.me.name || '';
+  const getName = () => { const n = $('#nm').value.trim(); if (!n) { S.err = 'Bitte gib einen Namen ein.'; UPDATE.home(); $('#nm').focus(); return null; } return n; };
+  $('#create').onclick = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } startHost(n); };
+  const join = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } joinGame($('#code').value, n); };
+  $('#join').onclick = join;
+  $('#code').onkeydown = e => { if (e.key === 'Enter') join(); };
+  (hashCode && S.me.name ? $('#join') : hashCode ? $('#nm') : $('#nm')).focus();
+};
+UPDATE.home = () => { $('#homeErr').textContent = S.err || ''; };
+
+MOUNT.connecting = () => { app.innerHTML = `<div class="center"><div><div class="spinner"></div><h2>Verbinde …</h2><p class="muted">${S.isHost ? 'Lobby wird erstellt' : 'Lobby ' + esc(S.code) + ' wird gesucht'}</p></div></div>`; };
+MOUNT.lost = () => {
+  app.innerHTML = `<div class="center"><div class="card" style="max-width:420px"><h2>Verbindung verloren</h2><p class="muted">Der Host hat die Lobby verlassen oder deine Verbindung ist abgebrochen.</p><div class="row" style="justify-content:center"><button class="btn-primary" id="re">Erneut verbinden</button><button id="hm">Startseite</button></div></div></div>`;
+  $('#re').onclick = () => joinGame(S.code, S.me.name);
+  $('#hm').onclick = () => { S.view = 'home'; S.err = ''; render(); };
+};
+MOUNT.kicked = () => {
+  app.innerHTML = `<div class="center"><div class="card"><h2>Du wurdest aus der Lobby entfernt.</h2><p><button id="hm">Zur Startseite</button></p></div></div>`;
+  $('#hm').onclick = () => { history.replaceState(null, '', location.pathname + location.search); S.view = 'home'; render(); };
+};
+
+function topBar(extra) {
+  return `<header class="top">${logoHTML(true)}
+    <div class="codebox">Code <b>${esc(S.state.code)}</b><button class="small" id="copyLink">Code kopieren</button></div>
+    ${extra || ''}</header>`;
+}
+function bindCopy() {
+  const b = $('#copyLink'); if (!b) return;
+  b.onclick = async () => {
+    const code = S.state.code;
+    try { await navigator.clipboard.writeText(code); toast('Code ' + code + ' kopiert'); }
+    catch { prompt('Code kopieren:', code); }
+  };
+}
+
+/* ---------- Lobby ---------- */
+MOUNT.lobby = () => {
+  app.innerHTML = topBar(`<span class="grow"></span><span id="meBadge"></span>`) + `
+  <main class="lobby">
+    <section class="col"><div class="card"><h2>Spieler</h2><div id="teams"></div></div></section>
+    <section class="col">
+      <div class="card"><h2>Einstellungen</h2><div id="settings"></div><div class="startArea" id="startArea"></div></div>
+      ${chatHTML(false)}
+    </section>
+  </main>`;
+  bindCopy(); bindChat();
+  if (amHost()) mountSettingsForm();
+};
+UPDATE.lobby = () => {
+  const st = S.state;
+  $('#meBadge').innerHTML = `<span class="muted">Du bist</span> <b>${esc(S.me.name)}</b>${amHost() ? ' <span class="tag you">Host</span>' : ''}`;
+  $('#teams').innerHTML = teamsHTML(st);
+  bindTeams();
+  if (!amHost()) $('#settings').innerHTML = settingsSummary(st.settings);
+  else syncSettingsForm();
+  const sa = $('#startArea');
+  if (amHost()) {
+    const ps = Object.values(st.players);
+    const noTeam = st.settings.mode === 'team' ? ps.filter(p => p.team == null).length : 0;
+    const pool = wordPool(st.settings).length, need = st.settings.size ** 2;
+    let warn = '';
+    if (noTeam) warn = `${noTeam} Spieler ${noTeam === 1 ? 'hat' : 'haben'} noch kein Team.`;
+    else if (st.settings.wordMode === 'custom' && pool < need) warn = `Nur ${pool} eigene Begriffe – der Rest wird mit Standardbegriffen aufgefüllt.`;
+    sa.innerHTML = `<button class="btn-primary" id="startBtn" ${noTeam ? 'disabled' : ''}>${st.settings.draft ? 'Wort-Draft starten' : 'Spiel starten'}</button>
+      ${st.settings.mode === 'team' ? '<button id="shuffleBtn">Teams zufällig mischen</button>' : ''}
+      ${warn ? `<div class="muted" style="font-size:13px">${esc(warn)}</div>` : ''}`;
+    $('#startBtn').onclick = hostStart;
+    if ($('#shuffleBtn')) $('#shuffleBtn').onclick = () => {
+      shuffle(Object.keys(H.players)).forEach((p, i) => H.players[p].team = i % 2); commit();
+    };
+  } else {
+    sa.innerHTML = `<div class="muted" style="text-align:center;padding:8px">Warte darauf, dass der Host das Spiel startet …</div>`;
+  }
+  renderChat();
+};
+
+function playerLi(st, pid, moveTo) {
+  const p = st.players[pid]; const isMe = pid === S.me.pid;
+  const hostCtl = amHost() && !isMe ? `
+    ${moveTo != null ? `<button class="small" data-move="${pid}" data-to="${moveTo}" title="Team wechseln">⇄</button>` : ''}
+    <button class="small danger" data-kick="${pid}" title="Entfernen">✕</button>` : '';
+  return `<li class="${p.online ? '' : 'off'}"><span class="nm">${esc(p.name)}</span>
+    ${isMe ? '<span class="tag you">Du</span>' : ''}${pid === st.hostPid ? '<span class="tag">Host</span>' : ''}${p.online ? '' : '<span class="tag">offline</span>'}${hostCtl}</li>`;
+}
+function teamsHTML(st) {
+  const ids = Object.keys(st.players);
+  if (st.settings.mode !== 'team') {
+    return `<ul class="plist">${ids.map(pid => playerLi(st, pid, null).replace('<li', `<li style="--c:${SOLOC[st.players[pid].ci % SOLOC.length]}"`).replace('<span class="nm">', '<span class="dot"></span><span class="nm">')).join('')}</ul>
+      <p class="muted" style="font-size:13px;margin:12px 0 0">Jeder spielt für sich mit einer eigenen Karte.</p>`;
+  }
+  const myTeam = me()?.team;
+  const teamBox = i => {
+    const mem = ids.filter(p => st.players[p].team === i);
+    return `<div class="team" style="--c:${TEAMC[i]}">
+      <div class="team-h"><span class="dot"></span>${esc(st.settings.teamNames[i])}<small>${mem.length} Spieler</small></div>
+      <ul class="plist">${mem.map(p => playerLi(st, p, 1 - i)).join('') || '<li class="empty" style="background:none">Noch niemand</li>'}</ul>
+      <button data-team="${i}" ${myTeam === i ? 'disabled' : ''} class="${myTeam === i ? '' : 'btn-primary'}" style="${myTeam === i ? '' : `background:${TEAMC[i]};border-color:${TEAMC[i]};color:#111`}">${myTeam === i ? 'Du bist in diesem Team' : 'Diesem Team beitreten'}</button>
+    </div>`;
+  };
+  const none = ids.filter(p => st.players[p].team == null);
+  return `<div class="teamgrid">${teamBox(0)}${teamBox(1)}</div>
+    <div class="unassigned"><div class="muted" style="font-size:13px;margin-bottom:6px">Noch ohne Team</div>
+    ${none.length ? `<ul class="plist">${none.map(p => playerLi(st, p, null)).join('')}</ul>` : '<div class="empty">Alle haben ein Team 👍</div>'}
+    ${myTeam != null ? '<button class="small" data-team="-1" style="margin-top:8px">Team verlassen</button>' : ''}</div>`;
+}
+function bindTeams() {
+  $$('[data-team]').forEach(b => b.onclick = () => act({t:'team', team: +b.dataset.team < 0 ? null : +b.dataset.team}));
+  $$('[data-move]').forEach(b => b.onclick = () => { H.players[b.dataset.move].team = +b.dataset.to; commit(); });
+  $$('[data-kick]').forEach(b => b.onclick = () => { if (confirm('Spieler wirklich entfernen?')) hostKick(b.dataset.kick); });
+}
+
+function settingsSummary(s) {
+  return `<dl class="summary">
+    <dt>Modus</dt><dd>${s.mode === 'team' ? 'Team gegen Team' : 'Jeder für sich'}</dd>
+    <dt>Karte</dt><dd>${s.size} × ${s.size} (${s.size * s.size} Begriffe)</dd>
+    <dt>Zeit</dt><dd>${s.minutes ? s.minutes + ' Minuten' : 'Ohne Limit'}</dd>
+    <dt>Sieg</dt><dd>${WIN_NAMES[s.win]}</dd>
+    <dt>Lockout</dt><dd>${s.lockout ? 'An – ein Feld kann nur einer holen' : 'Aus'}</dd>
+    <dt>Abstimmung</dt><dd>${s.voting ? 'An' : 'Aus'}</dd>
+    <dt>Orte</dt><dd>1 aus ${s.locCount} wählen${s.locEvery && s.maxLocs !== 1 ? ', alle ' + s.locEvery + ' Min. ein weiterer (max. ' + (s.maxLocs || '∞') + ')' : ''}</dd>
+    <dt>Zwischenrunde</dt><dd>${s.voting && s.interEvery ? 'nach je ' + s.interEvery + ' Fotos' : 'Aus'}</dd>
+    <dt>Teleport</dt><dd>${s.tpRadius ? 'Im Umkreis von ' + String(s.tpRadius).replace('.', ',') + ' km' : 'Aus'}</dd>
+    <dt>Wort-Draft</dt><dd>${s.draft ? 'An' + (s.draftTime ? ' (' + s.draftTime + ' Sek.)' : '') : 'Aus'}</dd>
+    <dt>Gebiet</dt><dd>${REGION_NAMES[s.region]}</dd>
+    <dt>Begriffe</dt><dd>${s.wordMode === 'std' ? 'Standard' : s.wordMode === 'custom' ? 'Eigene Liste' : 'Standard + eigene'}</dd>
+  </dl>`;
+}
+function mountSettingsForm() {
+  $('#settings').innerHTML = `<div class="settings">
+    <div class="full"><label>Modus</label><div class="seg" id="sMode"><button data-v="team">Team gegen Team</button><button data-v="solo">Jeder für sich</button></div></div>
+    <label id="tn0w">Name Team 1<input id="sTn0" maxlength="20"></label>
+    <label id="tn1w">Name Team 2<input id="sTn1" maxlength="20"></label>
+    <label>Kartengröße<select id="sSize"><option value="3">3 × 3</option><option value="4">4 × 4</option><option value="5">5 × 5</option></select></label>
+    <label>Zeitlimit<select id="sMin">${[3,5,8,10,15,20,30,45,0].map(m => `<option value="${m}">${m ? m + ' Minuten' : 'Ohne Limit'}</option>`).join('')}</select></label>
+    <label>Siegbedingung<select id="sWin">${Object.entries(WIN_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label>Orte zur Auswahl<select id="sLocN">${[2,3,4,5,6].map(n => `<option value="${n}">1 aus ${n} wählen</option>`).join('')}</select></label>
+    <label>Weiterer Ort alle<select id="sLocE">${[1,2,3,4,5,10].map(m => `<option value="${m}">${m} Minuten</option>`).join('')}</select></label>
+    <label>Max. Orte pro Spieler<select id="sLocMax">${[1,2,3,4,5,6,0].map(n => `<option value="${n}">${n ? n + (n === 1 ? ' Ort (ganze Runde)' : ' Orte') : 'Unbegrenzt'}</option>`).join('')}</select></label>
+    <label>Zwischenrunde nach<select id="sInter">${[0,3,4,5,6,8,10,12].map(n => `<option value="${n}">${n ? n + ' Fotos' : 'Aus'}</option>`).join('')}</select></label>
+    <label>Teleport-Radius<select id="sTp">${[0,0.5,1,2,5].map(n => `<option value="${n}">${n ? String(n).replace('.', ',') + ' km um den Startpunkt' : 'Aus'}</option>`).join('')}</select></label>
+    <label>Gebiet der Orte<select id="sReg">${Object.entries(REGION_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></label>
+    <div class="full" style="display:grid;gap:8px">
+      <label class="chk"><input type="checkbox" id="sLock"> Lockout – ein Feld kann nur ein Team / Spieler holen</label>
+      <label class="chk"><input type="checkbox" id="sVote"> Abstimmung am Ende (Fotos prüfen)</label>
+      <label class="chk"><input type="checkbox" id="sDraft"> Wort-Draft vor der Runde (alle stimmen über die Begriffe ab)</label>
+    </div>
+    <label id="sDtW">Zeit für den Draft<select id="sDt">${[30,45,60,90,120,180,0].map(n => `<option value="${n}">${n ? (n < 60 ? n + ' Sekunden' : n / 60 + ' Min.') : 'Bis alle fertig sind'}</option>`).join('')}</select></label>
+    <label class="full">Begriffe<select id="sWm"><option value="std">Standardliste (${WORDS.length} Begriffe)</option><option value="mix">Standard + eigene</option><option value="custom">Nur eigene</option></select></label>
+    <label class="full" id="customW">Eigene Begriffe (einer pro Zeile oder mit Komma getrennt)<textarea id="sCustom" placeholder="z. B. Pinguin, Rote Telefonzelle, Leuchtreklame"></textarea></label>
+  </div>`;
+  const s = () => H.settings;
+  const save = (soon) => { store.set('settings', H.settings); soon ? commitSoon() : commit(); };
+  $$('#sMode button').forEach(b => b.onclick = () => { s().mode = b.dataset.v; save(); });
+  $('#sTn0').oninput = e => { s().teamNames[0] = e.target.value.slice(0, 20) || 'Team 1'; save(true); };
+  $('#sTn1').oninput = e => { s().teamNames[1] = e.target.value.slice(0, 20) || 'Team 2'; save(true); };
+  $('#sSize').onchange = e => { s().size = +e.target.value; save(); };
+  $('#sMin').onchange = e => { s().minutes = +e.target.value; if (!s().minutes && s().win === 'most') { s().win = 'line'; toast('„Meiste Felder“ braucht ein Zeitlimit – Siegbedingung auf Bingo gestellt.'); } save(); };
+  $('#sWin').onchange = e => { s().win = e.target.value; if (s().win === 'most' && !s().minutes) s().minutes = 10; save(); };
+  $('#sReg').onchange = e => { s().region = e.target.value; save(); };
+  $('#sLocN').onchange = e => { s().locCount = +e.target.value; save(); };
+  $('#sLocE').onchange = e => { s().locEvery = +e.target.value; save(); };
+  $('#sLocMax').onchange = e => { s().maxLocs = +e.target.value; save(); };
+  $('#sInter').onchange = e => { s().interEvery = +e.target.value; save(); };
+  $('#sLock').onchange = e => { s().lockout = e.target.checked; save(); };
+  $('#sVote').onchange = e => { s().voting = e.target.checked; save(); };
+  $('#sTp').onchange = e => { s().tpRadius = +e.target.value; save(); };
+  $('#sDraft').onchange = e => { s().draft = e.target.checked; save(); };
+  $('#sDt').onchange = e => { s().draftTime = +e.target.value; save(); };
+  $('#sWm').onchange = e => { s().wordMode = e.target.value; save(); };
+  $('#sCustom').oninput = e => { s().custom = e.target.value.slice(0, 5000); save(true); };
+}
+function syncSettingsForm() {
+  const s = H.settings; const a = document.activeElement;
+  $$('#sMode button').forEach(b => b.classList.toggle('on', b.dataset.v === s.mode));
+  $('#tn0w').classList.toggle('hidden', s.mode !== 'team'); $('#tn1w').classList.toggle('hidden', s.mode !== 'team');
+  const setv = (id, v, prop = 'value') => { const el = $('#' + id); if (el !== a && el[prop] !== v) el[prop] = v; };
+  setv('sTn0', s.teamNames[0]); setv('sTn1', s.teamNames[1]);
+  setv('sSize', String(s.size)); setv('sMin', String(s.minutes)); setv('sWin', s.win); setv('sReg', s.region);
+  setv('sLocN', String(s.locCount)); setv('sLocE', String(s.locEvery || 3)); setv('sLocMax', String(s.maxLocs ?? 4)); $('#sLocE').disabled = s.maxLocs === 1; setv('sInter', String(s.interEvery));
+  $('#sInter').disabled = !s.voting;
+  setv('sTp', String(s.tpRadius ?? 1)); setv('sDraft', s.draft, 'checked'); setv('sDt', String(s.draftTime));
+  $('#sDtW').classList.toggle('hidden', !s.draft);
+  setv('sLock', s.lockout, 'checked'); setv('sVote', s.voting, 'checked');
+  setv('sWm', s.wordMode); setv('sCustom', s.custom);
+  $('#customW').classList.toggle('hidden', s.wordMode === 'std');
+}
+
+/* ---------- Chat ---------- */
+function chatHTML(inGame) {
+  const team = inGame && S.state.settings.mode === 'team';
+  return `<div class="card chat"><h2>${team ? 'Chat' : 'Chat'}</h2><div class="log" id="chatlog"></div>
+    <form id="chatf">${team ? '<select id="chatScope"><option value="team">Team</option><option value="all">Alle</option></select>' : ''}
+    <input id="chatin" placeholder="Nachricht …" maxlength="300" autocomplete="off"><button>Senden</button></form></div>`;
+}
+function bindChat() {
+  const f = $('#chatf'); if (!f) return;
+  const sc = $('#chatScope'); if (sc) { sc.value = S.chatScope; sc.onchange = () => S.chatScope = sc.value; }
+  f.onsubmit = e => {
+    e.preventDefault(); const i = $('#chatin'); const text = i.value.trim(); if (!text) return;
+    act({t:'chat', text, scope: sc ? sc.value : 'all'}); i.value = '';
+  };
+}
+function renderChat() {
+  const log = $('#chatlog'); if (!log) return;
+  const atBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 40;
+  log.innerHTML = S.chat.map(m => m.sys
+    ? `<div class="msg sys">${esc(m.text)}</div>`
+    : `<div class="msg" style="--c:${esc(m.color)}">${m.scope !== 'all' ? '<span class="sc">Team</span>' : ''}<b>${esc(m.name)}:</b> ${esc(m.text)}</div>`).join('') || '<div class="msg sys">Noch keine Nachrichten.</div>';
+  if (atBottom) log.scrollTop = log.scrollHeight;
+}
+
+/* ---------- Spiel ---------- */
+function svURL(l) {
+  return `https://maps.google.com/maps?q=&layer=c&cbll=${l.lat},${l.lng}&cbp=11,${l.h},0,0,0&source=embed&output=svembed`;
+}
+const allLocs = () => (S.state && S.state.locs && S.state.locs[S.me.pid]) || [];
+const myLocs = () => allLocs().filter(l => l.ch);                 // gewählte Orte (bleiben die ganze Runde)
+const myOptions = () => allLocs().filter(l => !l.ch && !allLocs().some(x => x.ch && x.b === l.b)); // offene Vorschläge
+const MAX_FRAMES = 12; // so viele Street-View-Fenster bleiben gleichzeitig „am Leben“
+
+/* Ort anzeigen – jedes Land hat sein eigenes Street-View-Fenster, das beim Wechseln
+   nur versteckt wird. So bleibt der Standort erhalten, wenn man zurückwechselt. */
+/* Teleport: zufälliger Punkt im Umkreis (km) um den ursprünglichen Startpunkt */
+function teleport() {
+  const loc = myLocs().find(l => l.id === S.curLoc); const R = S.state.settings.tpRadius; if (!loc || !R) return;
+  const r = R * Math.sqrt(Math.random()), a = Math.random() * 2 * Math.PI;
+  const lat = loc.lat + (r * Math.cos(a)) / 111.32;
+  const lng = loc.lng + (r * Math.sin(a)) / (111.32 * Math.cos(loc.lat * Math.PI / 180));
+  S.tp[loc.id] = { lat: +lat.toFixed(6), lng: +lng.toFixed(6), h: Math.floor(Math.random() * 360) };
+  showLoc(loc.id, true);
+  toast(`🎯 Teleportiert (${(r).toFixed(1).replace('.', ',')} km vom Startpunkt)`);
+}
+function showLoc(id, fresh) {
+  const base = myLocs().find(l => l.id === id); if (!base) return;
+  const loc = { ...base, ...(S.tp[id] || {}) };
+  const wrap = $('#svwrap'); if (!wrap) return;
+  let fr = S.frames.get(id);
+  if (fr && fresh) { fr.remove(); S.frames.delete(id); fr = null; }
+  if (!fr) {
+    fr = document.createElement('iframe');
+    fr.title = 'Street View ' + loc.n; fr.allowFullscreen = true; fr.referrerPolicy = 'no-referrer-when-downgrade';
+    fr.src = svURL(loc);
+    wrap.insertBefore(fr, $('#mapOv'));
+    S.frames.set(id, fr);
+  }
+  S.lru = S.lru.filter(x => x !== id); S.lru.push(id);
+  while (S.frames.size > MAX_FRAMES) { const old = S.lru.shift(); const f = S.frames.get(old); if (f) f.remove(); S.frames.delete(old); }
+  S.frames.forEach((f, k) => f.classList.toggle('off', k !== id));
+  S.curLoc = id; S.visited.add(id);
+  $('#svEmpty').classList.add('hidden');
+  $('#gm').href = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}&heading=${loc.h}`;
+  toggleMap(false);
+  renderLocUI();
+}
+function toggleMap(show) {
+  const ov = $('#mapOv'); if (!ov) return;
+  ov.classList.toggle('hidden', !show);
+  S.mapOpen = show;
+  if (show) { initMap(); setTimeout(() => { if (S.map) { layoutMap(); fitMap(); } }, 60); }
+}
+
+const addScript = src => new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.appendChild(sc); });
+let d3P = null;
+function loadD3() {
+  if (window.d3 && d3.geoNaturalEarth1 && d3.zoom) return Promise.resolve();
+  if (d3P) return d3P;
+  d3P = addScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js')
+    .catch(() => addScript('https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js'))
+    .then(() => { if (!window.d3) throw new Error('d3 fehlt'); });
+  d3P.catch(() => { d3P = null; });
+  return d3P;
+}
+/* TopoJSON → GeoJSON (kleiner eigener Decoder) */
+function topoFeatures(topo, obj) {
+  const tf = topo.transform;
+  const arcs = topo.arcs.map(arc => { let x = 0, y = 0; return arc.map(p => {
+    if (!tf) return p.slice(0, 2);
+    x += p[0]; y += p[1]; return [x * tf.scale[0] + tf.translate[0], y * tf.scale[1] + tf.translate[1]];
+  }); });
+  const arc = i => i < 0 ? arcs[~i].slice().reverse() : arcs[i];
+  const ring = ids => { const pts = []; ids.forEach((i, k) => { const a = arc(i); pts.push(...(k ? a.slice(1) : a)); }); return pts; };
+  const geom = g => g.type === 'Polygon' ? {type:'Polygon', coordinates:g.arcs.map(ring)}
+    : g.type === 'MultiPolygon' ? {type:'MultiPolygon', coordinates:g.arcs.map(p => p.map(ring))} : null;
+  return { type:'FeatureCollection', features: obj.geometries.map(g => ({type:'Feature', properties:g.properties || {}, geometry:geom(g)})).filter(f => f.geometry) };
+}
+/* Länderumrisse (Natural Earth über world-atlas) – keine Kartenkacheln, kein API-Schlüssel */
+let worldP = null;
+function loadWorld() {
+  if (worldP) return worldP;
+  worldP = fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
+    .catch(() => fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json'))
+    .then(r => r.json())
+    .then(t => topoFeatures(t, t.objects.countries));
+  worldP.catch(() => { worldP = null; });
+  return worldP;
+}
+function initMap() {
+  if (S.map || S.mapLoading || !$('#wmap')) return;
+  S.mapLoading = true;
+  loadD3().then(() => {
+    S.mapLoading = false;
+    if (S.map || !$('#wmap')) return;
+    buildMap();
+  }).catch(() => {
+    S.mapLoading = false;
+    const fb = $('#mapFb'); if (fb) fb.innerHTML = 'Die Weltkarte konnte nicht geladen werden.<br>Wähle deinen Ort rechts aus der Liste.';
+  });
+}
+function buildMap() {
+  const el = $('#wmap');
+  const svg = d3.select(el).append('svg');
+  const gRoot = svg.append('g'), gBase = gRoot.append('g'), gMk = svg.append('g');
+  const M = S.map = { el, svg, gRoot, gBase, gMk, t: d3.zoomIdentity, proj: d3.geoNaturalEarth1(), world: null, items: [] };
+  M.zoom = d3.zoom().scaleExtent([1, 16]).on('zoom', e => { M.t = e.transform; gRoot.attr('transform', M.t); placeMarkers(); });
+  svg.call(M.zoom);
+  const zb = document.createElement('div'); zb.className = 'wzoom';
+  zb.innerHTML = '<button class="small" data-z="1.8" aria-label="Hineinzoomen">+</button><button class="small" data-z="0.55" aria-label="Herauszoomen">−</button><button class="small" data-z="0" title="Ganze Welt">⤢</button>';
+  zb.onclick = e => { const b = e.target.closest('[data-z]'); if (!b) return; const z = +b.dataset.z;
+    if (z) M.svg.transition().duration(300).call(M.zoom.scaleBy, z); else M.svg.transition().duration(500).call(M.zoom.transform, d3.zoomIdentity); };
+  el.appendChild(zb);
+  $('#mapFb').classList.add('hidden');
+  layoutMap();
+  loadWorld().then(w => { if (S.map !== M) return; M.world = w; drawBase(); })
+    .catch(() => toast('Länderumrisse konnten nicht geladen werden – die Orte sind trotzdem auf der Karte.', '#ff5d6c'));
+  if (window.ResizeObserver) new ResizeObserver(() => layoutMap()).observe(el);
+  renderLocUI(); fitMap(true);
+}
+function layoutMap() {
+  const M = S.map; if (!M) return;
+  const w = M.el.clientWidth, h = M.el.clientHeight; if (!w || !h) return;
+  if (w === M.w && h === M.h) return;
+  M.w = w; M.h = h;
+  M.svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
+  M.proj.fitExtent([[10, 10], [w - 10, h - 10]], {type:'Sphere'});
+  M.path = d3.geoPath(M.proj);
+  M.zoom.extent([[0, 0], [w, h]]).translateExtent([[0, 0], [w, h]]);
+  drawBase(); placeMarkers(); S.fitSig = ''; fitMap(true);
+}
+function drawBase() {
+  const M = S.map; if (!M || !M.path) return;
+  M.gBase.selectAll('*').remove();
+  M.gBase.append('path').datum({type:'Sphere'}).attr('class', 'wsphere').attr('d', M.path);
+  M.gBase.append('path').datum(d3.geoGraticule10()).attr('class', 'wgrat').attr('d', M.path);
+  if (M.world) M.gBase.append('g').selectAll('path').data(M.world.features).join('path').attr('class', 'wland').attr('d', M.path)
+    .append('title').text(d => d.properties.name || '');
+}
+function placeMarkers() {
+  const M = S.map; if (!M || !M.path) return;
+  const sel = M.gMk.selectAll('g.mkg').data(M.items, d => d.key).join(enter => {
+    const g = enter.append('g').on('click', (e, d) => { e.stopPropagation(); d.fn(); });
+    g.append('title'); g.append('circle').attr('r', 13);
+    g.append('text').attr('class', 'mkn').attr('dy', '0.35em');
+    g.append('text').attr('class', 'mkl').attr('x', 18).attr('dy', '0.35em');
+    return g;
+  });
+  sel.attr('class', d => 'mkg ' + d.cls).attr('transform', d => { const p = M.t.apply(M.proj([d.l.lng, d.l.lat])); return `translate(${p[0]},${p[1]})`; });
+  sel.select('title').text(d => d.tip); sel.select('.mkn').text(d => d.label); sel.select('.mkl').text(d => d.name);
+  sel.filter(d => d.cls).raise();
+}
+function fitMap(force) {
+  const M = S.map; if (!M || !M.path) return;
+  const opts = myOptions(); const locs = opts.length ? opts.concat(myLocs()) : myLocs();
+  const sig = locs.map(l => l.id).join() + '|' + M.w + 'x' + M.h;
+  if (!locs.length || (sig === S.fitSig && !force)) return;
+  S.fitSig = sig;
+  const pts = locs.map(l => M.proj([l.lng, l.lat]));
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const k = Math.max(1, Math.min(4, 0.62 / Math.max((x1 - x0) / M.w, (y1 - y0) / M.h, 0.01)));
+  const t = d3.zoomIdentity.translate(M.w / 2 - 30, M.h / 2).scale(k).translate(-(x0 + x1) / 2, -(y0 + y1) / 2);
+  M.svg.transition().duration(force ? 0 : 600).call(M.zoom.transform, t);
+}
+function chooseLoc(id) {
+  const l = myOptions().find(x => x.id === id); if (!l || S.state.phase !== 'game') return;
+  S.autoShow = id;
+  act({t:'choose', id});
+}
+function renderLocUI() {
+  if (!$('#locChips')) return;
+  const locs = myLocs(), opts = myOptions(), st = S.state;
+  // gerade gewählten Ort direkt öffnen
+  if (S.autoShow && locs.some(l => l.id === S.autoShow)) { const id = S.autoShow; S.autoShow = null; return showLoc(id); }
+  // Joker-Tausch: ersetzten Ort automatisch öffnen
+  if (S.jokerSwap) {
+    const sw = S.jokerSwap;
+    if (locs.some(l => l.id === sw.to)) {
+      S.jokerSwap = null;
+      const f = S.frames.get(sw.from); if (f) f.remove(); S.frames.delete(sw.from); S.lru = S.lru.filter(x => x !== sw.from);
+      if (S.curLoc === sw.from) { S.curLoc = null; return showLoc(sw.to); }
+    }
+  }
+  if (S.curLoc && !locs.some(l => l.id === S.curLoc)) { S.curLoc = null; S.frames.forEach(f => f.classList.add('off')); $('#svEmpty').classList.remove('hidden'); }
+  if (opts.length && !S.seenOpts?.includes(opts[0].b)) { S.seenOpts = (S.seenOpts || []).concat(opts[0].b); if (!locs.length) toggleMap(true); }
+  const mb = $('#mapBtn');
+  mb.innerHTML = opts.length ? `🗺 ${locs.length + 1}. Ort wählen` : '🗺 Weltkarte';
+  mb.classList.toggle('pulse', !!opts.length);
+  $('#locChips').innerHTML = locs.map((l, i) => `<button class="chip ${l.id === S.curLoc ? 'cur' : ''}" data-loc="${l.id}" title="${esc(l.n)}"><span class="n">${i + 1}</span>${esc(l.c)}</button>`).join('');
+  $('#svEmpty').textContent = locs.length ? 'Wähle oben einen deiner Orte.' : 'Wähle auf der Weltkarte deinen ersten Ort.';
+  let html = '';
+  if (opts.length) {
+    html += `<h3>Wähle deinen ${locs.length + 1}. Ort</h3><p class="hint">Er bleibt bis zum Ende der Runde. Die anderen Vorschläge verschwinden.</p>`;
+    opts.forEach((l, i) => {
+      html += `<button class="locbtn opt" data-opt="${l.id}"><span class="n">${String.fromCharCode(65 + i)}</span><span>${esc(l.c)}<small>${esc(l.n)}</small></span><span class="badge">wählen</span></button>`;
+    });
+  }
+  if (locs.length) {
+    html += `<h3 style="margin-top:${opts.length ? '14px' : '0'}">Deine Orte</h3>`;
+    locs.forEach((l, i) => {
+      html += `<button class="locbtn ${l.id === S.curLoc ? 'cur' : ''}" data-loc="${l.id}"><span class="n">${i + 1}</span><span>${esc(l.c)}<small>${esc(l.n)}</small></span>${l.id === S.curLoc ? '<span class="badge" style="background:var(--accent);color:var(--accent-ink)">hier</span>' : ''}</button>`;
+    });
+  }
+  const max = st.settings.maxLocs;
+  if (!opts.length) html += `<p class="hint" style="margin-top:8px">${st.nextLocAt ? 'Der nächste Ort kommt, sobald der Countdown oben abläuft.' : max && locs.length >= max ? 'Du hast die maximale Anzahl an Orten.' : 'In dieser Runde kommen keine weiteren Orte.'}</p>`;
+  if (S.curLoc) html += '<button id="mapClose" style="margin-top:auto">Karte schließen</button>';
+  $('#mapList').innerHTML = html;
+  if ($('#mapClose')) $('#mapClose').onclick = () => toggleMap(false);
+  const cur = locs.find(l => l.id === S.curLoc);
+  $('#curLabel').innerHTML = cur ? `📍 <b>${esc(cur.c)}</b> · ${esc(cur.n)}` : 'Noch kein Ort gewählt';
+  $('#reloadBtn').disabled = !cur; $('#gm').classList.toggle('hidden', !cur);
+  const tb = $('#tpBtn'); const R = st.settings.tpRadius;
+  tb.classList.toggle('hidden', !R); tb.disabled = !cur || st.phase !== 'game';
+  tb.textContent = `🎯 Teleport (${String(R).replace('.', ',')} km)`;
+  // Marker
+  if (S.map) {
+    S.map.items = [
+      ...locs.map((l, i) => ({ key:l.id, l, label:String(i + 1), name:l.c, cls: l.id === S.curLoc ? 'cur' : '', tip:`${i + 1}. ${l.c} – ${l.n}`, fn:() => showLoc(l.id) })),
+      ...opts.map((l, i) => ({ key:l.id, l, label:String.fromCharCode(65 + i), name:l.c, cls:'new', tip:`${l.c} – ${l.n} (klicken zum Wählen)`,
+        fn:() => { if (confirm(`„${l.c} – ${l.n}“ als deinen ${locs.length + 1}. Ort wählen?\nEr bleibt bis zum Ende der Runde.`)) chooseLoc(l.id); } }))
+    ];
+    placeMarkers();
+    if (S.mapOpen) fitMap();
+  }
+}
+
+MOUNT.game = () => {
+  const st = S.state;
+  S.frames = new Map(); S.lru = []; S.curLoc = null; S.visited = new Set(); S.map = null; S.markers = null; S.jokerSwap = null; S.lastPhase = null; S.autoShow = null; S.seenOpts = []; S.tp = {};
+  app.innerHTML = `
+  <header class="top game-top">${logoHTML(true)}<div id="timer" class="timer">--:--</div><div id="scores" class="scores"></div><div id="hostCtl" class="row"></div></header>
+  <main class="game">
+    <section class="viewer card">
+      <div class="vtools">
+        <button id="mapBtn" class="btn-primary">🗺 Weltkarte</button>
+        <div id="locChips" class="chips"></div>
+        <span id="nextLoc" class="nextloc"></span>
+      </div>
+      <div class="svwrap" id="svwrap">
+        <div id="svEmpty" class="svempty">Wähle auf der Weltkarte einen deiner Orte.</div>
+        <div id="mapOv" class="mapov">
+          <div class="mapbox"><div id="wmap"></div><div id="mapFb" class="mapfb">Weltkarte wird geladen …</div></div>
+          <div class="maplist" id="mapList"></div>
+        </div>
+      </div>
+      <div class="vhint"><span class="grow" id="curLabel"></span>
+        <button class="small" id="tpBtn" title="Springt an einen zufälligen Punkt in der Nähe deines Startpunkts – z. B. wenn du feststeckst"></button>
+        <button class="small" id="reloadBtn" title="Street View an dieser Stelle neu laden">↻ Neu laden</button>
+        <a id="gm" class="btnlike small" target="_blank" rel="noopener">Google Maps ↗</a>
+      </div>
+    </section>
+    <aside class="sidebar">
+      <div class="card"><div class="boardhead"><h2 id="boardTitle">Eure Karte</h2><span id="myprog" class="myprog"></span></div><div id="board" class="board"></div>
+        <p class="hint" id="boardHint" style="margin-top:10px"></p></div>
+      ${chatHTML(true)}
+    </aside>
+  </main>
+  <div id="teampick"></div>
+  <div id="inter" class="inter hidden">
+    <header class="top">${logoHTML(true)}<h2 style="margin:0">⏸ Zwischenrunde</h2><span class="muted" id="vprog"></span><span class="grow"></span><span class="muted">Die Zeit ist pausiert.</span></header>
+    <main class="vote"><div class="card vote-main" id="vmain"></div><div class="strip" id="vstrip"></div></main>
+  </div>`;
+  $('#mapBtn').onclick = () => toggleMap(!S.mapOpen);
+  const pickLoc = e => {
+    const o = e.target.closest('[data-opt]'); if (o) return chooseLoc(o.dataset.opt);
+    const b = e.target.closest('[data-loc]'); if (b) showLoc(b.dataset.loc);
+  };
+  $('#locChips').onclick = pickLoc; $('#mapList').onclick = pickLoc;
+  $('#reloadBtn').onclick = () => { if (S.curLoc) showLoc(S.curLoc, true); };
+  $('#tpBtn').onclick = teleport;
+  $('#board').onclick = e => { const b = e.target.closest('.cell'); if (b && !b.disabled) openCapture(+b.dataset.cell); };
+  bindChat();
+  S.chatScope = st.settings.mode === 'team' ? 'team' : 'all'; if ($('#chatScope')) $('#chatScope').value = S.chatScope;
+  toggleMap(true);
+};
+
+function fmtTime(ms) { ms = Math.max(0, ms); const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function tickTimer() {
+  const el = $('#timer'); if (!el || !S.state) return;
+  const st = S.state; const paused = st.phase === 'intermission';
+  const now = paused ? st.pausedAt : Date.now() + S.offset;
+  if (!st.endsAt) { el.textContent = paused ? '⏸ ∞' : '∞'; el.title = 'Ohne Zeitlimit'; }
+  else { const left = st.endsAt - now; el.textContent = (paused ? '⏸ ' : '') + fmtTime(left); el.classList.toggle('warn', !paused && left < 60000); }
+  el.classList.toggle('paused', paused);
+  const nl = $('#nextLoc');
+  if (nl) {
+    if (!st.nextLocAt) nl.innerHTML = '';
+    else nl.innerHTML = `Nächster Ort in <b>${fmtTime(st.nextLocAt - now)}</b>`;
+  }
+}
+setInterval(tickTimer, 250);
+
+UPDATE.game = () => {
+  const st = S.state; const side = mySide(); const size = Math.round(Math.sqrt(st.board.length));
+  tickTimer();
+  // Punktestand
+  const ss = sides(st);
+  $('#scores').innerHTML = ss.map(sd => {
+    const set = claimed(st, sd.id, true); const li = lineInfo(size, set);
+    const c = set.size - (st.free != null ? 1 : 0);
+    return `<div class="score ${sd.id === side ? 'me' : ''}" style="--c:${sd.color}"><span class="dot"></span>${esc(sd.name)} <b>${c}</b>${li.count ? `<span class="bingo">BINGO${li.count > 1 ? ' ×' + li.count : ''}</span>` : ''}</div>`;
+  }).join('');
+  $('#hostCtl').innerHTML = amHost() ? `<button class="small" id="endBtn">Runde beenden</button>` : '';
+  if (amHost()) $('#endBtn').onclick = () => { if (confirm('Runde jetzt beenden?')) hostEnd('Der Host hat die Runde beendet.'); };
+
+  // Karte
+  const sd = side ? sideInfo(st, side) : null;
+  $('#boardTitle').textContent = sd ? (st.settings.mode === 'team' ? 'Karte von ' + sd.name : 'Deine Karte') : 'Bingo-Karte';
+  const mine = side ? claimed(st, side, true) : new Set();
+  const li = lineInfo(size, mine);
+  $('#myprog').textContent = side ? `${mine.size - (st.free != null ? 1 : 0)} / ${st.board.length - (st.free != null ? 1 : 0)} Felder · ${li.count} Reihe${li.count === 1 ? '' : 'n'}` : '';
+  const board = $('#board'); board.style.setProperty('--n', size);
+  board.style.setProperty('--fs', size === 3 ? '15px' : size === 4 ? '13px' : '11.5px');
+  board.innerHTML = st.board.map((w, i) => {
+    if (i === st.free) return `<button class="cell free" disabled><span class="w">FREI</span></button>`;
+    const team = Object.entries(st.findings).filter(([, f]) => f.side === side && f.cell === i);
+    const ok = team.filter(([fid]) => isValid(st, fid));
+    let cls = '', style = '', extra = '';
+    if (ok.length) {
+      cls = 'got'; style = `--c:${sd.color};`;
+      const img = S.images[ok[ok.length - 1][0]];
+      if (img) style += `background-image:url(${img});`;
+      if (team.length > 1) extra = `<span class="cnt">${team.length} 📷</span>`;
+    } else if (team.length) {
+      extra = '<span class="bad" title="Foto wurde abgelehnt – nimm ein neues auf">✗</span>';
+    } else if (st.settings.lockout) {
+      const other = Object.entries(st.findings).map(([id, f]) => isValid(st, id) && f).find(f => f && f.cell === i && f.side !== side);
+      if (other) { cls = 'blocked'; style = `--c:${sideInfo(st, other.side).color}`; }
+    }
+    if (li.cells.has(i)) cls += ' line';
+    return `<button class="cell ${cls}" data-cell="${i}" style="${style}" ${!side || cls.includes('blocked') ? 'disabled' : ''} title="${esc(w)}"><span class="w">${esc(w)}</span>${extra}</button>`;
+  }).join('');
+  $('#boardHint').innerHTML = st.settings.mode === 'team'
+    ? 'Ihr teilt euch diese Karte. Jedes Teammitglied kann für ein Feld ein eigenes Foto beisteuern – das Feld zählt, sobald eines davon gültig ist.'
+    : 'Klicke auf ein Feld, um ein Foto dafür aufzunehmen.';
+
+  // Teamwahl für Nachzügler
+  const tp = $('#teampick');
+  if (st.settings.mode === 'team' && me() && me().team == null) {
+    tp.innerHTML = `<div class="teampick"><div class="card"><h2>Wähle dein Team</h2><div class="row">${[0, 1].map(i => `<button data-pick="${i}" style="background:${TEAMC[i]};border-color:${TEAMC[i]};color:#111">${esc(st.settings.teamNames[i])}</button>`).join('')}</div></div></div>`;
+    $$('[data-pick]').forEach(b => b.onclick = () => act({t:'team', team:+b.dataset.pick}));
+  } else tp.innerHTML = '';
+
+  // Orte & Zwischenrunde
+  renderLocUI();
+  const inter = $('#inter');
+  if (st.phase === 'intermission') {
+    if (S.lastPhase !== 'intermission') { closeModal(); }
+    inter.classList.remove('hidden'); renderVote(true);
+  } else inter.classList.add('hidden');
+  S.lastPhase = st.phase;
+  renderChat();
+};
+
+/* ---------- Foto aufnehmen ---------- */
+let capStream = null, capVideo = null;
+async function ensureStream() {
+  if (capStream && capStream.active) return;
+  capStream = await navigator.mediaDevices.getDisplayMedia({ video:{ displaySurface:'browser', frameRate:15 }, audio:false, preferCurrentTab:true, selfBrowserSurface:'include', surfaceSwitching:'exclude' });
+  capVideo = document.createElement('video'); capVideo.muted = true; capVideo.playsInline = true; capVideo.srcObject = capStream;
+  await capVideo.play();
+  capStream.getVideoTracks()[0].addEventListener('ended', () => { capStream = null; });
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function toJpeg(src, sx, sy, sw, sh) {
+  const maxW = 1100; const k = Math.min(1, maxW / sw);
+  const c = document.createElement('canvas'); c.width = Math.round(sw * k); c.height = Math.round(sh * k);
+  c.getContext('2d').drawImage(src, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  let q = 0.78, url = c.toDataURL('image/jpeg', q);
+  while (url.length > 420000 && q > 0.35) { q -= 0.1; url = c.toDataURL('image/jpeg', q); }
+  return url;
+}
+async function grabStreetView(crop) {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) throw new Error('Dein Browser unterstützt keine Bildschirmaufnahme. Nutze Screenshot + Strg+V.');
+  await ensureStream();
+  const m = $('#modal'); m.style.visibility = 'hidden';
+  await sleep(350);
+  try {
+    const vw = capVideo.videoWidth, vh = capVideo.videoHeight;
+    let sx = 0, sy = 0, sw = vw, sh = vh;
+    const kx = vw / innerWidth, ky = vh / innerHeight;
+    if (crop && Math.abs(kx - ky) / kx < 0.08) {
+      const r = $('#svwrap').getBoundingClientRect();
+      sx = Math.max(0, r.left * kx); sy = Math.max(0, r.top * ky); sw = Math.min(vw - sx, r.width * kx); sh = Math.min(vh - sy, r.height * ky);
+    }
+    return toJpeg(capVideo, sx, sy, sw, sh);
+  } finally { m.style.visibility = ''; }
+}
+async function fileToJpeg(file) {
+  const bmp = await createImageBitmap(file);
+  return toJpeg(bmp, 0, 0, bmp.width, bmp.height);
+}
+
+function thumbHTML(st, fid, f) {
+  const sd = sideInfo(st, f.side); const src = S.images[fid];
+  return `<div class="thumb" data-zoom="${fid}" style="--c:${sd.color}">${src ? `<img src="${src}" alt="">` : '<div style="height:70px;display:grid;place-items:center">⏳</div>'}<div>${esc(st.players[f.pid]?.name || '?')}</div></div>`;
+}
+
+function openCapture(cell) {
+  const st = S.state; const side = mySide(); if (!side) return;
+  const word = st.board[cell];
+  const team = Object.entries(st.findings).filter(([, f]) => f.side === side && f.cell === cell);
+  const mine = team.find(([, f]) => f.pid === S.me.pid);
+  let shot = null;
+  const box = openModal(`<div class="cap">
+    <h2>„${esc(word)}“</h2>
+    ${team.length ? `<div><div class="hint" style="margin-bottom:6px">Schon von deinem Team gefunden:</div><div class="thumbs">${team.map(([fid, f]) => thumbHTML(st, fid, f)).join('')}</div></div>` : ''}
+    <div class="capprev" id="capprev"><div class="ph">Noch kein Foto.<br>Richte Street View so aus, dass man „${esc(word)}“ gut erkennt.</div></div>
+    <div class="caprow">
+      <button class="btn-primary" id="capShot">📸 Street View aufnehmen</button>
+      <label class="btnlike">🖼️ Bild-Datei<input type="file" accept="image/*" id="capFile" hidden></label>
+    </div>
+    <label class="chk"><input type="checkbox" id="capCrop" checked> Nur den Street-View-Bereich behalten</label>
+    <p class="hint">Beim ersten Mal fragt der Browser, ob du diesen Tab teilen willst – wähle <b>diesen Tab</b>. Alternativ: Screenshot machen (<kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) und hier mit <kbd>Strg</kbd>+<kbd>V</kbd> einfügen.</p>
+    <div class="capfoot">${mine ? '<button id="capDel" class="danger">Mein Foto entfernen</button>' : ''}<span class="grow"></span>
+      <button id="capCancel">Abbrechen</button><button class="btn-primary" id="capSend" disabled>${mine ? 'Foto ersetzen' : 'Abschicken'}</button></div>
+  </div>`);
+  const show = url => { shot = url; $('#capprev').innerHTML = `<img src="${url}" alt="">`; $('#capSend').disabled = false; };
+  $('#capShot').onclick = async () => {
+    try { show(await grabStreetView($('#capCrop').checked)); }
+    catch (e) { if (e && e.name === 'NotAllowedError') toast('Aufnahme abgebrochen.', '#ff5d6c'); else toast(e.message || 'Aufnahme fehlgeschlagen', '#ff5d6c'); }
+  };
+  $('#capFile').onchange = async e => { const f = e.target.files[0]; if (f) try { show(await fileToJpeg(f)); } catch { toast('Bild konnte nicht gelesen werden.', '#ff5d6c'); } };
+  const onPaste = async e => {
+    const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+    if (item) { e.preventDefault(); try { show(await fileToJpeg(item.getAsFile())); } catch { toast('Bild konnte nicht gelesen werden.', '#ff5d6c'); } }
+  };
+  document.addEventListener('paste', onPaste);
+  modalCleanup = () => document.removeEventListener('paste', onPaste);
+  $('#capCancel').onclick = closeModal;
+  $('#capSend').onclick = () => { if (!shot) return; act({t:'capture', cell, img:shot}); closeModal(); };
+  if (mine) $('#capDel').onclick = () => { act({t:'remove', fid:mine[0]}); closeModal(); };
+  $$('[data-zoom]', box).forEach(t => t.onclick = () => lightbox(t.dataset.zoom));
+}
+
+/* ---------- Wort-Draft ---------- */
+MOUNT.draft = () => {
+  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">🗳 Wort-Draft</h2><div id="dTimer" class="timer" style="font-family:'Bricolage Grotesque';font-weight:800;font-size:24px"></div>
+    <span class="grow"></span><span class="muted" id="dReadyInfo"></span><button id="dReady">Fertig ✓</button><span id="dHost"></span></header>
+    <main class="draft">
+      <div class="draft-intro"><div><b id="dNeed"></b> <span class="muted" id="dSub"></span></div>
+        <div class="muted" style="font-size:13px">👍 = soll auf die Karte · 👎 = lieber nicht · nochmal klicken nimmt die Stimme zurück. Jeder stimmt für sich, egal in welchem Team.</div></div>
+      <div class="dgrid" id="dGrid"></div>
+    </main>`;
+  $('#dGrid').onclick = e => {
+    const b = e.target.closest('[data-dv]'); if (!b) return;
+    const i = +b.dataset.i, v = +b.dataset.dv;
+    const cur = ((S.state.draftVotes[i] || {})[S.me.pid]) || 0;
+    const nv = cur === v ? 0 : v;
+    // sofort lokal anzeigen
+    S.state.draftVotes[i] = { ...(S.state.draftVotes[i] || {}) };
+    if (nv) S.state.draftVotes[i][S.me.pid] = nv; else delete S.state.draftVotes[i][S.me.pid];
+    UPDATE.draft();
+    act({t:'dvote', i, v:nv});
+  };
+  $('#dReady').onclick = () => act({t:'dready', r: !(S.state.draftReady || {})[S.me.pid]});
+};
+function tickDraft() {
+  const el = $('#dTimer'); if (!el || !S.state || S.state.phase !== 'draft') return;
+  const st = S.state;
+  if (!st.draftEnds) { el.textContent = ''; return; }
+  const left = st.draftEnds - (Date.now() + S.offset);
+  el.textContent = fmtTime(left); el.classList.toggle('warn', left < 15000);
+}
+setInterval(tickDraft, 250);
+UPDATE.draft = () => {
+  const st = S.state; const need = wordsNeeded(st.settings);
+  const rank = draftRanking(st); const inSet = new Set(rank.slice(0, need).map(r => r.i));
+  const cutoff = rank[need - 1] ? rank[need - 1].score : 0;
+  $('#dNeed').textContent = `Die ${need} Begriffe mit den meisten Stimmen kommen auf die ${st.settings.size}×${st.settings.size}-Karte.`;
+  const myVotes = st.draftWords.map((_, i) => ((st.draftVotes[i] || {})[S.me.pid]) || 0);
+  $('#dSub').textContent = `Du hast ${myVotes.filter(x => x).length} von ${st.draftWords.length} bewertet.`;
+  $('#dGrid').innerHTML = rank.slice().sort((a, b) => a.i - b.i).map(r => {
+    const mv = myVotes[r.i];
+    const edge = r.score === cutoff;
+    return `<div class="dcard ${inSet.has(r.i) ? 'in' : ''}">
+      <div class="dw">${esc(r.w)}</div>
+      <div class="dmeta"><span class="dscore ${r.score > 0 ? 'pos' : r.score < 0 ? 'neg' : ''}">${r.score > 0 ? '+' : ''}${r.score}</span>
+        <span class="muted">${r.up}👍 ${r.down}👎</span>${inSet.has(r.i) ? `<span class="din" title="${edge ? 'Knapp – kann noch rausfallen' : ''}">auf der Karte${edge ? ' ?' : ''}</span>` : ''}</div>
+      <div class="dbtns"><button class="small up ${mv > 0 ? 'on' : ''}" data-i="${r.i}" data-dv="1" aria-label="Upvote">👍</button><button class="small down ${mv < 0 ? 'on' : ''}" data-i="${r.i}" data-dv="-1" aria-label="Downvote">👎</button></div>
+    </div>`;
+  }).join('');
+  const online = Object.keys(st.players).filter(p => st.players[p].online);
+  const ready = online.filter(p => (st.draftReady || {})[p]);
+  const meReady = !!(st.draftReady || {})[S.me.pid];
+  $('#dReadyInfo').textContent = `${ready.length}/${online.length} fertig`;
+  const rb = $('#dReady'); rb.textContent = meReady ? 'Doch nicht fertig' : 'Fertig ✓'; rb.className = meReady ? '' : 'btn-primary';
+  $('#dHost').innerHTML = amHost() ? '<button id="dEnd">Draft beenden & starten</button>' : '';
+  if (amHost()) $('#dEnd').onclick = hostFinishDraft;
+  tickDraft();
+};
+
+/* ---------- Abstimmung ---------- */
+MOUNT.vote = () => {
+  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">Abstimmung</h2><span class="muted" id="vprog"></span><span class="grow"></span><span class="muted" id="vreason"></span></header>
+    <main class="vote"><div class="card vote-main" id="vmain"></div><div class="strip" id="vstrip"></div></main>`;
+};
+addEventListener('keydown', e => voteKeys(e));
+function voteKeys(e) {
+  if (!S.state || !['vote', 'intermission'].includes(S.state.phase) || e.target.matches('input,textarea') || !$('#modal').classList.contains('hidden')) return;
+  const b = e.key === 'j' || e.key === 'y' ? $('.vote-bar .yes') : e.key === 'n' ? $('.vote-bar .no') : null;
+  if (b && !b.disabled) b.click();
+  if (amHost() && e.key === 'ArrowRight') $('#vNext')?.click();
+  if (amHost() && e.key === 'ArrowLeft') $('#vPrev')?.click();
+}
+UPDATE.vote = () => renderVote(false);
+function renderVote(isInter) {
+  const st = S.state; const order = st.voteOrder; const idx = Math.min(st.voteIdx, order.length - 1);
+  const fid = order[idx]; const f = st.findings[fid]; if (!f) return;
+  const sd = sideInfo(st, f.side);
+  const v = st.votes[fid] || {}; const y = Object.values(v).filter(x => x > 0).length, n = Object.values(v).filter(x => x < 0).length;
+  const elig = eligibleVoters(st, f); const canVote = elig.includes(S.me.pid); const myV = v[S.me.pid] || 0;
+  const missing = elig.filter(p => !(p in v)).map(p => st.players[p]?.name).filter(Boolean);
+  $('#vprog').textContent = `Foto ${idx + 1} von ${order.length}`;
+  if ($('#vreason')) $('#vreason').textContent = st.endReason || '';
+  $('#vmain').innerHTML = `
+    <div class="vote-head"><span class="pill" style="--c:${sd.color}">${esc(sd.name)}</span><h2>„${esc(st.board[f.cell])}“</h2><span class="muted">gefunden von ${esc(st.players[f.pid]?.name || '?')}</span></div>
+    ${S.images[fid] ? `<img class="vote-img" src="${S.images[fid]}" alt="" data-zoom="${fid}">` : '<div class="capprev"><div class="ph">Bild wird geladen …</div></div>'}
+    <div class="vote-bar">
+      ${canVote ? `<button class="yes ${myV > 0 ? 'on' : ''}" data-v="1">✓ Zählt <kbd>J</kbd></button><button class="no ${myV < 0 ? 'on' : ''}" data-v="-1">✗ Zählt nicht <kbd>N</kbd></button>`
+                : `<span class="muted">Bei Fotos ${st.settings.mode === 'team' ? 'deines Teams' : 'von dir'} stimmen die anderen ab.</span>`}
+      <span class="grow"></span>
+      <div class="tally"><span class="y">✓ ${y}</span><span class="n">✗ ${n}</span><span class="muted" style="font-weight:500">${y >= n ? 'zählt' : 'zählt nicht'}</span></div>
+    </div>
+    <div class="muted" style="font-size:13px">${missing.length ? 'Noch offen: ' + esc(missing.join(', ')) : 'Alle haben abgestimmt.'} · Gleichstand zählt als gültig.</div>
+    ${amHost() ? `<div class="row" style="flex-wrap:wrap"><button id="vPrev" ${idx === 0 ? 'disabled' : ''}>◀ Zurück</button><button class="btn-primary" id="vNext" ${idx >= order.length - 1 ? 'disabled' : ''}>Nächstes Foto ▶</button><span class="grow"></span><button id="vFinish" class="${idx >= order.length - 1 ? 'btn-primary' : ''}">${isInter ? 'Weiter spielen ▶' : 'Ergebnis zeigen'}</button></div>`
+      : '<div class="muted" style="font-size:13px">Der Host blättert durch die Fotos.</div>'}`;
+  $$('.vote-bar [data-v]').forEach(b => b.onclick = () => act({t:'vote', fid, v: +b.dataset.v === myV ? 0 : +b.dataset.v}));
+  $$('[data-zoom]').forEach(t => t.onclick = () => lightbox(t.dataset.zoom));
+  if (amHost()) {
+    $('#vPrev').onclick = () => { H.voteIdx = Math.max(0, idx - 1); commit(); };
+    $('#vNext').onclick = () => { H.voteIdx = Math.min(order.length - 1, idx + 1); commit(); };
+    $('#vFinish').onclick = () => { if (isInter) hostResume(); else { H.phase = 'results'; commit(); } };
+  }
+  $('#vstrip').innerHTML = order.map((id, i) => {
+    const ff = st.findings[id]; const vv = st.votes[id] || {}; const yy = Object.values(vv).filter(x => x > 0).length, nn = Object.values(vv).filter(x => x < 0).length;
+    return `<button data-jump="${i}" class="${i === idx ? 'cur' : ''}" style="border-bottom:3px solid ${sideInfo(st, ff.side).color}" title="${esc(st.board[ff.cell])}">${S.images[id] ? `<img src="${S.images[id]}" alt="">` : '<div style="width:92px;height:58px"></div>'}<span class="st">${Object.keys(vv).length ? (yy >= nn ? '✓' : '✗') : '·'}</span></button>`;
+  }).join('');
+  $$('[data-jump]').forEach(b => b.onclick = () => { if (amHost()) { H.voteIdx = +b.dataset.jump; commit(); } });
+  const cur = $('#vstrip .cur'); if (cur) cur.scrollIntoView({block:'nearest', inline:'center'});
+}
+
+/* ---------- Ergebnis ---------- */
+MOUNT.results = () => {
+  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">Ergebnis</h2><span class="grow"></span><span id="resCtl"></span></header><main class="results" id="res"></main>`;
+};
+UPDATE.results = () => {
+  const st = S.state; const res = standings(st); const n = st.board.length; const size = Math.round(Math.sqrt(n));
+  const winners = res.filter(r => r.win);
+  const wc = winners.length === 1 ? winners[0].color : '#ffb020';
+  const banner = !winners.length ? 'Niemand hat ein gültiges Feld 🤷' : winners.length > 1 ? 'Unentschieden: ' + winners.map(w => esc(w.name)).join(' & ') : esc(winners[0].name) + ' gewinnt!';
+  $('#resCtl').innerHTML = amHost() ? '<button class="btn-primary" id="again">Neue Runde</button>' : '<span class="muted">Der Host kann eine neue Runde starten.</span>';
+  if (amHost()) $('#again').onclick = hostToLobby;
+  const fids = Object.keys(st.findings).sort((a, b) => st.findings[a].cell - st.findings[b].cell);
+  $('#res').innerHTML = `
+    <div class="winner" style="--c:${wc}"><div class="muted">${esc(st.endReason || '')}</div><div class="display">🏆 ${banner}</div>
+      <div class="muted">Siegbedingung: ${WIN_NAMES[st.settings.win]}</div></div>
+    <div class="rgrid">${res.map(r => `
+      <div class="card rcard" style="--c:${r.color}">
+        <div class="rh"><span class="rank">#${r.rank}</span><span class="pill" style="--c:${r.color}">${esc(r.name)}</span>${r.win ? '<span>🏆</span>' : ''}</div>
+        ${st.settings.mode === 'team' ? `<div class="muted" style="font-size:13px">${r.members.map(p => esc(st.players[p]?.name)).join(', ') || '–'}</div>` : ''}
+        <div class="stats"><div><b>${r.cells}</b>Felder</div><div><b>${r.lines}</b>Reihen</div><div><b>${Object.values(st.findings).filter(f => f.side === r.id).length}</b>Fotos</div></div>
+        <div class="mini" style="--n:${size}">${st.board.map((w, i) => {
+          if (i === st.free) return '<span class="f" title="FREI"></span>';
+          const all = Object.entries(st.findings).filter(([, f]) => f.side === r.id && f.cell === i);
+          const ok = all.some(([fid]) => isValid(st, fid));
+          return `<span class="${ok ? 'v' : all.length ? 'x' : ''} ${r.lineCells.has(i) ? 'l' : ''}" title="${esc(w)}"></span>`;
+        }).join('')}</div>
+      </div>`).join('')}</div>
+    <h2>Alle Fotos</h2>
+    ${fids.length ? `<div class="gallery">${fids.map(fid => {
+      const f = st.findings[fid]; const sd = sideInfo(st, f.side); const ok = isValid(st, fid);
+      return `<div class="gitem ${ok ? '' : 'rej'}" data-zoom="${fid}" style="--c:${sd.color}">${S.images[fid] ? `<img src="${S.images[fid]}" alt="">` : '<div style="aspect-ratio:16/10"></div>'}
+        <div class="gi"><b>${esc(st.board[f.cell])}</b><span class="muted">${esc(st.players[f.pid]?.name || '?')}</span><span>${ok ? '✅' : '❌'}</span></div></div>`;
+    }).join('')}</div>` : '<p class="muted">Keine Fotos in dieser Runde.</p>'}`;
+  $$('[data-zoom]').forEach(t => t.onclick = () => lightbox(t.dataset.zoom));
+};
+
+/* ---------- Start ---------- */
+addEventListener('beforeunload', e => { if (S.isHost && H && Object.keys(H.players).length > 1) { e.preventDefault(); e.returnValue = ''; } });
+render();
+</script>
+</body>
+</html>
