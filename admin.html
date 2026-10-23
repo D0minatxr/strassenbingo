@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-rYQzRhnljAbYRa+vje8pRpEhcYiVEBiea+3Y/Imyhbw='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Straßenbingo · Admin</title>
+<style>
+@font-face{font-family:'PixelUI';src:url(vendor/fonts/PixelifySans.ttf) format('truetype');font-weight:400 700;font-display:swap}
+@font-face{font-family:'PixelUI';src:url(vendor/fonts/Jersey10-Regular.ttf) format('truetype');font-weight:400 700;font-display:swap;unicode-range:U+30-39,U+25;size-adjust:128%}
+@font-face{font-family:'Instrument Sans';src:url(vendor/fonts/InstrumentSans-Regular.ttf) format('truetype');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(vendor/fonts/InstrumentSans-Bold.ttf) format('truetype');font-weight:600 900;font-display:swap}
+:root{--bg:#17132c;--panel:#241f44;--panel2:#2e2854;--ink:#0a0816;--text:#f4f1e8;--muted:#a8a2cc;--accent:#ffc22e;--ok:#35c873;--bad:#ff5d6c;--pxf:'PixelUI','Instrument Sans',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 'Instrument Sans',system-ui,sans-serif}
+h1,h2,h3{font-family:var(--pxf);margin:0;font-weight:700}
+button,select,input,textarea{font:inherit;color:var(--text)}
+button{font-family:var(--pxf);font-weight:600;cursor:pointer;border:0;padding:6px 12px;background:#3a3368;box-shadow:inset 0 0 0 3px var(--ink),inset 0 4px 0 #5b53a0,inset 0 -4px 0 #211c40}
+button:hover:not(:disabled){background:#463e7c}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.pri{background:var(--accent);color:#1b1206;box-shadow:inset 0 0 0 3px var(--ink),inset 0 4px 0 #fff2a6,inset 0 -4px 0 #c47d06}
+button.danger{color:var(--bad)}
+button.on{background:var(--accent);color:#1b1206}
+input,textarea,select{width:100%;background:#0f0c20;border:0;padding:8px 10px;box-shadow:inset 0 0 0 3px var(--ink),inset 0 3px 0 #05040c}
+textarea{resize:vertical}
+a{color:var(--accent)}
+.top{display:flex;gap:12px;align-items:center;padding:12px 20px;background:#0f0c20;box-shadow:0 3px 0 var(--ink),0 6px 0 var(--panel2);flex-wrap:wrap}
+.logo{font-family:var(--pxf);font-weight:700;font-size:20px}.logo span{background:var(--accent);color:#1b1206;padding:0 6px;margin-left:3px}
+.grow{flex:1}.muted{color:var(--muted)}
+.seg{display:inline-flex;gap:2px;padding:3px;background:#0f0c20;box-shadow:inset 0 0 0 3px var(--ink)}
+.seg button{box-shadow:none;background:transparent;color:var(--muted);padding:4px 10px}
+.seg button.on{background:var(--accent);color:#1b1206}
+main{max-width:1400px;margin:0 auto;padding:18px 20px}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:16px;align-items:start}
+.panel{background:var(--panel);padding:12px;box-shadow:0 0 0 3px var(--ink),inset 0 3px 0 #3d3670}
+.list{display:grid;gap:6px;max-height:calc(100vh - 190px);overflow:auto;padding:3px}
+.item{display:flex;gap:10px;align-items:flex-start;text-align:left;font-family:'Instrument Sans',sans-serif;font-weight:400;background:#1b1735;box-shadow:inset 0 -3px 0 #130f26;padding:8px 10px}
+.item.on{background:#2e2610;color:var(--text);box-shadow:inset 0 0 0 3px var(--accent)}
+.item b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+.item small{color:var(--muted);font-size:12px}
+.tag{font-family:var(--pxf);font-size:12px;padding:1px 7px;flex:none;color:#1b1206;background:#a8a2cc}
+.k-bug{background:var(--bad)}.k-idea{background:#4f86ff;color:#fff}.k-player{background:#ff7a1f}.k-photo{background:var(--accent)}
+.d-h{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.meta{color:var(--muted);font-size:14px;margin-bottom:12px}.meta b{color:var(--text)}
+.photo{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;margin-bottom:12px}
+.img{background:#05080b;min-height:200px;display:grid;place-items:center;box-shadow:0 0 0 3px var(--ink)}
+.img img{width:100%;max-height:60vh;object-fit:contain;display:block;cursor:zoom-in}
+.word{font-family:var(--pxf);font-size:26px;margin-bottom:8px}
+.votes{display:grid;gap:5px}
+.votes span{font-size:14px;padding:4px 8px;background:#1b1735}
+.votes .y{color:var(--ok)}.votes .n{color:var(--bad)}.votes .f{color:var(--accent)}
+.body{white-space:pre-wrap;overflow-wrap:anywhere;background:#0f0c20;padding:10px 12px;margin-bottom:12px;box-shadow:inset 0 0 0 3px var(--ink)}
+details{margin-bottom:14px;font-size:13px;color:var(--muted)}details div{overflow-wrap:anywhere}
+.reply{display:grid;gap:8px;padding-top:12px;border-top:3px dashed #2a2450}
+.rcpt{display:flex;flex-wrap:wrap;gap:6px 14px}
+.rcpt label{display:flex;gap:6px;align-items:center;cursor:pointer}.rcpt input{width:auto}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+.gate{max-width:520px;margin:12vh auto;text-align:center;display:grid;gap:12px;padding:24px}
+#toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:grid;gap:8px;z-index:9}
+.toast{background:#0f0c20;padding:10px 16px;box-shadow:0 0 0 3px var(--ink),inset 6px 0 0 var(--c,var(--accent));font-family:var(--pxf)}
+@media (max-width:860px){.grid{grid-template-columns:1fr}.list{max-height:none}.photo{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="logo">STRASSEN<span>BINGO</span></div><h1 style="font-size:18px">Admin-Tool</h1><span class="grow"></span><span class="muted" id="who"></span><a href="./">Zum Spiel</a></header>
+<main id="app"><div class="empty">Lädt …</div></main>
+<div id="toasts"></div>
+<script>
+/* Admin-Tool: zeigt Meldungen nur, wenn der Server das angemeldete Konto als Admin bestätigt.
+   Ohne Berechtigung liefert die Datenbank keine Daten (Fehler „not_admin“). */
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SUPA = { url: 'https://eaydvicdtlnkuniqeqte.supabase.co', key: 'sb_publishable_uwIVu_m7tRGESPC9wwHl5Q_t7Brxupn' };
+const IMG_RE = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const okImg = d => typeof d === 'string' && d.length <= 700000 && IMG_RE.test(d) ? d : null;
+const UUID = /^[0-9a-f-]{36}$/;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('sb_' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('sb_' + k, JSON.stringify(v)); } catch {} }
+};
+const fmtCode = c => c ? c.slice(0, 3) + ' ' + c.slice(3) : '';
+const KINDS = { bug: 'Bug', idea: 'Idee', player: 'Spieler', photo: 'Foto' };
+function toast(text, c) { const el = document.createElement('div'); el.className = 'toast'; el.style.setProperty('--c', c || '#ffc22e'); el.textContent = text; $('#toasts').appendChild(el); setTimeout(() => el.remove(), 3500); }
+async function session() {
+  let ses = store.get('supaSession', null);
+  if (!ses || ses.anon !== false) return null;
+  if (ses.expires_at - 60 > Date.now() / 1000) return ses;
+  const r = await fetch(SUPA.url + '/auth/v1/token?grant_type=refresh_token', { method:'POST', headers:{ apikey:SUPA.key, 'Content-Type':'application/json' }, body: JSON.stringify({ refresh_token: ses.refresh_token }) });
+  if (!r.ok) return null;
+  const x = await r.json();
+  ses = { ...ses, access_token: x.access_token, refresh_token: x.refresh_token, expires_at: +x.expires_at || Math.floor(Date.now() / 1000) + (+x.expires_in || 3600) };
+  store.set('supaSession', ses); return ses;
+}
+async function rpc(fn, body) {
+  const ses = await session(); if (!ses) throw new Error('login_required');
+  const r = await fetch(SUPA.url + '/rest/v1/rpc/' + fn, { method:'POST', headers:{ apikey:SUPA.key, Authorization:'Bearer ' + ses.access_token, 'Content-Type':'application/json' }, body: JSON.stringify(body || {}) });
+  if (!r.ok) { let m = ''; try { m = (await r.json()).message; } catch {} throw new Error(m || 'Fehler ' + r.status); }
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+const gate = (title, text, link) => { $('#app').innerHTML = `<div class="gate panel"><h2>${esc(title)}</h2><p class="muted">${esc(text)}</p>${link ? `<p><a href="./">${esc(link)}</a></p>` : ''}</div>`; };
+const A = { status: 'open', kind: 'all', items: [], sel: null, imgs: {} };
+async function start() {
+  const ses = store.get('supaSession', null);
+  if (!ses || ses.anon !== false) return gate('Kein Zugriff', 'Bitte melde dich zuerst im Spiel mit deinem Konto an und öffne diese Seite dann erneut.', 'Zum Spiel');
+  let ok = false;
+  try { ok = await rpc('is_admin'); } catch (e) { return gate('Kein Zugriff', /login_required/.test(e.message) ? 'Deine Anmeldung ist abgelaufen – bitte im Spiel neu anmelden.' : 'Fehler: ' + e.message, 'Zum Spiel'); }
+  if (!ok) return gate('Kein Zugriff', 'Dieses Konto hat keine Admin-Berechtigung.', 'Zum Spiel');
+  $('#who').textContent = 'Angemeldet als ' + (ses.uname || 'Admin');
+  $('#app').innerHTML = `<div class="bar"><div class="seg" id="st"><button data-s="open">Offen</button><button data-s="done">Erledigt</button></div>
+    <div class="seg" id="kd"><button data-k="all">Alle</button>${Object.entries(KINDS).map(([k, l]) => `<button data-k="${k}">${l}</button>`).join('')}</div>
+    <span class="grow"></span><button id="reload">Neu laden</button></div>
+    <div class="grid"><div class="panel"><div id="list" class="list"></div></div><div class="panel" id="detail"></div></div>`;
+  $$('#st button').forEach(b => b.onclick = () => { A.status = b.dataset.s; A.sel = null; load(); });
+  $$('#kd button').forEach(b => b.onclick = () => { A.kind = b.dataset.k; A.sel = null; render(); });
+  $('#reload').onclick = load;
+  load();
+}
+async function load() {
+  $$('#st button').forEach(b => b.classList.toggle('on', b.dataset.s === A.status));
+  $('#list').innerHTML = '<div class="empty">Lädt …</div>';
+  try { A.items = await rpc('admin_reports', { p_status: A.status }) || []; } catch (e) { $('#list').innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
+  document.title = (A.status === 'open' && A.items.length ? '(' + A.items.length + ') ' : '') + 'Straßenbingo · Admin';
+  render();
+}
+const dt = d => new Date(d).toLocaleString('de-DE', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+function render() {
+  $$('#kd button').forEach(b => b.classList.toggle('on', b.dataset.k === A.kind));
+  const items = A.items.filter(r => A.kind === 'all' || r.kind === A.kind);
+  if (!items.some(r => r.id === A.sel)) A.sel = items.length ? items[0].id : null;
+  $('#list').innerHTML = items.length ? items.map(r => `<button class="item ${r.id === A.sel ? 'on' : ''}" data-id="${esc(r.id)}">
+      <span class="tag k-${esc(r.kind)}">${esc(KINDS[r.kind] || r.kind)}</span><span class="grow"><b>${esc(r.kind === 'photo' ? '„' + r.word + '“ – ' + (r.reason || 'Foto') : (r.body || '').slice(0, 70))}</b>
+      <small>${esc(r.reporter_name || '?')} · ${dt(r.created_at)}${r.replies ? ' · beantwortet' : ''}</small></span></button>`).join('')
+    : `<div class="empty">Keine ${A.status === 'open' ? 'offenen' : 'erledigten'} Meldungen.</div>`;
+  $$('[data-id]').forEach(b => b.onclick = () => { A.sel = b.dataset.id; render(); });
+  detail();
+}
+async function detail() {
+  const box = $('#detail'); const r = A.items.find(x => x.id === A.sel);
+  if (!r) { box.innerHTML = '<div class="empty">Keine Meldung ausgewählt.</div>'; return; }
+  const votes = Array.isArray(r.votes) ? r.votes.filter(v => v && typeof v === 'object') : [];
+  const ctx = r.context && typeof r.context === 'object' ? r.context : {};
+  const rc = new Map();
+  if (r.reporter) rc.set(r.reporter, 'Melder: ' + (r.reporter_name || '?'));
+  if (r.target) rc.set(r.target, (r.kind === 'photo' ? 'Finder: ' : 'Gemeldet: ') + (r.target_profile_name || r.target_name || '?'));
+  votes.forEach(v => { if (typeof v.acct === 'string' && UUID.test(v.acct) && !rc.has(v.acct)) rc.set(v.acct, (v.v > 0 ? '✓ ' : v.v < 0 ? '✗ ' : '') + (v.name || '?')); });
+  box.innerHTML = `<div class="d-h"><span class="tag k-${esc(r.kind)}">${esc(KINDS[r.kind] || r.kind)}</span><h2>${esc(r.reason || (r.kind === 'idea' ? 'Idee' : r.kind === 'bug' ? 'Bug' : r.kind === 'player' ? 'Spieler-Meldung' : 'Foto'))}</h2><span class="grow"></span><span class="muted">${dt(r.created_at)}</span></div>
+    <div class="meta">Von <b>${esc(r.reporter_name || 'gelöschtes Konto')}</b>${r.reporter_code ? ' (Code ' + esc(fmtCode(r.reporter_code)) + ')' : ''}${r.target_profile_name || r.target_name ? ` · betrifft <b>${esc(r.target_profile_name || r.target_name)}</b>${r.target ? '' : ' (ohne Konto)'}` : ''}${r.status === 'done' && r.done_at ? ' · erledigt ' + dt(r.done_at) : ''}</div>
+    ${r.kind === 'photo' ? `<div class="photo"><div class="img" id="img">${r.has_image ? '<span class="muted">Bild lädt …</span>' : '<span class="muted">Kein Bild</span>'}</div>
+      <div><div class="word">„${esc(r.word)}“</div><div class="votes">${votes.map(v => v.finder ? `<span class="f">📸 gefunden von ${esc(v.name || '?')}${v.acct ? '' : ' (Gast)'}</span>` : `<span class="${v.v > 0 ? 'y' : 'n'}">${v.v > 0 ? '✓ zählt' : '✗ zählt nicht'} – ${esc(v.name || '?')}${v.acct ? '' : ' (Gast)'}</span>`).join('') || '<span class="muted">Keine Stimmen</span>'}</div></div></div>` : ''}
+    ${r.body ? `<div class="body">${esc(r.body)}</div>` : ''}
+    <details><summary>Technische Infos</summary>${Object.entries(ctx).map(([k, v]) => `<div><b>${esc(k)}:</b> ${esc(typeof v === 'string' ? v : JSON.stringify(v))}</div>`).join('') || '–'}</details>
+    <div class="reply"><h3>Antwort / Hinweis schicken</h3>
+      ${rc.size ? `<div class="rcpt">${[...rc].map(([id, l], i) => `<label><input type="checkbox" value="${esc(id)}" ${i === 0 ? 'checked' : ''}>${esc(l)}</label>`).join('')}</div>` : '<p class="muted">Keine Empfänger mit Konto.</p>'}
+      <input id="ttl" maxlength="120" value="${esc(r.kind === 'photo' ? 'Zu deiner Foto-Meldung „' + r.word + '“' : r.kind === 'player' ? 'Hinweis vom Admin' : 'Zu deiner Meldung')}">
+      <textarea id="txt" rows="5" maxlength="3000" placeholder="Nachricht – landet im Postfach der ausgewählten Spieler"></textarea>
+      <div class="row"><button class="pri" id="send" ${rc.size ? '' : 'disabled'}>Senden</button><span class="grow"></span>
+        <button id="tog">${r.status === 'open' ? 'Als erledigt markieren' : 'Wieder öffnen'}</button><button class="danger" id="del">Löschen</button></div></div>`;
+  $('#send').onclick = async () => {
+    const to = $$('.rcpt input:checked').map(x => x.value).filter(x => UUID.test(x)), body = $('#txt').value.trim();
+    if (!to.length) return toast('Wähle mindestens einen Empfänger.', '#ff5d6c'); if (!body) return toast('Schreib eine Nachricht.', '#ff5d6c');
+    try { const n = await rpc('admin_send', { p_report: r.id, p_to: to, p_title: $('#ttl').value, p_body: body }); toast('An ' + n + ' Spieler geschickt', '#35c873'); r.replies = (r.replies || 0) + 1; $('#txt').value = ''; render(); }
+    catch (e) { toast('Senden fehlgeschlagen: ' + e.message, '#ff5d6c'); }
+  };
+  $('#tog').onclick = async () => { try { await rpc('admin_set_status', { p_id: r.id, p_status: r.status === 'open' ? 'done' : 'open' }); A.sel = null; load(); } catch (e) { toast(e.message, '#ff5d6c'); } };
+  $('#del').onclick = async () => { if (!confirm('Meldung endgültig löschen?')) return; try { await rpc('admin_delete_report', { p_id: r.id }); A.sel = null; load(); } catch (e) { toast(e.message, '#ff5d6c'); } };
+  if (r.kind === 'photo' && r.has_image) {
+    let img = A.imgs[r.id];
+    if (!img) { try { img = okImg(await rpc('admin_report_image', { p_id: r.id })); } catch {} if (img) A.imgs[r.id] = img; }
+    if (A.sel === r.id && $('#img')) {
+      $('#img').innerHTML = img ? `<img src="${img}" alt="Gemeldetes Foto">` : '<span class="muted">Bild nicht verfügbar</span>';
+      const el = $('#img img'); if (el) el.onclick = () => { const w = open(); if (w) { w.document.title = 'Foto'; const i = w.document.createElement('img'); i.src = img; i.style.maxWidth = '100%'; w.document.body.style.background = '#000'; w.document.body.appendChild(i); } };
+    }
+  }
+}
+start();
+</script>
+</body>
+</html>

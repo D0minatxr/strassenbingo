@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-4Dh/il1KvAnHur3Qk7ZTr32dDS3MIhkbSBlVa+0y7ew='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-svxQwZAG3sGDkmuv2uzV4m8J6d7bsRyimOn6ge8l2s8='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -837,6 +837,24 @@ kbd{border-radius:0}
 .libbtns .favbtn .ic{margin:0}
 #libF button .ic{width:14px;height:14px;margin-right:4px}
 @media (max-width:560px){#libF{width:100%}#libF button{padding:4px 6px;font-size:12px}}
+/* Feedback, Melden, Postfach */
+.headtools{display:inline-flex;align-items:center;gap:2px}
+.headtools .iconbtn{position:relative;text-decoration:none}
+.headtools .fbadge{position:absolute;top:-2px;right:-4px}
+.admbtn{color:var(--accent)!important}
+.fbk .seg{margin-top:0}
+.fbk .seg button .ic{width:14px;height:14px;margin-right:5px}
+.rp-photo{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:12px;align-items:start}
+.rp-photo img{width:100%;max-height:240px;object-fit:contain;background:#05080b;box-shadow:0 0 0 3px #0a0816}
+.rp-votes{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.rp-votes span{font-size:12px;padding:2px 7px;background:#1b1735;box-shadow:inset 0 -2px 0 #130f26}
+.rp-votes .y{color:var(--ok)}.rp-votes .n{color:var(--bad)}.rp-votes .f{color:var(--accent)}
+.mbox{display:grid;gap:10px}
+.mitem{padding:10px 12px;background:#1b1735;box-shadow:inset 0 -3px 0 #130f26}
+.mitem.new{box-shadow:inset 4px 0 0 var(--ok),inset 0 -3px 0 #130f26}
+.mhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.mhead b{font-family:var(--pxf)}
+.mitem p{margin:6px 0 2px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media (max-width:560px){.rp-photo{grid-template-columns:1fr}.headtools .iconbtn{padding:5px}}
 /* Minimap */
 .minimap{position:absolute;left:10px;bottom:10px;z-index:3;width:250px;height:190px;display:flex;flex-direction:column;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,0 0 0 6px #3d3670,0 8px 0 6px rgba(0,0,0,.35)}
 .minimap.big{width:min(480px,calc(100% - 20px));height:min(360px,calc(100% - 20px))}
@@ -894,7 +912,7 @@ function cleanState(st) {
   st.board = Array.isArray(st.board) ? st.board.map(w => String(w ?? '').slice(0, 80)) : [];
   if (st.layouts && typeof st.layouts === 'object') for (const k of Object.keys(st.layouts)) st.layouts[k] = Array.isArray(st.layouts[k]) ? st.layouts[k].map(x => x | 0) : [];
   for (const p of Object.values(st.players || {})) if (p && typeof p === 'object') { p.name = String(p.name ?? '').slice(0, 20); if (p.ci != null) p.ci = p.ci | 0; p.avatar = okAvatar(p.avatar); }
-  for (const f of Object.values(st.findings || {})) if (f && typeof f === 'object') { f.cell = f.cell | 0; f.ts = +f.ts || 0; }
+  for (const f of [...Object.values(st.findings || {}), ...Object.values(st.archive || {})]) if (f && typeof f === 'object') { f.cell = f.cell | 0; f.ts = +f.ts || 0; }
   for (const list of Object.values(st.locs || {})) if (Array.isArray(list)) list.forEach(l => { if (l && typeof l === 'object') { num(l, ['lat', 'lng', 'h', 'b']); l.id = String(l.id ?? '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40); } });
   if (Array.isArray(st.voteOrder)) st.voteOrder = st.voteOrder.map(x => String(x ?? '')).filter(x => SAFE_KEY.test(x));
   if (Array.isArray(st.draftWords)) st.draftWords = st.draftWords.map(w => String(w ?? '').slice(0, 80));
@@ -1678,7 +1696,7 @@ async function loadProfile() {
     await ensureProfile();
     const [me, friends] = await Promise.all([rpc('get_profile', { p_user: null }), rpc('list_friends')]);
     PROF.me = me; PROF.friends = friends || [];
-    presenceTick(false);
+    presenceTick(false); checkMail(true);
     if (me && me.name && $('#nm') && (!$('#nm').value || $('#nm').value === (account() || {}).uname)) { $('#nm').value = me.name; S.me.name = me.name; store.set('name', me.name); }
   } catch (e) { PROF.err = e.message; }
   PROF.loading = false;
@@ -1808,6 +1826,7 @@ async function presenceTick(withFriends = true) {
     try { PROF.friends = await rpc('list_friends') || []; renderFriendsBody(); renderProfileCard(); } catch {}
   }
   PRES.busy = false;
+  checkMail(false);
 }
 function schedulePoll() {
   clearTimeout(PRES.timer);
@@ -2279,6 +2298,12 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-24-feedback', date:'24.10.2026', title:'Feedback, Foto-Meldungen & Postfach', items:[
+    'Neuer Fahnen-Knopf oben: Bugs melden, Ideen einreichen oder einen Spieler melden, der trollt.',
+    'Bei der Abstimmung und in der Galerie kannst du Fotos melden – z. B. wenn ein gutes Foto zu Unrecht abgelehnt wurde.',
+    'Neues Postfach: Antworten vom Admin landen dort, ein Zähler zeigt neue Nachrichten.',
+    'In der Ergebnis-Galerie bleiben jetzt auch Fotos, die in der Zwischenrunde abgelehnt wurden.'
+  ] },
   { id:'2026-10-24-likes', date:'24.10.2026', title:'Wortlisten liken & favorisieren', items:[
     'Wortlisten kannst du jetzt mit dem Herz liken und mit dem Stern zu deinen Favoriten hinzufügen (mit Konto).',
     'Neue Filter in der Bibliothek: „Beliebt“ sortiert nach Likes, „Favoriten“ zeigt deine gemerkten Listen.'
@@ -2687,6 +2712,122 @@ function sfx(name) {
     o.connect(g); g.connect(c.destination); o.start(t0 + st); o.stop(t0 + st + dur + .05);
   }
 }
+/* ================= Feedback, Meldungen, Postfach & Admin-Tool =================
+   Meldungen gehen an die Datenbank (nur mit Konto). Das Admin-Tool liegt auf einer eigenen Seite (admin.html);
+   Daten bekommt dort nur ein Konto aus der Admin-Tabelle – das prüft der Server bei jedem Aufruf. */
+const MAIL = { unread: 0, at: 0, admin: false, open: 0, checked: false };
+const REPORT_KINDS = { bug: 'Bug', idea: 'Idee', player: 'Spieler', photo: 'Foto' };
+const PHOTO_REASONS = ['Falsch abgelehnt', 'Falsch angenommen', 'Unpassendes Bild', 'Sonstiges'];
+function headToolsHTML() {
+  if (!supaReady()) return '';
+  const acc = account();
+  return `<button class="iconbtn" data-fb title="Feedback: Bug, Idee oder Spieler melden" aria-label="Feedback">${ic('flag')}</button>`
+    + (acc ? `<button class="iconbtn" data-mail title="Postfach" aria-label="Postfach">${ic('mail')}${MAIL.unread ? `<span class="fbadge">${MAIL.unread}</span>` : ''}</button>` : '')
+    + (acc && MAIL.admin ? `<a class="iconbtn admbtn" href="admin.html" target="_blank" rel="noopener" title="Admin-Tool (neuer Tab)" aria-label="Admin-Tool">${ic('gear')}${MAIL.open ? `<span class="fbadge">${MAIL.open}</span>` : ''}</a>` : '');
+}
+function refreshHeadTools() { $$('.headtools').forEach(x => x.innerHTML = headToolsHTML()); }
+async function checkMail(force) {
+  if (!account() || !supaReady()) { MAIL.unread = 0; MAIL.admin = false; MAIL.checked = false; refreshHeadTools(); return; }
+  if (!force && Date.now() - MAIL.at < 55000) return;
+  MAIL.at = Date.now();
+  try {
+    if (!MAIL.checked) { MAIL.admin = !!(await rpc('is_admin')); MAIL.checked = true; }
+    const before = MAIL.unread;
+    MAIL.unread = (await rpc('unread_messages')) | 0;
+    if (MAIL.admin) MAIL.open = ((await rpc('admin_counts')) || {}).open | 0;
+    if (MAIL.unread > before && before >= 0 && MAIL.seen) { toast('📨 Neue Nachricht vom Admin – schau in dein Postfach.', '#35c873'); sfx('invite'); }
+    MAIL.seen = true;
+  } catch {}
+  refreshHeadTools();
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('[data-fb],[data-mail]'); if (!t) return;
+  if (t.hasAttribute('data-fb')) openFeedback(); else openMailbox();
+});
+const needAccount = what => { toast(what + ' geht nur mit Konto – so kann der Admin dir antworten.', '#ff5d6c'); openLogin(); };
+function reportContext() {
+  const st = S.state;
+  return { page: phaseKey(), code: st ? st.code : '', mode: st ? st.settings.mode : '', ranked: st && st.ranked ? st.ranked.mode : '', ver: CHANGELOG[0].id, ua: navigator.userAgent.slice(0, 160), w: innerWidth };
+}
+async function sendReport(payload, okText) {
+  try {
+    await rpc('submit_report', { p_kind: payload.kind, p_reason: payload.reason || '', p_body: payload.body || '', p_context: reportContext(),
+      p_target: payload.target || null, p_target_name: payload.target_name || '', p_word: payload.word || '', p_image: payload.image || null, p_votes: payload.votes || [] });
+    closeModal(); toast(okText || '✅ Danke! Deine Meldung ist beim Admin angekommen.', '#35c873');
+  } catch (e) {
+    toast(/too_many/.test(e.message) ? 'Du hast gerade sehr viele Meldungen geschickt – bitte später nochmal.' : /body_required/.test(e.message) ? 'Bitte beschreib kurz, worum es geht.' : 'Senden fehlgeschlagen: ' + e.message, '#ff5d6c');
+  }
+}
+/* Feedback: Bug, Idee oder Spieler melden */
+function openFeedback(kind) {
+  if (!account()) return needAccount('Feedback');
+  const st = S.state;
+  const others = st ? Object.entries(st.players).filter(([pid, p]) => pid !== S.me.pid && p.acct) : [];
+  let k = kind || 'bug';
+  openModal(`<div class="fbk"><div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">${ic('flag')}Feedback</h2><button class="small" id="fbClose" aria-label="Schließen">✕</button></div>
+    <div class="seg" id="fbKind"><button data-k="bug">${ic('alert')}Bug melden</button><button data-k="idea">${ic('sparkle')}Idee</button><button data-k="player">${ic('user')}Spieler melden</button></div>
+    <div id="fbPlayer" class="hidden" style="margin-top:12px"><label><span class="lbl">Welcher Spieler?</span>
+      ${others.length ? `<select id="fbTarget">${others.map(([pid, p]) => `<option value="${esc(p.acct)}" data-name="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select>`
+        : `<input id="fbTargetName" maxlength="40" placeholder="Name des Spielers (und wenn möglich Lobby-Code)">`}</label></div>
+    <label style="margin-top:12px"><span class="lbl" id="fbLbl"></span><textarea id="fbBody" maxlength="2000" rows="5"></textarea></label>
+    <p class="hint" style="margin-top:6px">Mitgeschickt werden dein Spielername, ${st ? 'der Lobby-Code, ' : ''}die Seite, auf der du gerade bist, und dein Browser. Der Admin kann dir über dein Postfach antworten.</p>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button id="fbCancel">Abbrechen</button><button class="btn-primary" id="fbSend">${ic('mail')}Abschicken</button></div></div>`);
+  const sync = () => {
+    $$('#fbKind button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+    $('#fbPlayer').classList.toggle('hidden', k !== 'player');
+    $('#fbLbl').textContent = k === 'bug' ? 'Was ist passiert? Was hast du gemacht, was hast du erwartet?' : k === 'idea' ? 'Deine Idee' : 'Was hat der Spieler gemacht?';
+    $('#fbBody').placeholder = k === 'bug' ? 'z. B. „Nach der Zwischenrunde war mein Foto weg …“' : k === 'idea' ? 'z. B. „Ein Modus, bei dem …“' : 'z. B. „Lehnt absichtlich alle Fotos ab“';
+  };
+  $$('#fbKind button').forEach(b => b.onclick = () => { k = b.dataset.k; sync(); });
+  sync();
+  $('#fbClose').onclick = $('#fbCancel').onclick = closeModal;
+  $('#fbSend').onclick = () => {
+    const body = $('#fbBody').value.trim(); if (body.length < 3) return toast('Bitte beschreib kurz, worum es geht.', '#ff5d6c');
+    const p = { kind: k, body };
+    if (k === 'player') {
+      const sel = $('#fbTarget');
+      if (sel) { p.target = sel.value; p.target_name = sel.selectedOptions[0].dataset.name; }
+      else { p.target_name = ($('#fbTargetName').value || '').trim(); if (!p.target_name) return toast('Wen möchtest du melden?', '#ff5d6c'); }
+    }
+    sendReport(p);
+  };
+}
+/* Foto melden: Bild, Begriff, Finder und wer wie abgestimmt hat */
+function photoInfo(fid) {
+  const st = S.state; if (!st) return null;
+  const f = st.findings[fid] || (st.archive || {})[fid]; if (!f) return null;
+  const votes = f.rej ? f.votes || {} : st.votes[fid] || {};
+  const finder = st.players[f.pid] || {};
+  return { f, word: st.board[f.cell], finder, img: okImg(S.images[fid]), ok: !f.rej && isValid(st, fid),
+    votes: Object.entries(votes).map(([pid, v]) => ({ name: (st.players[pid] || {}).name || '?', acct: (st.players[pid] || {}).acct || null, v: v > 0 ? 1 : -1 })) };
+}
+function openPhotoReport(fid) {
+  if (!account()) return needAccount('Fotos melden');
+  const pi = photoInfo(fid); if (!pi || !pi.img) return toast('Dieses Foto ist nicht mehr verfügbar.', '#ff5d6c');
+  openModal(`<div class="fbk"><div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">${ic('flag')}Foto melden</h2><button class="small" id="fbClose" aria-label="Schließen">✕</button></div>
+    <div class="rp-photo"><img src="${pi.img}" alt=""><div><b>„${esc(pi.word)}“</b><div class="muted">gefunden von ${esc(pi.finder.name || '?')} · ${pi.ok ? 'zählt' : 'abgelehnt'}</div>
+      <div class="rp-votes">${pi.votes.length ? pi.votes.map(v => `<span class="${v.v > 0 ? 'y' : 'n'}">${v.v > 0 ? '✓' : '✗'} ${esc(v.name)}</span>`).join('') : '<span class="muted">Keine Stimmen</span>'}</div></div></div>
+    <label style="margin-top:12px"><span class="lbl">Grund</span><select id="rpReason">${PHOTO_REASONS.map(r => `<option>${esc(r)}</option>`).join('')}</select></label>
+    <label style="margin-top:10px"><span class="lbl">Details (optional)</span><textarea id="fbBody" maxlength="2000" rows="3" placeholder="z. B. „Auf dem Bild ist eindeutig eine Ampel zu sehen.“"></textarea></label>
+    <p class="hint" style="margin-top:6px">Der Admin sieht das Bild, den Begriff, wer es gefunden hat und wer wie abgestimmt hat.</p>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button id="fbCancel">Abbrechen</button><button class="btn-primary" id="fbSend">${ic('mail')}Melden</button></div></div>`);
+  $('#fbClose').onclick = $('#fbCancel').onclick = closeModal;
+  $('#fbSend').onclick = () => sendReport({ kind: 'photo', reason: $('#rpReason').value, body: $('#fbBody').value.trim(), word: pi.word,
+    target: pi.finder.acct || null, target_name: pi.finder.name || '', image: pi.img, votes: [{ name: pi.finder.name || '?', acct: pi.finder.acct || null, v: 0, finder: true }, ...pi.votes] });
+}
+/* Postfach: Nachrichten vom Admin */
+async function openMailbox() {
+  if (!account()) return needAccount('Das Postfach');
+  openModal(`<div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">${ic('mail')}Postfach</h2><button class="small" id="mbClose" aria-label="Schließen">✕</button></div><div id="mbBody" class="empty-state">Lädt …</div>`);
+  $('#mbClose').onclick = closeModal;
+  try {
+    const list = await rpc('my_messages') || [];
+    $('#mbBody').className = 'mbox';
+    $('#mbBody').innerHTML = list.length ? list.map(m => `<article class="mitem ${m.read_at ? '' : 'new'}"><div class="mhead"><b>${esc(m.title)}</b>${m.read_at ? '' : '<span class="news-new">Neu</span>'}<span class="grow"></span><span class="muted">${new Date(m.created_at).toLocaleString('de-DE', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}</span></div><p>${esc(m.body)}</p><small class="muted">vom Admin</small></article>`).join('')
+      : `<div class="empty-state">${ic('mail', 'big')}<p>Noch keine Nachrichten. Antworten auf deine Meldungen landen hier.</p></div>`;
+    if (list.some(m => !m.read_at)) { await rpc('read_messages'); MAIL.unread = 0; refreshHeadTools(); }
+  } catch (e) { $('#mbBody').textContent = 'Konnte das Postfach nicht laden: ' + e.message; }
+}
 function soundBtnHTML() { return `<button class="iconbtn sndbtn" data-snd title="${SFX.on ? 'Ton aus' : 'Ton an'}" aria-label="${SFX.on ? 'Ton aus' : 'Ton an'}">${ic(SFX.on ? 'volume' : 'mute')}</button>`; }
 document.addEventListener('click', e => {
   const b = e.target.closest && e.target.closest('[data-snd]'); if (!b) return;
@@ -2735,7 +2876,7 @@ function hostHandle(cid, msg) {
       for (let b = 0; b < Math.max(1, H.locBatch); b++) H.locs[pid] = (H.locs[pid] || []).concat(pickLocs(pid, H.settings.locCount, b));
     }
     S.net.send(cid, {t:'welcome', code:H.code});
-    for (const fid of Object.keys(H.findings)) if (S.images[fid]) S.net.send(cid, {t:'img', fid, data:S.images[fid]});
+    for (const fid of [...Object.keys(H.findings), ...Object.keys(H.archive || {})]) if (S.images[fid]) S.net.send(cid, {t:'img', fid, data:S.images[fid]});
     const t = p.team;
     S.net.send(cid, {t:'chathist', list: hostChat.filter(m => m.scope === 'all' || (t != null && m.scope === 't' + t))});
     hostChatPush({scope:'all', sys:true, text: name + ' ist beigetreten', ts:Date.now()});
@@ -2917,7 +3058,7 @@ function hostBeginGame(words) {
   H.draftWords = []; H.draftVotes = {}; H.draftReady = {}; H.draftEnds = 0;
   H.layouts = {};
   H.findings = {}; H.votes = {}; H.voteOrder = []; H.voteIdx = 0; H.lineCount = {}; H.pLineCount = {}; H.checkKind = null; H.checkSide = null; H.endReason = '';
-  H.reviewed = {}; H.sinceReview = 0; H.pausedAt = 0; H.jokers = {}; H.locs = {}; H.locBatch = 0;
+  H.reviewed = {}; H.sinceReview = 0; H.pausedAt = 0; H.jokers = {}; H.locs = {}; H.locBatch = 0; H.archive = {};
   S.images = {};
   for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
   H.phase = 'game'; H.round++; H.startedAt = Date.now();
@@ -3001,7 +3142,8 @@ function hostResume() {
   for (const f of rejIds) {
     const fd = H.findings[f];
     hostSendTo(fd.pid, {t:'event', text:'Dein Foto für „' + H.board[fd.cell] + '“ wurde abgelehnt – das Feld ist wieder frei, mach ein neues Foto.', color:'#ff5d6c'});
-    delete H.findings[f]; delete H.votes[f]; delete H.reviewed[f]; delete S.images[f];
+    H.archive = H.archive || {}; H.archive[f] = { ...fd, votes: H.votes[f] || {}, rej: true }; // bleibt für Galerie und Meldungen erhalten
+    delete H.findings[f]; delete H.votes[f]; delete H.reviewed[f];
   }
   const rejected = rejIds.length;
   const rejTxt = rejected ? rejected + ' Foto' + (rejected === 1 ? ' wurde' : 's wurden') + ' abgelehnt.' : '';
@@ -3153,9 +3295,10 @@ function closeModal() {
 }
 addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 function lightbox(fid) {
-  const st = S.state; const f = st.findings[fid]; const src = S.images[fid]; if (!src) return;
+  const st = S.state; const f = st.findings[fid] || (st.archive || {})[fid]; const src = okImg(S.images[fid]); if (!src || !f) return;
   const sd = sideInfo(st, f.side);
-  openModal(`<div class="lightbox"><div class="row" style="margin-bottom:10px"><span class="pill" style="--c:${sd.color}">${esc(sd.name)}</span><h2 class="grow" style="margin:0">„${esc(st.board[f.cell])}“</h2><span class="muted">${esc(st.players[f.pid]?.name || '?')}</span></div><img src="${src}" alt=""></div>`, 'wide');
+  openModal(`<div class="lightbox"><div class="row" style="margin-bottom:10px"><span class="pill" style="--c:${sd.color}">${esc(sd.name)}</span><h2 class="grow" style="margin:0">„${esc(st.board[f.cell])}“</h2><span class="muted">${esc(st.players[f.pid]?.name || '?')}</span>${supaReady() ? `<button class="small" id="lbReport" title="Foto an den Admin melden">${ic('flag')}Melden</button>` : ''}</div><img src="${src}" alt=""></div>`, 'wide');
+  if ($('#lbReport')) $('#lbReport').onclick = () => openPhotoReport(fid);
   $('#modal .modal-box').style.width = 'min(1100px,100%)';
 }
 
@@ -3310,7 +3453,7 @@ MOUNT.home = () => {
         <button id="navLib">${ic('book')}Wortlisten</button>
         <button id="allNews">${ic('news')}Neuigkeiten${newsUnseen() ? '<span class="ndot"></span>' : ''}</button>
       </nav>
-      <div id="acctBox" class="cacct">${accountHTML()}</div>${soundBtnHTML()}
+      <div id="acctBox" class="cacct">${accountHTML()}</div><span class="headtools">${headToolsHTML()}</span>${soundBtnHTML()}
     </header>
     ${LOCAL ? '<div class="localnote">Testmodus (?local): Spieler verbinden sich nur zwischen Tabs dieses Browsers.</div>' : ''}
     <div class="cbody"><main class="cmain" id="homeMain"></main><aside class="cside" id="socialSide" aria-label="Freunde"></aside></div>
@@ -3340,7 +3483,7 @@ MOUNT.kicked = () => {
 function topBar(extra) {
   return `<header class="top">${logoHTML(true)}
     <div class="codebox">Code <b>${esc(S.state.code)}</b><button class="small" id="copyLink">Code kopieren</button></div>
-    ${extra || ''}${soundBtnHTML()}</header>`;
+    ${extra || ''}<span class="headtools">${headToolsHTML()}</span>${soundBtnHTML()}</header>`;
 }
 function bindCopy() {
   const b = $('#copyLink'); if (!b) return;
@@ -3908,7 +4051,7 @@ MOUNT.game = () => {
   const st = S.state;
   S.frames = new Map(); S.lru = []; S.curLoc = null; S.visited = new Set(); S.map = null; S.markers = null; S.jokerSwap = null; S.lastPhase = null; S.autoShow = null; S.seenOpts = []; S.tp = {}; S.prepShow = null;
   app.innerHTML = `
-  <header class="top game-top">${logoHTML(true)}<div id="timer" class="timer">--:--</div><div id="scores" class="scores"></div><div id="hostCtl" class="row"></div></header>
+  <header class="top game-top">${logoHTML(true)}<div id="timer" class="timer">--:--</div><div id="scores" class="scores"></div><div id="hostCtl" class="row"></div><span class="headtools">${headToolsHTML()}</span></header>
   <main class="game">
     <section class="viewer card">
       <div class="vtools">
@@ -4262,7 +4405,7 @@ function renderVote(isInter) {
   $('#vprog').textContent = `Foto ${idx + 1} von ${order.length}`;
   if ($('#vreason')) $('#vreason').textContent = st.endReason || '';
   $('#vmain').innerHTML = `
-    <div class="vote-head"><span class="pill" style="--c:${sd.color}">${esc(sd.name)}</span><h2>„${esc(st.board[f.cell])}“</h2><span class="muted">gefunden von ${esc(st.players[f.pid]?.name || '?')}</span></div>
+    <div class="vote-head"><span class="pill" style="--c:${sd.color}">${esc(sd.name)}</span><h2>„${esc(st.board[f.cell])}“</h2><span class="muted">gefunden von ${esc(st.players[f.pid]?.name || '?')}</span><span class="grow"></span>${supaReady() ? `<button class="small" id="vReport" title="Foto an den Admin melden">${ic('flag')}Melden</button>` : ''}</div>
     ${S.images[fid] ? `<img class="vote-img" src="${S.images[fid]}" alt="" data-zoom="${fid}">` : '<div class="capprev"><div class="ph">Bild wird geladen …</div></div>'}
     <div class="vote-bar">
       ${canVote ? `<button class="yes ${myV > 0 ? 'on' : ''}" data-v="1">✓ Zählt <kbd>J</kbd></button><button class="no ${myV < 0 ? 'on' : ''}" data-v="-1">✗ Zählt nicht <kbd>N</kbd></button>`
@@ -4275,6 +4418,7 @@ function renderVote(isInter) {
     ${amHost() ? `<div class="row" style="flex-wrap:wrap"><button id="vPrev" ${idx === 0 ? 'disabled' : ''}>◀ Zurück</button><button class="btn-primary" id="vNext" ${idx >= order.length - 1 ? 'disabled' : ''}>Nächstes Foto ▶</button><span class="grow"></span><button id="vFinish" class="${idx >= order.length - 1 ? 'btn-primary' : ''}">${isInter ? 'Weiter spielen ▶' : 'Ergebnis zeigen'}</button></div>`
       : '<div class="muted" style="font-size:13px">Der Host blättert durch die Fotos.</div>'}`;
   $$('.vote-bar [data-v]').forEach(b => b.onclick = () => act({t:'vote', fid, v: +b.dataset.v === myV ? 0 : +b.dataset.v}));
+  if ($('#vReport')) $('#vReport').onclick = () => openPhotoReport(fid);
   $$('[data-zoom]').forEach(t => t.onclick = () => lightbox(t.dataset.zoom));
   if (amHost()) {
     $('#vPrev').onclick = () => { hostSetVoteIdx(Math.max(0, idx - 1)); commit(); };
@@ -4292,7 +4436,7 @@ function renderVote(isInter) {
 
 /* ---------- Ergebnis ---------- */
 MOUNT.results = () => {
-  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">Ergebnis</h2><span class="grow"></span><span id="resCtl"></span>${soundBtnHTML()}</header><main class="results" id="res"></main>`;
+  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">Ergebnis</h2><span class="grow"></span><span id="resCtl"></span><span class="headtools">${headToolsHTML()}</span>${soundBtnHTML()}</header><main class="results" id="res"></main>`;
 };
 UPDATE.results = () => {
   const st = S.state; const res = standings(st); const n = st.board.length; const size = Math.round(Math.sqrt(n));
@@ -4306,7 +4450,8 @@ UPDATE.results = () => {
     $('#resCtl').innerHTML = amHost() ? '<button class="btn-primary" id="again">Neue Runde</button>' : '<span class="muted">Der Host kann eine neue Runde starten.</span>';
     if (amHost()) $('#again').onclick = hostToLobby;
   }
-  const fids = Object.keys(st.findings).sort((a, b) => st.findings[a].cell - st.findings[b].cell);
+  const allF = { ...(st.archive || {}), ...st.findings };
+  const fids = Object.keys(allF).filter(id => allF[id] && typeof allF[id] === 'object').sort((a, b) => allF[a].cell - allF[b].cell || (allF[a].ts || 0) - (allF[b].ts || 0));
   $('#res').innerHTML = `
     <div class="winner" style="--c:${wc}"><div class="muted">${esc(st.endReason || '')}</div><div class="display">🏆 ${banner}</div>
       <div class="muted">Siegbedingung: ${st.ranked ? 'Meiste Punkte (Felder + ' + BINGO_BONUS + ' pro Bingo)' : WIN_NAMES[st.settings.win]}</div></div>
@@ -4327,8 +4472,8 @@ UPDATE.results = () => {
       </div>`).join('')}</div>
     <h2>Alle Fotos</h2>
     ${fids.length ? `<div class="gallery">${fids.map(fid => {
-      const f = st.findings[fid]; const sd = sideInfo(st, f.side); const ok = isValid(st, fid);
-      return `<div class="gitem ${ok ? '' : 'rej'}" data-zoom="${fid}" style="--c:${sd.color}">${S.images[fid] ? `<img src="${S.images[fid]}" alt="">` : '<div style="aspect-ratio:16/10"></div>'}
+      const f = allF[fid]; const sd = sideInfo(st, f.side); const ok = !f.rej && isValid(st, fid);
+      return `<div class="gitem ${ok ? '' : 'rej'}" data-zoom="${fid}" style="--c:${sd.color}" title="${f.rej ? 'In der Zwischenrunde abgelehnt' : ok ? 'Zählt' : 'Abgelehnt'}">${S.images[fid] ? `<img src="${S.images[fid]}" alt="">` : '<div style="aspect-ratio:16/10"></div>'}
         <div class="gi"><b>${esc(st.board[f.cell])}</b><span class="muted">${esc(st.players[f.pid]?.name || '?')}</span><span>${ok ? '✅' : '❌'}</span></div></div>`;
     }).join('')}</div>` : '<p class="muted">Keine Fotos in dieser Runde.</p>'}`;
   $$('[data-zoom]').forEach(t => t.onclick = () => lightbox(t.dataset.zoom));
