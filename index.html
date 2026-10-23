@@ -1769,7 +1769,8 @@ const CHANGELOG = [
     'Geprüfte Felder haben einen durchgehenden Rahmen mit Haken, vorläufige einen gestrichelten Rahmen.',
     'Kleine Klänge bei Zwischenrunde, möglichem Bingo, neuem Ort, Sieg und mehr – mit dem Lautsprecher-Knopf abschaltbar.',
     'Im Ergebnis siehst du auf jeder Karte die Begriffe und die Fotos.',
-    'Abstimmung mit Zeitlimit: 15 Sekunden pro Foto, dann geht es automatisch weiter – haben alle abgestimmt, schon früher.'
+    'Abstimmung mit Zeitlimit: 15 Sekunden pro Foto, dann geht es automatisch weiter – haben alle abgestimmt, schon früher.',
+    'Abgelehnte Fotos werden entfernt – das Feld ist sofort wieder frei für ein neues Foto.'
   ] },
   { id:'2026-10-23-casualmodes', date:'23.10.2026', title:'Casual mit allen Modi', items:[
     'Casual hat jetzt dieselben Modi wie Ranked: jeder gegen jeden, 1v1, 2v2, 3v3 und 4v4 – ohne Elo.',
@@ -2417,7 +2418,14 @@ function hostResume() {
   const kind = H.checkKind; H.checkKind = null; H.checkSide = null;
   H.phase = 'game'; H.pausedAt = 0; H.voteOrder = []; H.voteIdx = 0; H.voteEndsAt = 0;
   const size = Math.round(Math.sqrt(H.board.length)), n = H.board.length, win = H.settings.win;
-  const rejected = checked.filter(f => H.findings[f] && !isValid(H, f)).length;
+  // Abgelehnte Fotos werden entfernt – das Feld ist wieder frei für ein neues Foto
+  const rejIds = checked.filter(f => H.findings[f] && !isValid(H, f));
+  for (const f of rejIds) {
+    const fd = H.findings[f];
+    hostSendTo(fd.pid, {t:'event', text:'Dein Foto für „' + H.board[fd.cell] + '“ wurde abgelehnt – das Feld ist wieder frei, mach ein neues Foto.', color:'#ff5d6c'});
+    delete H.findings[f]; delete H.votes[f]; delete H.reviewed[f]; delete S.images[f];
+  }
+  const rejected = rejIds.length;
   const rejTxt = rejected ? rejected + ' Foto' + (rejected === 1 ? ' wurde' : 's wurden') + ' abgelehnt.' : '';
   // Gewinner nach der Prüfung?
   const res = sides(H).map(sd => { const c = claimed(H, sd.id, 'confirmed'); return { sd, c, lc: lineInfo(size, c, layoutOf(H, sd.id)).count }; });
