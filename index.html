@@ -622,7 +622,7 @@ const userInfo = u => {
 };
 const slimSession = (x, prev) => ({ access_token: x.access_token, refresh_token: x.refresh_token,
   expires_at: +x.expires_at || Math.floor(Date.now() / 1000) + (+x.expires_in || 3600), ...(x.user ? userInfo(x.user) : prev ? { uid: prev.uid, anon: prev.anon, email: prev.email, provider: prev.provider, uname: prev.uname } : {}) });
-const account = () => { const s = store.get('supaSession', null, LOCAL); return s && s.uid && !s.anon ? s : null; };
+const account = () => { const s = store.get('supaSession', null, LOCAL); return s && s.uid && s.anon === false ? s : null; }; // ältere Sitzungen ohne anon-Feld = Gast
 async function supaAuth() {
   // Anonyme Anmeldung: jeder Browser bekommt eine eigene, unsichtbare Kennung → „meine Listen“
   let ses = store.get('supaSession', null, LOCAL);
@@ -631,7 +631,7 @@ async function supaAuth() {
   if (ses && ses.refresh_token) {
     const r = await post('token?grant_type=refresh_token', { refresh_token: ses.refresh_token });
     if (r.ok) { ses = slimSession(await r.json(), ses); store.set('supaSession', ses, LOCAL); return ses; }
-    if (!ses.anon) { store.set('supaSession', null, LOCAL); toast('Deine Anmeldung ist abgelaufen – bitte melde dich neu an.', '#ff5d6c'); }
+    if (ses.anon === false) { store.set('supaSession', null, LOCAL); toast('Deine Anmeldung ist abgelaufen – bitte melde dich neu an.', '#ff5d6c'); }
   }
   const r = await post('signup', {});
   if (!r.ok) throw new Error('Anmeldung bei der Wortlisten-Datenbank fehlgeschlagen (' + r.status + ')');
@@ -655,7 +655,7 @@ const authPost = (path, body, token) => fetch(SUPA.url + '/auth/v1/' + path, { m
 async function authJSON(r) { let j = {}; try { j = await r.json(); } catch {} if (!r.ok) throw new Error(j.msg || j.error_description || j.message || ('Fehler ' + r.status)); return j; }
 async function prepareTransfer() {
   // nur wenn bisher ein Gast-Profil existiert
-  const ses = store.get('supaSession', null, LOCAL); if (!ses || !ses.anon) return;
+  const ses = store.get('supaSession', null, LOCAL); if (!ses || ses.anon === false) return;
   try { const code = await supa('rpc/prepare_transfer', { method:'POST', auth:true, body:{} }); if (code) store.set('listTransfer', code); } catch {}
 }
 async function claimTransfer() {
@@ -693,7 +693,10 @@ async function handleAuthReturn() {
   const p = new URLSearchParams(h.includes('=') ? h : location.search.slice(1));
   const code = store.get('afterLoginCode', '', true); store.set('afterLoginCode', '', true);
   history.replaceState(null, '', location.pathname + (code ? '#' + code : ''));
-  if (p.get('error')) { toast('Anmeldung abgebrochen: ' + (p.get('error_description') || p.get('error')).replace(/\+/g, ' '), '#ff5d6c'); return; }
+  if (p.get('error')) {
+    const ec = p.get('error_code') || '', ed = (p.get('error_description') || p.get('error')).replace(/\+/g, ' ');
+    toast(/bad_oauth_state|expired/i.test(ec + ed) ? 'Die Anmeldung hat zu lange gedauert – bitte versuche es noch einmal.' : /access_denied/i.test(p.get('error')) ? 'Anmeldung abgebrochen.' : 'Anmeldung fehlgeschlagen: ' + ed, '#ff5d6c', true); return;
+  }
   try {
     const acc = await finishLogin({ access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_at: p.get('expires_at'), expires_in: p.get('expires_in') });
     toast(`✅ Angemeldet als ${acc ? acc.uname || acc.email : 'Spieler'}`, '#35c873');
@@ -806,8 +809,10 @@ function openProfileEdit() {
   $('#peClose').onclick = $('#peCancel').onclick = closeModal;
   $('#peFile').onchange = async e => {
     const f = e.target.files[0]; if (!f) return;
+    $('#peSave').disabled = true; $('#peSave').textContent = 'Bild wird vorbereitet …';
     try { blob = await makeAvatarBlob(f); removed = false; preset = null; $$('.avpick').forEach(x => x.classList.remove('on')); $('#peAv').innerHTML = `<img class="av xl" src="${URL.createObjectURL(blob)}" alt="">`; $('#peRemove').disabled = false; }
     catch { toast('Dieses Bild konnte nicht gelesen werden.', '#ff5d6c'); }
+    $('#peSave').disabled = false; $('#peSave').textContent = 'Speichern';
   };
   $$('.avpick').forEach(b => b.onclick = () => {
     preset = b.dataset.av; blob = null; removed = false;
