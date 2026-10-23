@@ -512,7 +512,7 @@ const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'}
 const SUPA = { url: 'https://eaydvicdtlnkuniqeqte.supabase.co', key: 'sb_publishable_uwIVu_m7tRGESPC9wwHl5Q_t7Brxupn' };
 const supaReady = () => !!(SUPA.url && SUPA.key);
 // Welche Login-Anbieter in Supabase eingerichtet sind (nur diese werden angezeigt)
-const AUTH_PROVIDERS = { discord: true, google: false, email: true };
+const AUTH_PROVIDERS = { discord: true, google: false, email: false };
 const userInfo = u => {
   if (!u) return {};
   const m = u.user_metadata || {};
@@ -608,7 +608,8 @@ function openLogin() {
       ${AUTH_PROVIDERS.discord ? `<button class="lg discord" data-prov="discord"><span class="lgi">${ICON_DISCORD}</span>Weiter mit Discord</button>` : ''}
       ${AUTH_PROVIDERS.google ? `<button class="lg google" data-prov="google"><span class="lgi">${ICON_GOOGLE}</span>Weiter mit Google</button>` : ''}
     </div>
-    <div class="or" style="margin:14px 0">oder mit E-Mail</div>` : ''}
+    ${AUTH_PROVIDERS.email ? '<div class="or" style="margin:14px 0">oder mit E-Mail</div>' : ''}` : ''}
+    <div class="${AUTH_PROVIDERS.email ? '' : 'hidden'}">
     <div class="seg" id="lgMode" style="margin-bottom:10px"><button data-m="in" class="on">Anmelden</button><button data-m="up">Registrieren</button></div>
     <form id="lgForm" class="lgform">
       <label id="lgNameW" class="hidden"><span class="lbl">Spielername</span><input id="lgName" maxlength="20" autocomplete="nickname" value="${esc(S.me.name || '')}"></label>
@@ -616,7 +617,7 @@ function openLogin() {
       <label><span class="lbl">Passwort <small class="muted" id="lgPwHint"></small></span><input id="lgPw" type="password" autocomplete="current-password" minlength="6" required></label>
       <div class="err" id="lgErr"></div>
       <button class="btn-primary" id="lgSubmit">Anmelden</button>
-    </form></div>`);
+    </form></div></div>`);
   $('#modal .modal-box').style.width = 'min(440px,100%)';
   $('#lgClose').onclick = closeModal;
   $$('[data-prov]').forEach(b => b.onclick = () => { b.disabled = true; loginWith(b.dataset.prov); });
@@ -760,7 +761,7 @@ function libEditor(l, prefill) {
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
   { id:'2026-10-23-login', date:'23.10.2026', title:'Optionaler Login', items:[
-    'Neu: Anmelden mit Discord, Google oder E-Mail – komplett freiwillig, spielen geht weiter ohne Konto.',
+    'Neu: Anmelden mit Discord (Google folgt) – komplett freiwillig, spielen geht weiter ohne Konto.',
     'Mit Konto hast du deine Wortlisten auf jedem Gerät und dein Spielername ist schon eingetragen.',
     'Listen, die du vorher als Gast angelegt hast, werden beim Anmelden automatisch übernommen.' ]},
   { id:'2026-10-23-wortlisten', date:'23.10.2026', title:'Wortlisten-Bibliothek', items:[
