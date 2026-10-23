@@ -194,6 +194,38 @@ label.dim{opacity:.45}
 .foot a{color:var(--muted)}
 .foot a:hover{color:var(--text)}
 
+/* Profil & Freunde */
+.profile-card{grid-column:1/-1}
+.pteaser{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.pgrid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px}
+.phead{display:flex;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.acav.big{width:46px;height:46px}
+.pcode{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);flex-wrap:wrap;margin-top:2px}
+.pcode b{font-family:'Bricolage Grotesque';font-size:20px;letter-spacing:.12em;color:var(--accent)}
+.pstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pstat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;justify-items:start;gap:1px}
+.pstat .pi{font-size:15px}
+.pstat b{font-family:'Bricolage Grotesque';font-size:24px;line-height:1.1}
+.pstat small{font-size:12px;color:var(--muted)}
+.psub{font-size:14px;margin:16px 0 8px}
+.pmodes{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.pmodes b{color:var(--text)}
+.recent{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.recent li{display:flex;gap:10px;align-items:center;font-size:13px;background:rgba(0,0,0,.18);border-radius:10px;padding:7px 10px;flex-wrap:wrap}
+.rres{font-size:11px;font-weight:800;text-transform:uppercase;border-radius:6px;padding:2px 7px}
+.rres.w{background:rgba(53,200,115,.18);color:var(--ok)}
+.rres.l{background:rgba(255,93,108,.14);color:var(--bad)}
+.pfriends{border-left:1px solid var(--line);padding-left:20px}
+.flist{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.flist li{display:flex;align-items:center;gap:10px;font-size:14px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.18)}
+.flist li[data-fprof]{cursor:pointer}
+.flist li[data-fprof]:hover{background:var(--panel2)}
+.flist.big li{padding:8px 10px;flex-wrap:wrap}
+.favatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-weight:800;flex:none;color:var(--accent)}
+.fbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:999px;background:var(--ok);color:#06210f;font-size:11px;padding:0 5px}
+.fnote{font-size:13px;color:var(--ok);margin-bottom:8px}
+@media (max-width:760px){.pgrid{grid-template-columns:1fr}.pfriends{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:14px}.pstats{grid-template-columns:repeat(2,1fr)}}
+
 /* Neuigkeiten */
 .newsbtn{position:relative}
 .ndot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--bg)}
@@ -577,7 +609,7 @@ async function claimTransfer() {
 async function finishLogin(tokens) {
   const r = await fetch(SUPA.url + '/auth/v1/user', { headers:{ apikey:SUPA.key, Authorization:'Bearer ' + tokens.access_token } });
   const user = await authJSON(r);
-  store.set('supaSession', slimSession({ ...tokens, user }));
+  store.set('supaSession', slimSession({ ...tokens, user })); PROF.me = null; PROF.friends = [];
   await claimTransfer();
   const acc = account();
   if (acc && acc.uname && !S.me.name) { S.me.name = acc.uname.slice(0, 20); store.set('name', S.me.name); }
@@ -594,7 +626,7 @@ async function loginWith(provider) {
 async function logout() {
   const ses = store.get('supaSession', null);
   if (ses) authPost('logout', {}, ses.access_token).catch(() => {});
-  store.set('supaSession', null);
+  store.set('supaSession', null); PROF.me = null; PROF.friends = [];
   toast('Abgemeldet'); render(); if (S.view === 'home' && !S.state) { S.mounted = null; render(); }
 }
 /* Rückkehr vom Login (Discord/Google): Tokens stehen im #-Teil der Adresse */
@@ -673,6 +705,140 @@ function accountHTML() {
   const icon = acc.provider === 'discord' ? ICON_DISCORD : acc.provider === 'google' ? ICON_GOOGLE : '✉️';
   return `<div class="acct on"><span class="acav">${icon}</span><span class="grow"><b>${esc(acc.uname || acc.email)}</b><small>${acc.email ? esc(acc.email) : 'angemeldet'}</small></span><button class="small" id="logoutBtn">Abmelden</button></div>`;
 }
+/* ---------------- Profil, Freundescode, Freunde & Statistiken (nur mit Konto) ---------------- */
+const fmtCode = c => c ? c.slice(0, 3) + ' ' + c.slice(3) : '––– –––';
+const rpc = (fn, body) => supa('rpc/' + fn, { method:'POST', auth:true, body: body || {} });
+const PROF = { me:null, friends:[], loading:false, err:'' };
+async function ensureProfile() {
+  const acc = account(); if (!acc) return null;
+  const rows = await rpc('ensure_profile', { p_name: (acc.uname || S.me.name || '').slice(0, 30) });
+  return rows && rows[0];
+}
+async function loadProfile() {
+  if (!account() || PROF.loading) return;
+  PROF.loading = true; PROF.err = '';
+  try {
+    await ensureProfile();
+    const [me, friends] = await Promise.all([rpc('get_profile', { p_user: null }), rpc('list_friends')]);
+    PROF.me = me; PROF.friends = friends || [];
+  } catch (e) { PROF.err = e.message; }
+  PROF.loading = false;
+  renderProfileCard();
+}
+const pct = (a, b) => b ? Math.round(a / b * 100) + ' %' : '–';
+function statTiles(st) {
+  return [
+    ['🎮', 'Matches', st.matches], ['🏆', 'Siege', st.wins], ['📈', 'Siegquote', pct(st.wins, st.matches)],
+    ['🎯', 'Bingos', st.lines], ['📸', 'Fotos', st.photos], ['✅', 'Gültige Fotos', pct(st.valid_photos, st.photos)]
+  ].map(([i, l, v]) => `<div class="pstat"><span class="pi">${i}</span><b>${esc(String(v))}</b><small>${l}</small></div>`).join('');
+}
+function recentHTML(list, max) {
+  if (!list || !list.length) return '<div class="muted" style="font-size:13px">Noch keine Matches – spiel eine Runde mit Konto, dann erscheinen sie hier.</div>';
+  return `<ul class="recent">${list.slice(0, max).map(m => `<li><span class="rres ${m.won ? 'w' : 'l'}">${m.won ? 'Sieg' : 'Niederlage'}</span>
+    <span class="grow">${m.mode === 'team' ? 'Team' : 'Solo'} · ${m.size}×${m.size} · ${m.players} Spieler</span>
+    <span class="muted">${m.valid_photos}/${m.photos} 📸 · ${new Date(m.played_at).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit' })}</span></li>`).join('')}</ul>`;
+}
+function renderProfileCard() {
+  const box = $('#profileCard'); if (!box) return;
+  if (!supaReady()) { box.innerHTML = ''; box.classList.add('hidden'); return; }
+  box.classList.remove('hidden');
+  const acc = account();
+  if (!acc) {
+    box.innerHTML = `<div class="pteaser"><div class="grow"><h2 style="margin:0 0 4px">👤 Dein Profil</h2>
+      <p class="muted" style="margin:0">Melde dich an, um deinen Freundescode, Statistiken (Matches, Siege, Bingos …) und eine Freundesliste zu bekommen.</p></div>
+      <button class="btn-primary" id="pcLogin">Anmelden</button></div>`;
+    $('#pcLogin').onclick = openLogin; return;
+  }
+  const me = PROF.me;
+  if (!me) { box.innerHTML = `<div class="muted" style="padding:6px">${PROF.err ? '⚠️ Profil konnte nicht geladen werden: ' + esc(PROF.err) : 'Profil wird geladen …'}</div>`; return; }
+  const inc = PROF.friends.filter(f => f.kind === 'incoming'), fr = PROF.friends.filter(f => f.kind === 'friend');
+  box.innerHTML = `<div class="pgrid">
+    <div class="pmain">
+      <div class="phead"><span class="acav big">${acc.provider === 'discord' ? ICON_DISCORD : acc.provider === 'google' ? ICON_GOOGLE : '👤'}</span>
+        <div class="grow"><h2 style="margin:0">${esc(me.name || acc.uname || 'Spieler')}</h2>
+          <div class="pcode">Dein Freundescode <b>${fmtCode(me.friend_code)}</b><button class="small" id="pcCopy">Kopieren</button></div></div>
+        <button class="small" id="pcFull">👤 Ganzes Profil</button></div>
+      <div class="pstats">${statTiles(me.stats)}</div>
+      <h3 class="psub">Letzte Matches</h3>${recentHTML(me.recent, 3)}
+    </div>
+    <div class="pfriends">
+      <div class="row" style="margin-bottom:8px"><h3 class="psub grow" style="margin:0">👥 Freunde <span class="muted">${fr.length}</span></h3><button class="small" id="pcFriends">Verwalten${inc.length ? ` <span class="fbadge">${inc.length}</span>` : ''}</button></div>
+      ${inc.length ? `<div class="fnote">📨 ${inc.length} neue Freundschaftsanfrage${inc.length === 1 ? '' : 'n'}</div>` : ''}
+      ${fr.length ? `<ul class="flist">${fr.slice(0, 6).map(f => `<li data-fprof="${f.id}"><span class="favatar">${esc((f.name || '?')[0].toUpperCase())}</span><span class="grow">${esc(f.name || 'Spieler')}</span><span class="muted">${fmtCode(f.friend_code)}</span></li>`).join('')}</ul>`
+        : '<div class="muted" style="font-size:13px">Noch keine Freunde. Gib deinen Code weiter oder trag den Code eines Freundes ein.</div>'}
+    </div></div>`;
+  $('#pcCopy').onclick = async () => { try { await navigator.clipboard.writeText(me.friend_code); toast('Freundescode ' + fmtCode(me.friend_code) + ' kopiert'); } catch { prompt('Freundescode:', me.friend_code); } };
+  $('#pcFull').onclick = () => openProfile(null);
+  $('#pcFriends').onclick = openFriends;
+  $$('[data-fprof]', box).forEach(li => li.onclick = () => openProfile(li.dataset.fprof));
+}
+async function openProfile(uid) {
+  openModal('<div class="empty-state">Profil wird geladen …</div>');
+  try {
+    const p = await rpc('get_profile', { p_user: uid });
+    const s = p.stats;
+    $('#modal .modal-box').innerHTML = `<div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">👤 ${esc(p.name || 'Spieler')}</h2><button class="small" id="prClose" aria-label="Schließen">✕</button></div>
+      <div class="pcode" style="margin-bottom:14px">Freundescode <b>${fmtCode(p.friend_code)}</b><span class="muted">· dabei seit ${new Date(p.since).toLocaleDateString('de-DE')}</span></div>
+      <div class="pstats">${statTiles(s)}</div>
+      <div class="pmodes"><div><b>Team</b> ${s.team_wins} / ${s.team_matches} Siegen</div><div><b>Solo</b> ${s.solo_wins} / ${s.solo_matches} Siegen</div><div><b>Felder</b> ${s.cells} gefunden</div></div>
+      <h3 class="psub">Letzte Matches</h3>${recentHTML(p.recent, 10)}`;
+    $('#prClose').onclick = closeModal;
+  } catch (e) {
+    $('#modal .modal-box').innerHTML = `<div class="empty-state err">Profil nicht verfügbar${/not_allowed/.test(e.message) ? ' – ihr seid nicht (mehr) befreundet.' : ': ' + esc(e.message)}</div>`;
+  }
+}
+function openFriends() {
+  openModal(`<div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">👥 Freunde</h2><button class="small" id="frClose" aria-label="Schließen">✕</button></div>
+    <form id="frAdd" class="row" style="gap:8px;margin-bottom:6px"><input id="frCode" inputmode="numeric" maxlength="7" placeholder="Freundescode, z. B. 482 913" autocomplete="off"><button class="btn-primary">Hinzufügen</button></form>
+    <div class="hint" style="margin-bottom:12px">Dein eigener Code: <b>${fmtCode(PROF.me && PROF.me.friend_code)}</b></div>
+    <div id="frBody"></div>`);
+  $('#modal .modal-box').style.width = 'min(560px,100%)';
+  $('#frClose').onclick = closeModal;
+  $('#frCode').oninput = e => { const d = e.target.value.replace(/\D/g, '').slice(0, 6); e.target.value = d.length > 3 ? d.slice(0, 3) + ' ' + d.slice(3) : d; };
+  $('#frAdd').onsubmit = async e => {
+    e.preventDefault(); const code = $('#frCode').value.replace(/\D/g, '');
+    if (code.length !== 6) return toast('Der Freundescode hat 6 Ziffern.', '#ff5d6c');
+    try {
+      const r = await rpc('send_friend_request', { p_code: code });
+      const msg = { sent:'📨 Anfrage gesendet', accepted:'🤝 Ihr seid jetzt befreundet!', exists:'Ihr seid schon befreundet oder die Anfrage läuft noch.', self:'Das ist dein eigener Code 😉', not_found:'Zu diesem Code gibt es keinen Spieler.', too_many:'Du hast zu viele offene Anfragen.' }[r] || r;
+      toast(msg, r === 'sent' || r === 'accepted' ? '#35c873' : '#ff5d6c'); $('#frCode').value = '';
+      await refreshFriends();
+    } catch (err) { toast('Fehler: ' + err.message, '#ff5d6c'); }
+  };
+  renderFriendsBody();
+}
+async function refreshFriends() {
+  try { PROF.friends = await rpc('list_friends') || []; } catch {}
+  renderFriendsBody(); renderProfileCard();
+}
+function renderFriendsBody() {
+  const body = $('#frBody'); if (!body) return;
+  const g = k => PROF.friends.filter(f => f.kind === k);
+  const sec = (title, items, btns) => items.length ? `<h3 class="psub">${title} <span class="muted">${items.length}</span></h3><ul class="flist big">${items.map(f => `<li><span class="favatar">${esc((f.name || '?')[0].toUpperCase())}</span><span class="grow"><b>${esc(f.name || 'Spieler')}</b>${f.friend_code ? `<small class="muted"> · ${fmtCode(f.friend_code)}</small>` : ''}</span>${btns(f)}</li>`).join('')}</ul>` : '';
+  const html = sec('📨 Anfragen an dich', g('incoming'), f => `<button class="small btn-primary" data-facc="${f.id}">Annehmen</button><button class="small" data-fdec="${f.id}">Ablehnen</button>`)
+    + sec('Freunde', g('friend'), f => `<button class="small" data-fprof="${f.id}">Profil</button><button class="small danger" data-frem="${f.id}" data-fname="${esc(f.name)}">Entfernen</button>`)
+    + sec('Gesendet – wartet auf Antwort', g('outgoing'), f => `<button class="small" data-frem="${f.id}" data-fname="${esc(f.name)}">Zurückziehen</button>`);
+  body.innerHTML = html || '<div class="empty-state">Noch keine Freunde. Gib oben den Code eines Freundes ein.</div>';
+  $$('[data-facc]', body).forEach(b => b.onclick = async () => { await rpc('respond_friend_request', { p_other: b.dataset.facc, p_accept: true }).catch(e => toast(e.message, '#ff5d6c')); toast('🤝 Freundschaft angenommen', '#35c873'); refreshFriends(); });
+  $$('[data-fdec]', body).forEach(b => b.onclick = async () => { await rpc('respond_friend_request', { p_other: b.dataset.fdec, p_accept: false }).catch(e => toast(e.message, '#ff5d6c')); refreshFriends(); });
+  $$('[data-frem]', body).forEach(b => b.onclick = async () => { if (!confirm(`${b.dataset.fname || 'Diesen Spieler'} wirklich aus deiner Freundesliste entfernen?`)) return; await rpc('remove_friend', { p_other: b.dataset.frem }).catch(e => toast(e.message, '#ff5d6c')); refreshFriends(); });
+  $$('[data-fprof]', body).forEach(b => b.onclick = () => openProfile(b.dataset.fprof));
+}
+/* Ergebnis eines Matches im Profil speichern (einmal pro Match, nur mit Konto) */
+const recordedMatches = new Set();
+async function recordMyMatch(st, res) {
+  if (!account() || !supaReady()) return;
+  const id = `${st.code}-${st.round}-${st.startedAt}`; if (recordedMatches.has(id)) return; recordedMatches.add(id);
+  const side = sideOf(st, S.me.pid); const r = res.find(x => x.id === side); if (!side || !r) return;
+  const mine = Object.entries(st.findings).filter(([, f]) => f.pid === S.me.pid);
+  try {
+    await ensureProfile();
+    await rpc('record_match', { p_match: id, p_won: !!r.win, p_mode: st.settings.mode === 'team' ? 'team' : 'solo', p_size: Math.round(Math.sqrt(st.board.length)),
+      p_players: Object.keys(st.players).length, p_photos: mine.length, p_valid: mine.filter(([fid]) => isValid(st, fid)).length, p_cells: r.cells, p_lines: r.lines });
+    toast('📈 Ergebnis in deinem Profil gespeichert', '#35c873');
+  } catch (e) { console.warn('Statistik nicht gespeichert:', e.message); }
+}
+
 function bindAccount() {
   if ($('#loginBtn')) $('#loginBtn').onclick = openLogin;
   if ($('#logoutBtn')) $('#logoutBtn').onclick = logout;
@@ -772,6 +938,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-profil', date:'23.10.2026', title:'Profil, Freundescode & Freunde', items:[
+    'Mit Konto bekommst du einen festen 6-stelligen Freundescode.',
+    'Neues Profil auf der Startseite: Matches, Siege, Siegquote, Bingos, Fotos und deine letzten Spiele.',
+    'Freunde per Code hinzufügen, Anfragen annehmen und die Profile deiner Freunde ansehen.' ]},
   { id:'2026-10-23-datenschutz', date:'23.10.2026', title:'Mehr Datenschutz', items:[
     'Schriften, Bibliotheken und Kartendaten kommen jetzt direkt von dieser Seite – nichts mehr von Google Fonts oder fremden Servern.',
     'Google Street View lädt erst, nachdem du zugestimmt hast (einmal pro Gerät).',
@@ -1437,6 +1607,7 @@ MOUNT.home = () => {
       <div class="row"><input id="code" placeholder="CODE" maxlength="5" value="${esc(hashCode)}"><button id="join">Beitreten</button></div>
       <div class="err" id="homeErr"></div>
     </div>
+    <section class="card profile-card hidden" id="profileCard"></section>
     <section class="card news-card">
       <div class="row" style="margin-bottom:6px"><h2 class="grow" style="margin:0">📰 Neuigkeiten</h2><button class="small" id="allNews">Alle anzeigen</button></div>
       <div class="news-list news-short">${newsHTML(CHANGELOG.slice(0, 2), store.get('newsSeen', ''))}</div>
@@ -1445,6 +1616,7 @@ MOUNT.home = () => {
   </div>`;
   $('#allNews').onclick = openNews;
   bindAccount();
+  renderProfileCard(); loadProfile();
   store.set('newsSeen', CHANGELOG[0].id);
   $('#nm').value = S.me.name || (account() && account().uname ? account().uname.slice(0, 20) : '');
   const getName = () => { const n = $('#nm').value.trim(); if (!n) { S.err = 'Bitte gib einen Namen ein.'; UPDATE.home(); $('#nm').focus(); return null; } return n; };
@@ -2310,6 +2482,7 @@ MOUNT.results = () => {
 };
 UPDATE.results = () => {
   const st = S.state; const res = standings(st); const n = st.board.length; const size = Math.round(Math.sqrt(n));
+  recordMyMatch(st, res);
   const winners = res.filter(r => r.win);
   const wc = winners.length === 1 ? winners[0].color : '#ffb020';
   const banner = !winners.length ? 'Niemand hat ein gültiges Feld 🤷' : winners.length > 1 ? 'Unentschieden: ' + winners.map(w => esc(w.name)).join(' & ') : esc(winners[0].name) + ' gewinnt!';
