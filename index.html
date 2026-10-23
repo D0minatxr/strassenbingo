@@ -221,6 +221,20 @@ label.dim{opacity:.45}
 .flist li[data-fprof]{cursor:pointer}
 .flist li[data-fprof]:hover{background:var(--panel2)}
 .flist.big li{padding:8px 10px;flex-wrap:wrap}
+.invbox{position:fixed;left:16px;bottom:16px;z-index:60;display:grid;gap:10px;width:min(360px,calc(100vw - 32px))}
+.invcard{display:flex;gap:10px;align-items:center;background:#0b0f14;border:1px solid var(--line);border-left:4px solid #5b8cff;border-radius:14px;padding:10px 12px;box-shadow:0 12px 34px rgba(0,0,0,.45);animation:tin .25s ease-out}
+.invcard .grow{min-width:0;font-size:14px}.invcard small{display:block;color:var(--muted);font-size:12px}
+.invbtns{display:flex;gap:6px;flex:none}
+.partybox{margin-top:12px;border:1px dashed var(--line);border-radius:14px;padding:12px}
+.partybox.on{border-style:solid;border-color:#5b8cff;background:rgba(91,140,255,.06)}
+.partyhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.partyslots{display:grid;gap:6px;margin:8px 0}
+.partyslots li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.18);font-size:14px}
+.partyslots li.empty{color:var(--muted);border:1px dashed var(--line);background:none;justify-content:center;cursor:pointer}
+.partyslots li.empty:hover{color:var(--text);border-color:#5b8cff}
+.leadtag{font-size:11px;padding:1px 6px;border-radius:6px;background:rgba(255,176,32,.15);color:#ffb020;font-weight:700}
+.invlist li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.18)}
+.homelib{width:100%;margin-top:12px}
 .pres{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
 .pres i{width:9px;height:9px;border-radius:50%;background:#ff5d6c;flex:none}
 .pres.online{color:#35c873}.pres.online i{background:#35c873;box-shadow:0 0 0 3px rgba(53,200,115,.2)}
@@ -972,19 +986,153 @@ function presenceHTML(f) {
   return `<span class="pres ${p}"><i></i>${p === 'online' ? 'Online' : p === 'away' ? 'Abwesend' : lastSeenText(f.last_seen)}</span>`;
 }
 const sortFriends = list => [...list].sort((a, b) => (PRES_RANK[a.presence] ?? 2) - (PRES_RANK[b.presence] ?? 2) || new Date(b.last_seen || 0) - new Date(a.last_seen || 0) || String(a.name).localeCompare(String(b.name)));
-const PRES = { lastInput: Date.now(), sent: 0, busy: false };
+const PRES = { lastInput: Date.now(), sent: 0, busy: false, friendsAt: 0, timer: null };
 ['pointerdown', 'keydown', 'wheel', 'touchstart', 'mousemove'].forEach(ev => addEventListener(ev, () => { PRES.lastInput = Date.now(); }, { passive:true, capture:true }));
+/* Regelmäßige Abfrage (nur mit Konto): Online-Status, Einladungen, Gruppe.
+   In einer Gruppe alle 4 s (damit alle gleichzeitig in die Suche gehen), sonst alle 15 s, im Hintergrund seltener. */
 async function presenceTick(withFriends = true) {
   if (!account() || !supaReady() || PRES.busy) return;
   PRES.busy = true;
   const t = Date.now(), active = PRES.lastInput > PRES.sent;
-  try { await rpc('heartbeat', { p_active: active }); PRES.sent = t; } catch {}
-  if (withFriends && PROF.me && ($('#profileCard') || $('#frBody'))) {
+  try {
+    const r = await rpc('poll_state', { p_active: active }); PRES.sent = t;
+    if (r) { setInvites(r.invites || []); setParty(r.party || null); }
+  } catch {}
+  if (withFriends && PROF.me && Date.now() - PRES.friendsAt > 55000 && ($('#profileCard') || $('#frBody'))) {
+    PRES.friendsAt = Date.now();
     try { PROF.friends = await rpc('list_friends') || []; renderFriendsBody(); if ($('#profileCard')) renderProfileCard(); } catch {}
   }
   PRES.busy = false;
 }
-setInterval(presenceTick, 60000);
+function schedulePoll() {
+  clearTimeout(PRES.timer);
+  const ms = PARTY.state ? 4000 : document.hidden ? 60000 : 15000;
+  PRES.timer = setTimeout(async () => { await presenceTick(); schedulePoll(); }, ms);
+}
+setTimeout(schedulePoll, 0); // nach dem Laden aller Skriptteile starten
+document.addEventListener('visibilitychange', () => { if (!document.hidden && account()) { presenceTick(); schedulePoll(); } });
+
+/* ---------------- Einladungen ---------------- */
+const INV = { list: [], hidden: new Set(), seen: new Set() };
+function setInvites(list) {
+  INV.list = list.filter(i => !INV.hidden.has(i.id));
+  for (const i of INV.list) if (!INV.seen.has(i.id)) { INV.seen.add(i.id); try { navigator.vibrate && navigator.vibrate(60); } catch {} }
+  renderInvites();
+}
+function renderInvites() {
+  let box = document.getElementById('invbox');
+  if (!box) { box = document.createElement('div'); box.id = 'invbox'; box.className = 'invbox'; document.body.appendChild(box); }
+  box.innerHTML = INV.list.slice(0, 3).map(i => `<div class="invcard" data-inv="${i.id}">${avatarHTML(i.avatar_url, i.from, 'sm')}
+    <div class="grow"><b>${esc(i.from)}</b> ${i.kind === 'lobby' ? 'lädt dich in eine Lobby ein' : `lädt dich in die Gruppe ein`}
+      <small>${i.kind === 'lobby' ? 'Lobby ' + esc(i.code || '') : 'Ranked ' + esc(i.mode || '') + ' · ihr spielt im selben Team'}</small></div>
+    <div class="invbtns"><button class="small btn-primary" data-iacc="${i.id}">${i.kind === 'lobby' ? 'Beitreten' : 'Annehmen'}</button><button class="small" data-idec="${i.id}" aria-label="Ablehnen">✕</button></div></div>`).join('');
+  $$('[data-iacc]', box).forEach(b => b.onclick = () => answerInvite(b.dataset.iacc, true));
+  $$('[data-idec]', box).forEach(b => b.onclick = () => answerInvite(b.dataset.idec, false));
+}
+async function answerInvite(id, accept) {
+  const inv = INV.list.find(i => i.id === id);
+  INV.hidden.add(id); INV.list = INV.list.filter(i => i.id !== id); renderInvites();
+  let r;
+  try { r = await rpc('respond_invite', { p_id: id, p_accept: accept }); } catch (e) { return toast('Fehler: ' + e.message, '#ff5d6c'); }
+  if (!accept) return;
+  const msg = { gone:'Diese Einladung gibt es nicht mehr.', expired:'Die Einladung ist abgelaufen.', full:'Die Gruppe ist schon voll.', busy:'Die Gruppe sucht gerade schon ein Match – versuch es gleich nochmal.' }[r && r.status];
+  if (msg) return toast(msg, '#ff5d6c');
+  if (r.kind === 'party') { setParty(r.party); toast(`👥 Du bist jetzt in der Gruppe von ${inv ? inv.from : 'deinem Freund'}`, '#35c873'); if (phaseKey() !== 'home') toast('Geh zur Startseite, um mit deiner Gruppe zu suchen.'); return; }
+  if (r.kind === 'lobby' && r.code) joinInvitedLobby(r.code);
+}
+async function joinInvitedLobby(code) {
+  if (phaseKey() === 'home') {
+    const name = ((PROF.me && PROF.me.name) || ($('#nm') && $('#nm').value.trim()) || S.me.name || 'Spieler').slice(0, 20);
+    S.me.name = name; store.set('name', name);
+    if (!LOCAL) { try { await loadPeer(); } catch (e) { return toast(e.message, '#ff5d6c'); } }
+    return joinGame(code, name);
+  }
+  if (S.state && S.state.code === code) return toast('Du bist schon in dieser Lobby.');
+  if (!confirm('Du verlässt deine aktuelle Lobby bzw. dein Spiel und trittst der neuen Lobby bei. Weiter?')) return;
+  store.set('autoJoin', code, true);
+  location.href = location.pathname + location.search + '#' + code;
+  location.reload();
+}
+async function openInvitePicker(kind) {
+  if (!account()) return openLogin();
+  openModal(`<div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">👥 ${kind === 'lobby' ? 'Freunde in die Lobby einladen' : 'Freunde in die Gruppe einladen'}</h2><button class="small" id="ipClose" aria-label="Schließen">✕</button></div>
+    <div id="ipBody"><div class="muted">Freunde werden geladen …</div></div>`);
+  $('#modal .modal-box').style.width = 'min(480px,100%)';
+  $('#ipClose').onclick = closeModal;
+  try { PROF.friends = await rpc('list_friends') || []; } catch {}
+  const inParty = new Set(((PARTY.state && PARTY.state.members) || []).map(m => m.uid));
+  const fr = sortFriends(PROF.friends.filter(f => f.kind === 'friend'));
+  const body = $('#ipBody'); if (!body) return;
+  body.innerHTML = fr.length ? `<p class="hint" style="margin:0 0 10px">${kind === 'lobby' ? 'Deine Freunde bekommen eine Einladung mit einem Beitreten-Knopf (gültig 15 Minuten).' : 'Wer annimmt, kommt in deine Gruppe und landet in der Ranked-Suche in deinem Team.'}</p>
+    <ul class="flist invlist">${fr.map(f => `<li>${avatarHTML(f.avatar_url, f.name, 'sm')}<span class="grow fname"><b>${esc(f.name)}</b>${presenceHTML(f)}</span>
+      ${inParty.has(f.id) ? '<span class="muted">in deiner Gruppe</span>' : `<button class="small btn-primary" data-invite="${f.id}">Einladen</button>`}</li>`).join('')}</ul>`
+    : '<div class="empty-state">Du hast noch keine Freunde. Füge Freunde über ihren Freundescode hinzu (Profil → Freunde verwalten).</div>';
+  $$('[data-invite]', body).forEach(b => b.onclick = async () => {
+    b.disabled = true;
+    try {
+      if (kind === 'party' && !PARTY.state) { setParty(await rpc('party_create', { p_mode: PARTY.pick || '2v2' })); }
+      const r = await rpc('invite_friend', { p_to: b.dataset.invite, p_kind: kind, p_code: kind === 'lobby' ? S.state.code : null });
+      b.textContent = r === 'already' ? 'schon dabei' : 'Eingeladen ✓';
+    } catch (e) {
+      b.disabled = false;
+      toast({ party_full:'Deine Gruppe ist schon voll.', too_fast:'Zu viele Einladungen – warte kurz.', not_friends:'Ihr seid nicht (mehr) befreundet.' }[Object.keys({ party_full:1, too_fast:1, not_friends:1 }).find(k => e.message.includes(k))] || 'Fehler: ' + e.message, '#ff5d6c');
+    }
+  });
+}
+
+/* ---------------- Gruppe (Ranked 2v2 / 3v3 / 4v4) ---------------- */
+const RANKED_TEAM = { '2v2':2, '3v3':3, '4v4':4 };
+const PARTY = { state: null, pick: '2v2', sig: '' };
+function setParty(p) {
+  const was = PARTY.state;
+  PARTY.state = p && p.id ? p : null;
+  const sig = JSON.stringify(PARTY.state);
+  if (sig !== PARTY.sig) { PARTY.sig = sig; renderPartyBox(); }
+  if (!!was !== !!PARTY.state) schedulePoll();
+  // Gruppenleiter hat die Suche gestartet → Mitglieder steigen automatisch ein
+  const me = account();
+  if (PARTY.state && PARTY.state.searching && me && PARTY.state.leader !== me.uid && !Q.active) {
+    if (phaseKey() === 'home') startSearch(PARTY.state.mode, { joined: true });
+    else if (!PARTY.warned) { PARTY.warned = true; toast('👥 Deine Gruppe sucht ein Match – geh zur Startseite, um mitzusuchen.', '#5b8cff', true); }
+  }
+  if (!PARTY.state || !PARTY.state.searching) PARTY.warned = false;
+}
+function renderPartyBox() {
+  const box = $('#partyBox'); if (!box) return;
+  const me = account(); if (!me) { box.innerHTML = ''; return; }
+  const p = PARTY.state;
+  if (!p) {
+    box.innerHTML = `<div class="partybox"><div class="partyhead"><b class="grow">👥 Mit Freunden ins Team</b>
+      <div class="seg" id="ptPick" style="margin:0">${['2v2', '3v3', '4v4'].map(m => `<button data-pm="${m}" class="${PARTY.pick === m ? 'on' : ''}">${m}</button>`).join('')}</div></div>
+      <div class="muted" style="font-size:13px;margin-bottom:8px">Lade Freunde in deine Gruppe ein – ihr sucht zusammen und spielt im selben Team.</div>
+      <button class="small btn-primary" id="ptCreate">👥 Gruppe erstellen &amp; Freunde einladen</button></div>`;
+    $$('[data-pm]', box).forEach(b => b.onclick = () => { PARTY.pick = b.dataset.pm; renderPartyBox(); });
+    $('#ptCreate').onclick = async () => {
+      try { setParty(await rpc('party_create', { p_mode: PARTY.pick })); openInvitePicker('party'); }
+      catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); }
+    };
+    return;
+  }
+  const lead = p.leader === me.uid, free = Math.max(0, p.size - p.members.length);
+  box.innerHTML = `<div class="partybox on"><div class="partyhead"><b class="grow">👥 Deine Gruppe · Ranked ${esc(p.mode)} <span class="muted">${p.members.length}/${p.size}</span></b>
+      ${lead ? `<div class="seg" style="margin:0">${['2v2', '3v3', '4v4'].map(m => `<button data-pmode="${m}" class="${p.mode === m ? 'on' : ''}" ${p.members.length > RANKED_TEAM[m] ? 'disabled' : ''}>${m}</button>`).join('')}</div>` : ''}</div>
+    <ul class="partyslots" style="list-style:none;padding:0">${p.members.map(m => `<li>${avatarHTML(m.avatar_url, m.name, 'sm')}<span class="grow fname"><span>${esc(m.name)}${m.uid === p.leader ? ' <span class="leadtag">Leiter</span>' : ''}${m.uid === me.uid ? ' <span class="tag you">Du</span>' : ''}</span>${presenceHTML(m)}</span>
+      <span class="muted">${m.elo} Elo</span>${lead && m.uid !== me.uid ? `<button class="small" data-pkick="${m.uid}" aria-label="Aus der Gruppe entfernen">✕</button>` : ''}</li>`).join('')}
+      ${Array.from({ length: free }, () => '<li class="empty" data-pinv>+ Freund einladen</li>').join('')}</ul>
+    <div class="row" style="gap:8px;flex-wrap:wrap">
+      ${p.searching ? '<span class="muted grow">🔎 Die Gruppe sucht gerade …</span>' : lead ? `<button class="btn-primary small grow" id="ptSearch">🔎 Ranked ${esc(p.mode)} suchen</button>` : '<span class="muted grow">Warte, bis der Leiter die Suche startet.</span>'}
+      <button class="small" id="ptLeave">Gruppe verlassen</button></div></div>`;
+  $$('[data-pinv]', box).forEach(b => b.onclick = () => openInvitePicker('party'));
+  $$('[data-pmode]', box).forEach(b => b.onclick = async () => { if (b.dataset.pmode === p.mode) return; try { setParty(await rpc('party_set_mode', { p_mode: b.dataset.pmode })); } catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); } });
+  $$('[data-pkick]', box).forEach(b => b.onclick = async () => { try { setParty(await rpc('party_kick', { p_user: b.dataset.pkick })); } catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); } });
+  if ($('#ptSearch')) $('#ptSearch').onclick = () => startSearch(p.mode);
+  $('#ptLeave').onclick = async () => { try { await rpc('party_leave'); setParty(null); } catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); } };
+}
+function leaveLobby() {
+  const host = amHost() && S.state && !S.state.ranked;
+  if (!confirm(host ? 'Lobby verlassen? Da du der Host bist, wird die Lobby für alle geschlossen.' : 'Lobby verlassen und zur Startseite zurückkehren?')) return;
+  goHome();
+}
 async function refreshFriends() {
   try { PROF.friends = await rpc('list_friends') || []; } catch {}
   renderFriendsBody(); renderProfileCard();
@@ -1026,6 +1174,7 @@ function renderOnlineCard() {
       <button class="btn-primary big" data-queue="casual" ${acc ? '' : 'disabled'}>🌍 Jeder gegen jeden <small>${RANKED_NEED.casual} · ohne Elo</small></button>
       <h3 class="psub">🏆 Ranked – jeder Modus mit eigener Elo</h3>
       <div class="rqgrid">${['solo', '2v2', '3v3', '4v4'].map(tile).join('')}</div>
+      ${acc ? '<div id="partyBox"></div>' : ''}
       ${acc ? '' : '<button style="margin-top:10px" id="ocLogin">Anmelden</button>'}
     </div>
     <div class="olb">
@@ -1036,6 +1185,7 @@ function renderOnlineCard() {
   $$('[data-queue]', box).forEach(b => b.onclick = () => startSearch(b.dataset.queue));
   if ($('#ocLogin')) $('#ocLogin').onclick = openLogin;
   $$('[data-lb]', box).forEach(b => b.onclick = () => { LB.mode = b.dataset.lb; LB.optIn = true; $$('[data-lb]', box).forEach(x => x.classList.toggle('on', x === b)); renderLeaderboard(); loadLeaderboard(); });
+  renderPartyBox();
   renderLeaderboard();
   if (account() || LB.optIn) loadLeaderboard(); // Gäste: erst nach Klick (keine Datenübertragung ohne Aktion)
 }
@@ -1060,14 +1210,25 @@ function renderLeaderboard() {
     + (d.me ? `<div class="lbme">Du: Platz <b>${d.me.rank}</b> von ${d.players} · <b>${d.me.elo}</b> Elo</div>` : account() ? '<div class="lbme muted">Du hast in diesem Modus noch nicht gespielt.</div>' : '');
 }
 /* Suche / Warteschlange */
-const Q = { mode:null, timer:null, started:0, done:false };
-async function startSearch(mode) {
+const Q = { mode:null, timer:null, started:0, done:false, active:false };
+const QUEUE_ERR = { party_member:'Nur der Gruppenleiter kann die Suche starten.', party_mode:'Deine Gruppe ist für einen anderen Modus – wechsle den Modus oder verlasse die Gruppe.',
+  party_offline:'Nicht alle Gruppenmitglieder sind gerade online.', in_party:'Verlasse zuerst deine Gruppe.' };
+async function startSearch(mode, opts = {}) {
   if (!account()) return openLogin();
+  const party = PARTY.state;
+  if (!opts.joined && party) {
+    if (!isTeamMode(mode)) return toast('Mit Gruppe geht nur Ranked 2v2, 3v3 oder 4v4. Verlasse sonst zuerst die Gruppe.', '#ff5d6c', true);
+    if (party.leader !== account().uid) return toast(QUEUE_ERR.party_member, '#ff5d6c');
+    if (mode !== party.mode) {
+      if (party.members.length > RANKED_TEAM[mode]) return toast(`Deine Gruppe ist zu groß für ${mode}.`, '#ff5d6c');
+      try { PARTY.state = await rpc('party_set_mode', { p_mode: mode }); renderPartyBox(); } catch (e) { return toast('Fehler: ' + e.message, '#ff5d6c'); }
+    }
+  }
   // Online & Ranked: immer der Profilname (fest mit dem Konto verbunden)
   const name = ((PROF.me && PROF.me.name) || ($('#nm') && $('#nm').value.trim()) || '').slice(0, 20);
   if (!name) { toast('Bitte gib einen Namen ein.', '#ff5d6c'); return; }
   S.me.name = name; store.set('name', name);
-  Q.mode = mode; Q.started = Date.now(); Q.done = false;
+  Q.mode = mode; Q.started = Date.now(); Q.done = false; Q.active = true;
   openModal(`<div class="search"><div class="radar"><span></span><span></span><span></span><b>🔎</b></div>
     <h2 style="margin:6px 0 2px">${esc(RANKED_NAMES[mode])}</h2><div class="muted" id="qInfo">Verbinde mit der Warteschlange …</div>
     <div class="qtime" id="qTime">0:00</div><div class="muted" id="qRange" style="font-size:13px"></div>
@@ -1076,8 +1237,9 @@ async function startSearch(mode) {
   $('#modal').onclick = null;
   modalCleanup = () => { stopSearch(true); };
   $('#qCancel').onclick = closeModal;
-  try { await ensureProfile(); handleQueue(await rpc('queue_join', { p_mode: mode })); }
-  catch (e) { toast('Suche nicht möglich: ' + e.message, '#ff5d6c'); Q.done = true; closeModal(); return; }
+  try { await ensureProfile(); handleQueue(await rpc(opts.joined ? 'queue_poll' : 'queue_join', opts.joined ? {} : { p_mode: mode })); }
+  catch (e) { const k = Object.keys(QUEUE_ERR).find(x => e.message.includes(x)); toast(k ? QUEUE_ERR[k] : 'Suche nicht möglich: ' + e.message, '#ff5d6c', !!k); Q.done = true; closeModal(); return; }
+  if (PARTY.state) $('#qInfo') && ($('#qInfo').insertAdjacentHTML('beforebegin', `<div class="muted" style="font-size:13px">👥 mit deiner Gruppe (${PARTY.state.members.length})</div>`));
   Q.timer = setInterval(async () => {
     if (Q.done) return;
     $('#qTime') && ($('#qTime').textContent = fmtTime(Date.now() - Q.started + 999).replace(/^/, ''));
@@ -1086,18 +1248,18 @@ async function startSearch(mode) {
   }, 1000);
 }
 function stopSearch(leave) {
-  clearInterval(Q.timer); Q.timer = null;
+  clearInterval(Q.timer); Q.timer = null; Q.active = false;
   if (leave && !Q.done) { Q.done = true; rpc('queue_leave').catch(() => {}); }
 }
 function handleQueue(r) {
   if (Q.done || !r) return;
   if (r.status === 'waiting') {
     $('#qInfo') && ($('#qInfo').innerHTML = `<b>${r.in_queue}</b> von ${r.needed} Spielern gefunden`);
-    $('#qRange') && ($('#qRange').textContent = Q.mode === 'casual' ? (r.in_queue >= 3 ? 'Startet spätestens nach 30 Sekunden Wartezeit' : '') : `Deine Elo ${r.elo} · Suche im Bereich ±${r.range}`);
+    $('#qRange') && ($('#qRange').textContent = Q.mode === 'casual' ? (r.in_queue >= 3 ? 'Startet spätestens nach 30 Sekunden Wartezeit' : '') : (r.range >= 100000 ? `Deine Elo ${r.elo} · wird jetzt mit allen Elo-Stufen aufgefüllt (faire Punkte nach Elo-Unterschied)` : `Deine Elo ${r.elo} · Suche im Bereich ±${r.range} · ab 4 Min. mit jeder Elo`));
   } else if (r.status === 'matched' && r.match) {
     Q.done = true; stopSearch(false); modalCleanup = null; matchFound(r.match);
   } else if (r.status === 'idle') {
-    Q.done = true; stopSearch(false); closeModal(); toast('Die Suche wurde beendet.', '#ff5d6c');
+    Q.done = true; stopSearch(false); closeModal(); toast(PARTY.state ? 'Die Suche deiner Gruppe wurde beendet.' : 'Die Suche wurde beendet.', '#ff5d6c');
   }
 }
 function matchFound(m) {
@@ -1296,6 +1458,13 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-party', date:'23.10.2026', title:'Mit Freunden spielen: Gruppen & Einladungen', items:[
+    'Neu: 👥 Gruppen für Ranked 2v2, 3v3 und 4v4 – lade Freunde ein, sucht zusammen und spielt im selben Team. Die Gegner werden so gewählt, dass die Teams nach Elo möglichst ausgeglichen sind.',
+    'Neu: In jeder Lobby gibt es „👥 Freunde einladen“ – deine Freunde bekommen eine Einladung mit Beitreten-Knopf.',
+    'Neu: 🚪 Verlassen-Knopf in der Lobby, um zur Startseite zurückzukehren.',
+    'Wortlisten kannst du jetzt auch direkt auf der Startseite ansehen und erstellen.',
+    'Ranked-Suche: Das Elo-Fenster wächst schneller (±100, +150 pro Minute). Ab 4 Minuten wird mit jeder Elo aufgefüllt – Siege gegen Stärkere bringen dann mehr, Niederlagen gegen Schwächere kosten mehr.'
+  ] },
   { id:'2026-10-23-presence', date:'23.10.2026', title:'Online-Status in der Freundesliste', items:[
     'Neu: In der Freundesliste siehst du, wer gerade da ist – 🟢 Online, 🟡 Abwesend (10 Min. keine Eingabe), 🔴 zuletzt online vor …',
     'Freunde, die gerade online sind, stehen ganz oben.',
@@ -1989,6 +2158,7 @@ MOUNT.home = () => {
       <div class="or">oder beitreten</div>
       <div class="row"><input id="code" placeholder="CODE" maxlength="5" value="${esc(hashCode)}"><button id="join">Beitreten</button></div>
       <div class="err" id="homeErr"></div>
+      <button class="homelib" id="homeLib">📚 Wortlisten ansehen &amp; erstellen</button>
     </div>
     <section class="card online-card hidden" id="onlineCard"></section>
     <section class="card profile-card hidden" id="profileCard"></section>
@@ -2007,6 +2177,9 @@ MOUNT.home = () => {
   $('#create').onclick = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } startHost(n); };
   const join = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } joinGame($('#code').value, n); };
   $('#join').onclick = join;
+  $('#homeLib').onclick = () => openLibrary();
+  const autoJoin = store.get('autoJoin', '', true);
+  if (autoJoin && autoJoin === hashCode) { store.set('autoJoin', '', true); setTimeout(join, 200); }
   $('#code').onkeydown = e => { if (e.key === 'Enter') join(); };
   (hashCode && S.me.name ? $('#join') : hashCode ? $('#nm') : $('#nm')).focus();
 };
@@ -2041,7 +2214,7 @@ function bindCopy() {
 MOUNT.lobby = () => {
   const host = amHost() && !S.state.ranked;
   S.lobbyTab = S.lobbyTab || 'players'; S.prevRules = null;
-  app.innerHTML = topBar(`<span class="grow"></span><button class="small" id="libBtn">📚 Wortlisten</button><button class="small newsbtn" id="newsBtn">📰 Neuigkeiten<span class="ndot ${newsUnseen() ? '' : 'hidden'}" id="newsDot"></span></button><span id="meBadge"></span>`) + `
+  app.innerHTML = topBar(`<span class="grow"></span>${account() && !S.state.ranked ? '<button class="small" id="invBtn">👥 Freunde einladen</button>' : ''}<button class="small" id="libBtn">📚 Wortlisten</button><button class="small newsbtn" id="newsBtn">📰 Neuigkeiten<span class="ndot ${newsUnseen() ? '' : 'hidden'}" id="newsDot"></span></button><span id="meBadge"></span><button class="small" id="leaveBtn">🚪 Verlassen</button>`) + `
   <main class="lobby">
     <section class="col">
       ${host ? `<div class="tabs" role="tablist">
@@ -2063,6 +2236,8 @@ MOUNT.lobby = () => {
   bindCopy(); bindChat();
   $('#newsBtn').onclick = openNews;
   $('#libBtn').onclick = () => openLibrary();
+  if ($('#invBtn')) $('#invBtn').onclick = () => openInvitePicker('lobby');
+  $('#leaveBtn').onclick = leaveLobby;
   if (host) {
     mountSettingsForm();
     $$('[data-tab]').forEach(b => b.onclick = () => { S.lobbyTab = b.dataset.tab; showLobbyTab(); });
