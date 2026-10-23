@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-y7L29BoUzzBrZc9zreQp9q009ElPObdAFJl1B7VfGa0='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-4Dh/il1KvAnHur3Qk7ZTr32dDS3MIhkbSBlVa+0y7ew='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -830,6 +830,13 @@ kbd{border-radius:0}
 .prep-side button{padding:6px 16px;font-size:16px}
 .game.prepping .vtools #mapBtn{visibility:hidden}
 @media (max-width:760px){.prepov{position:fixed;inset:0;z-index:45;padding:14px}.prep-grid{grid-template-columns:1fr}.prep-head{flex-wrap:nowrap}.prep-head h2{font-size:22px}.prep-head p{font-size:13px}.prep-count b{font-size:32px}.prep-board span{font-size:11px}}
+/* Wortlisten: Like & Favorit */
+.libbtns .likebtn b{font-family:var(--pxf);font-weight:600;margin-left:2px}
+.libbtns .likebtn.on{color:#ff6b8a}.libbtns .likebtn.on .ic{fill:#ff6b8a}
+.libbtns .favbtn.on{color:var(--accent)}.libbtns .favbtn.on .ic{fill:var(--accent)}
+.libbtns .favbtn .ic{margin:0}
+#libF button .ic{width:14px;height:14px;margin-right:4px}
+@media (max-width:560px){#libF{width:100%}#libF button{padding:4px 6px;font-size:12px}}
 /* Minimap */
 .minimap{position:absolute;left:10px;bottom:10px;z-index:3;width:250px;height:190px;display:flex;flex-direction:column;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,0 0 0 6px #3d3670,0 8px 0 6px rgba(0,0,0,.35)}
 .minimap.big{width:min(480px,calc(100% - 20px));height:min(360px,calc(100% - 20px))}
@@ -1704,6 +1711,7 @@ function recentHTML(list, max) {
     <span class="rph">${m.valid_photos}/${m.photos} 📸</span><span class="rdt">${new Date(m.played_at).toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit' })}</span></li>`).join('')}</ul>`;
 }
 function renderProfileCard() {
+  if (!account()) LIB.marks = null;
   renderSocial();
   if ($('#acctBox')) { $('#acctBox').innerHTML = accountHTML(); bindAccount(); }
   const box = $('#profileCard'); if (!box) return;
@@ -2143,7 +2151,7 @@ function bindAccount() {
 }
 const cleanWords = txt => [...new Set(String(txt).split(/[\n,;]+/).map(w => w.trim().slice(0, 40)).filter(Boolean))].slice(0, 300);
 
-const LIB = { filter:'all', q:'', items:[], timer:null };
+const LIB = { filter:'all', q:'', items:[], timer:null, marks:null, busy:{} };
 function openLibrary(prefill) {
   const box = openModal(`<div class="lib">
     <div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">📚 Wortlisten</h2>
@@ -2164,7 +2172,7 @@ function libBrowse() {
   $('#libNew').classList.remove('hidden');
   $('#libBody').innerHTML = `<div class="row" style="gap:8px;margin-bottom:10px;flex-wrap:wrap">
       <input id="libQ" class="grow" placeholder="🔎 Listen durchsuchen …" value="${esc(LIB.q)}" style="min-width:200px">
-      <div class="seg" id="libF" style="margin:0"><button data-f="all">Alle</button><button data-f="mine">Meine</button></div></div>
+      <div class="seg" id="libF" style="margin:0"><button data-f="all">Alle</button><button data-f="top">${ic('heart')}Beliebt</button><button data-f="fav">${ic('star')}Favoriten</button><button data-f="mine">Meine</button></div></div>
     <div id="libList" class="liblist"><div class="empty-state">Lädt …</div></div>`;
   $$('#libF button').forEach(b => { b.classList.toggle('on', b.dataset.f === LIB.filter); b.onclick = () => { LIB.filter = b.dataset.f; libBrowse(); }; });
   $('#libQ').oninput = e => { LIB.q = e.target.value; clearTimeout(LIB.timer); LIB.timer = setTimeout(libLoad, 300); };
@@ -2172,7 +2180,14 @@ function libBrowse() {
 }
 async function libLoad() {
   const list = $('#libList'); if (!list) return;
-  let q = 'word_lists?select=id,name,author,words,owner,uses,created_at&order=uses.desc,created_at.desc&limit=100';
+  let q = 'word_lists?select=id,name,author,words,owner,uses,likes,created_at&limit=100&order=' + (LIB.filter === 'top' ? 'likes.desc,uses.desc,created_at.desc' : 'uses.desc,created_at.desc');
+  if (account() && !LIB.marks) await libLoadMarks();
+  if (LIB.filter === 'fav') {
+    if (!account()) { list.innerHTML = `<div class="empty-state">Favoriten gibt es mit Konto. <button class="btn-primary small" id="libLogin">${ic('login')}Anmelden</button></div>`; $('#libLogin').onclick = openLogin; return; }
+    const ids = [...LIB.marks.fav];
+    if (!ids.length) { list.innerHTML = `<div class="empty-state">Noch keine Favoriten – markiere Listen mit dem Stern.</div>`; return; }
+    q += '&id=in.(' + ids.filter(x => /^[0-9a-f-]{36}$/.test(x)).join(',') + ')';
+  }
   const term = LIB.q.trim().replace(/[*,()%]/g, ' ').trim();
   if (term) q += '&name=ilike.' + encodeURIComponent('*' + term + '*');
   if (LIB.filter === 'mine') { const uid = myUid(); if (!uid) { list.innerHTML = '<div class="empty-state">Du hast noch keine Listen erstellt.</div>'; return; } q += '&owner=eq.' + uid; }
@@ -2181,18 +2196,46 @@ async function libLoad() {
     renderLibList();
   } catch (e) { if ($('#libList')) $('#libList').innerHTML = `<div class="empty-state err">Konnte die Listen nicht laden: ${esc(e.message)}</div>`; }
 }
+async function libLoadMarks() {
+  try { const m = await rpc('my_list_marks'); LIB.marks = { liked:new Set(m.liked || []), fav:new Set(m.fav || []) }; }
+  catch { LIB.marks = { liked:new Set(), fav:new Set() }; }
+}
+/* Liken (öffentlich gezählt) und Favorisieren (nur für dich) – beides nur mit Konto */
+async function libMark(id, kind) {
+  if (!account()) { toast(kind === 'like' ? 'Zum Liken brauchst du ein Konto.' : 'Favoriten gibt es mit Konto.', '#ff5d6c'); return openLogin(); }
+  if (LIB.busy[id + kind]) return; LIB.busy[id + kind] = true;
+  if (!LIB.marks) await libLoadMarks();
+  const set = kind === 'like' ? LIB.marks.liked : LIB.marks.fav, on = !set.has(id), l = LIB.items.find(x => x.id === id);
+  on ? set.add(id) : set.delete(id); if (l && kind === 'like') l.likes = Math.max(0, (l.likes || 0) + (on ? 1 : -1));
+  renderLibList();
+  try {
+    const n = await rpc('mark_list', { p_list:id, p_kind:kind, p_on:on });
+    if (l && kind === 'like' && typeof n === 'number') l.likes = n;
+    if (kind === 'fav') toast(on ? '⭐ Zu Favoriten hinzugefügt' : 'Aus Favoriten entfernt');
+    if (kind === 'fav' && !on && LIB.filter === 'fav') LIB.items = LIB.items.filter(x => x.id !== id);
+  } catch (e) {
+    on ? set.delete(id) : set.add(id); if (l && kind === 'like') l.likes = Math.max(0, (l.likes || 0) + (on ? -1 : 1));
+    toast(/own_list/.test(e.message) ? 'Eigene Listen kann man nicht liken.' : 'Hat nicht geklappt: ' + e.message, '#ff5d6c');
+  }
+  delete LIB.busy[id + kind]; renderLibList();
+}
 function renderLibList() {
   const list = $('#libList'); if (!list) return;
   const uid = myUid(); const canLoad = amHost() && S.state && S.state.phase === 'lobby';
-  if (!LIB.items.length) { list.innerHTML = `<div class="empty-state">${LIB.q ? 'Keine Liste gefunden.' : LIB.filter === 'mine' ? 'Du hast noch keine Listen erstellt.' : 'Noch keine Listen – erstelle die erste!'}</div>`; return; }
+  if (!LIB.items.length) { list.innerHTML = `<div class="empty-state">${LIB.q ? 'Keine Liste gefunden.' : LIB.filter === 'mine' ? 'Du hast noch keine Listen erstellt.' : LIB.filter === 'fav' ? 'Noch keine Favoriten.' : 'Noch keine Listen – erstelle die erste!'}</div>`; return; }
+  const mk = LIB.marks || { liked:new Set(), fav:new Set() };
   list.innerHTML = LIB.items.map(l => `<article class="libitem">
     <div class="libhead"><div class="grow"><h3>${esc(l.name)}</h3>
       <div class="libmeta">${l.author ? 'von ' + esc(l.author) + ' · ' : ''}${l.words.length} Begriffe${l.uses ? ' · ' + l.uses + '× gespielt' : ''}${l.owner === uid ? ' · <b class="mine">deine Liste</b>' : ''}</div></div>
-      <div class="libbtns">${canLoad ? `<button class="btn-primary small" data-lload="${l.id}">In die Lobby laden</button>` : ''}
+      <div class="libbtns"><button class="small likebtn ${mk.liked.has(l.id) ? 'on' : ''}" data-llike="${l.id}" ${l.owner === uid ? 'disabled title="Eigene Listen kann man nicht liken"' : `title="${mk.liked.has(l.id) ? 'Like entfernen' : 'Liken'}"`} aria-pressed="${mk.liked.has(l.id)}">${ic('heart')}<b>${l.likes || 0}</b></button>
+        <button class="small favbtn ${mk.fav.has(l.id) ? 'on' : ''}" data-lfav="${l.id}" title="${mk.fav.has(l.id) ? 'Aus Favoriten entfernen' : 'Zu Favoriten'}" aria-label="Favorit" aria-pressed="${mk.fav.has(l.id)}">${ic('star')}</button>
+        ${canLoad ? `<button class="btn-primary small" data-lload="${l.id}">In die Lobby laden</button>` : ''}
         ${l.owner === uid ? `<button class="small" data-ledit="${l.id}">Bearbeiten</button><button class="small danger" data-ldel="${l.id}">Löschen</button>` : ''}</div></div>
     <div class="libwords">${l.words.slice(0, 14).map(w => `<span>${esc(w)}</span>`).join('')}${l.words.length > 14 ? `<span class="more">+${l.words.length - 14}</span>` : ''}</div>
   </article>`).join('');
   $$('[data-lload]').forEach(b => b.onclick = () => libUse(LIB.items.find(x => x.id === b.dataset.lload)));
+  $$('[data-llike]').forEach(b => b.onclick = () => libMark(b.dataset.llike, 'like'));
+  $$('[data-lfav]').forEach(b => b.onclick = () => libMark(b.dataset.lfav, 'fav'));
   $$('[data-ledit]').forEach(b => b.onclick = () => libEditor(LIB.items.find(x => x.id === b.dataset.ledit)));
   $$('[data-ldel]').forEach(b => b.onclick = async () => {
     const l = LIB.items.find(x => x.id === b.dataset.ldel);
@@ -2236,6 +2279,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-24-likes', date:'24.10.2026', title:'Wortlisten liken & favorisieren', items:[
+    'Wortlisten kannst du jetzt mit dem Herz liken und mit dem Stern zu deinen Favoriten hinzufügen (mit Konto).',
+    'Neue Filter in der Bibliothek: „Beliebt“ sortiert nach Likes, „Favoriten“ zeigt deine gemerkten Listen.'
+  ] },
   { id:'2026-10-23-majority', date:'23.10.2026', title:'Lockout-Mehrheit & fairere Zwischenrunde', items:[
     'Lockout mit „Meiste Felder“: Wer mehr als die Hälfte aller Felder geprüft hat, ist uneinholbar und gewinnt sofort. Mit noch ungeprüften Fotos startet vorher ein Mehrheits-Check.',
     'Gelöschte oder ersetzte Fotos zählen nicht mehr zu den Fotos, nach denen die Zwischenrunde startet.'
