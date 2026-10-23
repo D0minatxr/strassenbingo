@@ -150,6 +150,23 @@ label.dim{opacity:.45}
 .wdots i{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:wd 1.2s infinite ease-in-out}
 .wdots i:nth-child(2){animation-delay:.15s}.wdots i:nth-child(3){animation-delay:.3s}
 @keyframes wd{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+/* Wortlisten */
+.libbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.listtag{font-size:12px;font-weight:700;color:var(--accent);background:rgba(255,176,32,.12);border:1px solid rgba(255,176,32,.35);border-radius:999px;padding:3px 10px}
+.liblist{display:grid;gap:10px;max-height:60vh;overflow:auto;padding-right:4px}
+.libitem{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.libhead{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.libhead h3{font-size:16px;margin:0 0 2px}
+.libmeta{font-size:12px;color:var(--muted)}
+.libmeta .mine{color:var(--accent)}
+.libbtns{display:flex;gap:6px;flex-wrap:wrap}
+.libwords{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.libwords span{font-size:12px;background:#0b0f14;border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.libwords .more{color:var(--muted)}
+.libedit{display:grid;gap:12px}
+.empty-state{padding:26px 10px;text-align:center;color:var(--muted)}
+.empty-state.err{color:var(--bad)}
+
 /* Neuigkeiten */
 .newsbtn{position:relative}
 .ndot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--bg)}
@@ -473,8 +490,134 @@ const DEFAULT_SETTINGS = {
 const WIN_NAMES = {line:'Erste Reihe (Bingo)', full:'Volle Karte', most:'Meiste Felder bei Zeitende'};
 const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'};
 
+/* ---------------- Wortlisten-Bibliothek (Supabase) ----------------
+   Öffentliche Projekt-Adresse + öffentlicher Schlüssel (anon/publishable). Beides ist
+   absichtlich öffentlich – die Zugriffsregeln (Row Level Security) liegen in der Datenbank. */
+const SUPA = { url: 'https://eaydvicdtlnkuniqeqte.supabase.co', key: 'sb_publishable_uwIVu_m7tRGESPC9wwHl5Q_t7Brxupn' };
+const supaReady = () => !!(SUPA.url && SUPA.key);
+const slimSession = x => ({ access_token: x.access_token, refresh_token: x.refresh_token,
+  expires_at: x.expires_at || Math.floor(Date.now() / 1000) + (x.expires_in || 3600), uid: x.user && x.user.id });
+async function supaAuth() {
+  // Anonyme Anmeldung: jeder Browser bekommt eine eigene, unsichtbare Kennung → „meine Listen“
+  let ses = store.get('supaSession', null);
+  if (ses && ses.expires_at - 60 > Date.now() / 1000) return ses;
+  const post = (path, body) => fetch(SUPA.url + '/auth/v1/' + path, { method:'POST', headers:{ apikey:SUPA.key, 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+  if (ses && ses.refresh_token) {
+    const r = await post('token?grant_type=refresh_token', { refresh_token: ses.refresh_token });
+    if (r.ok) { ses = slimSession(await r.json()); store.set('supaSession', ses); return ses; }
+  }
+  const r = await post('signup', {});
+  if (!r.ok) throw new Error('Anmeldung bei der Wortlisten-Datenbank fehlgeschlagen (' + r.status + ')');
+  ses = slimSession(await r.json()); store.set('supaSession', ses); return ses;
+}
+async function supa(path, { method = 'GET', body, auth = false, prefer } = {}) {
+  const h = { apikey: SUPA.key, 'Content-Type': 'application/json' }; // ohne Anmeldung: nur der öffentliche Schlüssel
+  if (auth) h.Authorization = 'Bearer ' + (await supaAuth()).access_token;
+  if (prefer) h.Prefer = prefer;
+  const r = await fetch(SUPA.url + '/rest/v1/' + path, { method, headers: h, body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) { let m = ''; try { m = (await r.json()).message; } catch {} throw new Error(m || 'Fehler ' + r.status); }
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+const myUid = () => (store.get('supaSession', null) || {}).uid || null;
+const cleanWords = txt => [...new Set(String(txt).split(/[\n,;]+/).map(w => w.trim().slice(0, 40)).filter(Boolean))].slice(0, 300);
+
+const LIB = { filter:'all', q:'', items:[], timer:null };
+function openLibrary(prefill) {
+  const box = openModal(`<div class="lib">
+    <div class="row" style="margin-bottom:12px"><h2 class="grow" style="margin:0">📚 Wortlisten</h2>
+      <button class="btn-primary small" id="libNew">＋ Neue Liste</button><button class="small" id="libClose" aria-label="Schließen">✕</button></div>
+    <div id="libBody"></div></div>`);
+  box.style.width = 'min(760px,100%)';
+  $('#libClose').onclick = closeModal;
+  $('#libNew').onclick = () => libEditor(null, prefill);
+  if (!supaReady()) {
+    $('#libNew').disabled = true;
+    $('#libBody').innerHTML = '<div class="empty-state">Die Wortlisten-Datenbank ist noch nicht eingerichtet.</div>';
+    return;
+  }
+  if (prefill) return libEditor(null, prefill);
+  libBrowse();
+}
+function libBrowse() {
+  $('#libNew').classList.remove('hidden');
+  $('#libBody').innerHTML = `<div class="row" style="gap:8px;margin-bottom:10px;flex-wrap:wrap">
+      <input id="libQ" class="grow" placeholder="🔎 Listen durchsuchen …" value="${esc(LIB.q)}" style="min-width:200px">
+      <div class="seg" id="libF" style="margin:0"><button data-f="all">Alle</button><button data-f="mine">Meine</button></div></div>
+    <div id="libList" class="liblist"><div class="empty-state">Lädt …</div></div>`;
+  $$('#libF button').forEach(b => { b.classList.toggle('on', b.dataset.f === LIB.filter); b.onclick = () => { LIB.filter = b.dataset.f; libBrowse(); }; });
+  $('#libQ').oninput = e => { LIB.q = e.target.value; clearTimeout(LIB.timer); LIB.timer = setTimeout(libLoad, 300); };
+  libLoad();
+}
+async function libLoad() {
+  const list = $('#libList'); if (!list) return;
+  let q = 'word_lists?select=id,name,author,words,owner,uses,created_at&order=uses.desc,created_at.desc&limit=100';
+  const term = LIB.q.trim().replace(/[*,()%]/g, ' ').trim();
+  if (term) q += '&name=ilike.' + encodeURIComponent('*' + term + '*');
+  if (LIB.filter === 'mine') { const uid = myUid(); if (!uid) { list.innerHTML = '<div class="empty-state">Du hast noch keine Listen erstellt.</div>'; return; } q += '&owner=eq.' + uid; }
+  try {
+    LIB.items = await supa(q);
+    renderLibList();
+  } catch (e) { if ($('#libList')) $('#libList').innerHTML = `<div class="empty-state err">Konnte die Listen nicht laden: ${esc(e.message)}</div>`; }
+}
+function renderLibList() {
+  const list = $('#libList'); if (!list) return;
+  const uid = myUid(); const canLoad = amHost() && S.state && S.state.phase === 'lobby';
+  if (!LIB.items.length) { list.innerHTML = `<div class="empty-state">${LIB.q ? 'Keine Liste gefunden.' : LIB.filter === 'mine' ? 'Du hast noch keine Listen erstellt.' : 'Noch keine Listen – erstelle die erste!'}</div>`; return; }
+  list.innerHTML = LIB.items.map(l => `<article class="libitem">
+    <div class="libhead"><div class="grow"><h3>${esc(l.name)}</h3>
+      <div class="libmeta">${l.author ? 'von ' + esc(l.author) + ' · ' : ''}${l.words.length} Begriffe${l.uses ? ' · ' + l.uses + '× gespielt' : ''}${l.owner === uid ? ' · <b class="mine">deine Liste</b>' : ''}</div></div>
+      <div class="libbtns">${canLoad ? `<button class="btn-primary small" data-lload="${l.id}">In die Lobby laden</button>` : ''}
+        ${l.owner === uid ? `<button class="small" data-ledit="${l.id}">Bearbeiten</button><button class="small danger" data-ldel="${l.id}">Löschen</button>` : ''}</div></div>
+    <div class="libwords">${l.words.slice(0, 14).map(w => `<span>${esc(w)}</span>`).join('')}${l.words.length > 14 ? `<span class="more">+${l.words.length - 14}</span>` : ''}</div>
+  </article>`).join('');
+  $$('[data-lload]').forEach(b => b.onclick = () => libUse(LIB.items.find(x => x.id === b.dataset.lload)));
+  $$('[data-ledit]').forEach(b => b.onclick = () => libEditor(LIB.items.find(x => x.id === b.dataset.ledit)));
+  $$('[data-ldel]').forEach(b => b.onclick = async () => {
+    const l = LIB.items.find(x => x.id === b.dataset.ldel);
+    if (!confirm(`Liste „${l.name}“ wirklich löschen?`)) return;
+    try { await supa('word_lists?id=eq.' + l.id, { method:'DELETE', auth:true }); toast('Liste gelöscht'); libLoad(); }
+    catch (e) { toast('Löschen fehlgeschlagen: ' + e.message, '#ff5d6c'); }
+  });
+}
+function libUse(l) {
+  if (!l || !amHost() || H.phase !== 'lobby') return;
+  H.settings.custom = l.words.join('\n'); H.settings.listName = l.name;
+  if (H.settings.wordMode === 'std') H.settings.wordMode = 'custom';
+  store.set('settings', H.settings); commit();
+  supa('rpc/use_word_list', { method:'POST', body:{ list_id: l.id } }).catch(() => {});
+  closeModal(); toast(`📚 „${l.name}“ geladen (${l.words.length} Begriffe)`);
+}
+function libEditor(l, prefill) {
+  $('#libNew').classList.add('hidden');
+  const words = l ? l.words.join('\n') : (prefill || '');
+  $('#libBody').innerHTML = `<div class="libedit">
+    <label><span class="lbl">Name der Liste</span><input id="leName" maxlength="60" placeholder="z. B. Japan-Runde, Nur Tiere, Schwer" value="${esc(l ? l.name : '')}"></label>
+    <label><span class="lbl">Erstellt von</span><input id="leAuthor" maxlength="30" value="${esc(l ? l.author : S.me.name || '')}"></label>
+    <label><span class="lbl">Begriffe (einer pro Zeile oder mit Komma getrennt) · <b id="leCount">0</b> Begriffe</span><textarea id="leWords" rows="10" placeholder="Pinguin&#10;Rote Telefonzelle&#10;Leuchtreklame">${esc(words)}</textarea></label>
+    <p class="hint">Alle können gespeicherte Listen sehen und laden. Bearbeiten und löschen kannst nur du (in diesem Browser).</p>
+    <div class="row"><button id="leBack">← Zurück</button><span class="grow"></span><button class="btn-primary" id="leSave">${l ? 'Änderungen speichern' : 'Liste speichern'}</button></div></div>`;
+  const cnt = () => $('#leCount').textContent = cleanWords($('#leWords').value).length;
+  $('#leWords').oninput = cnt; cnt();
+  $('#leBack').onclick = libBrowse;
+  $('#leSave').onclick = async () => {
+    const name = $('#leName').value.trim(), author = $('#leAuthor').value.trim(), ws = cleanWords($('#leWords').value);
+    if (!name) return toast('Bitte gib der Liste einen Namen.', '#ff5d6c');
+    if (ws.length < 9) return toast('Eine Liste braucht mindestens 9 Begriffe.', '#ff5d6c');
+    const btn = $('#leSave'); btn.disabled = true;
+    try {
+      if (l) await supa('word_lists?id=eq.' + l.id, { method:'PATCH', auth:true, body:{ name, author, words: ws, updated_at: new Date().toISOString() } });
+      else await supa('word_lists', { method:'POST', auth:true, prefer:'return=minimal', body:{ name, author, words: ws } });
+      toast(l ? 'Liste aktualisiert' : `📚 „${name}“ gespeichert`); LIB.filter = 'mine'; LIB.q = ''; libBrowse();
+    } catch (e) { btn.disabled = false; toast('Speichern fehlgeschlagen: ' + e.message, '#ff5d6c'); }
+  };
+}
+
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-wortlisten', date:'23.10.2026', title:'Wortlisten-Bibliothek', items:[
+    'Neu: 📚 Wortlisten. Erstelle eigene Begriffslisten und speichere sie online – sie gehen nicht mehr verloren.',
+    'Alle können die Listen durchsuchen; der Host lädt eine Liste mit einem Klick in die Lobby.',
+    'Deine eigenen Listen kannst du jederzeit bearbeiten oder löschen.' ]},
   { id:'2026-10-23-lobby', date:'23.10.2026', title:'Neue Lobby & Neuigkeiten', items:[
     'Die Lobby ist neu gestaltet: Der Host hat einen eigenen Reiter für die Einstellungen.',
     'Alle anderen sehen die Regeln der Runde als übersichtliche Kacheln – Änderungen leuchten kurz auf.',
@@ -1173,7 +1316,7 @@ function bindCopy() {
 MOUNT.lobby = () => {
   const host = amHost();
   S.lobbyTab = S.lobbyTab || 'players'; S.prevRules = null;
-  app.innerHTML = topBar(`<span class="grow"></span><button class="small newsbtn" id="newsBtn">📰 Neuigkeiten<span class="ndot ${newsUnseen() ? '' : 'hidden'}" id="newsDot"></span></button><span id="meBadge"></span>`) + `
+  app.innerHTML = topBar(`<span class="grow"></span><button class="small" id="libBtn">📚 Wortlisten</button><button class="small newsbtn" id="newsBtn">📰 Neuigkeiten<span class="ndot ${newsUnseen() ? '' : 'hidden'}" id="newsDot"></span></button><span id="meBadge"></span>`) + `
   <main class="lobby">
     <section class="col">
       ${host ? `<div class="tabs" role="tablist">
@@ -1193,6 +1336,7 @@ MOUNT.lobby = () => {
   </main>`;
   bindCopy(); bindChat();
   $('#newsBtn').onclick = openNews;
+  $('#libBtn').onclick = () => openLibrary();
   if (host) {
     mountSettingsForm();
     $$('[data-tab]').forEach(b => b.onclick = () => { S.lobbyTab = b.dataset.tab; showLobbyTab(); });
@@ -1240,7 +1384,7 @@ UPDATE.lobby = () => {
 /* Regeln als Kacheln – für alle Spieler */
 function ruleTiles(s) {
   const team = s.mode === 'team';
-  const words = s.wordMode === 'std' ? 'Standard' : s.wordMode === 'custom' ? 'Eigene Liste' : 'Standard + eigene';
+  const words = s.wordMode === 'std' ? 'Standard' : (s.listName ? '„' + s.listName + '“' : s.wordMode === 'custom' ? 'Eigene Liste' : 'Eigene') + (s.wordMode === 'mix' ? ' + Standard' : '');
   const customN = s.wordMode === 'std' ? 0 : wordPool({...s, wordMode:'custom'}).length;
   const inter = s.voting && s.interEvery;
   return [
@@ -1329,6 +1473,8 @@ function mountSettingsForm() {
       <div class="sgrid" style="margin-top:10px">
         <label class="full"><span class="lbl">Begriffe</span>${sel('sWm', [['std', `Standardliste (${WORDS.length} Begriffe)`], ['mix', 'Standard + eigene'], ['custom', 'Nur eigene']])}</label>
         <label class="full" id="customW"><span class="lbl">Eigene Begriffe (einer pro Zeile oder mit Komma getrennt)</span><textarea id="sCustom" placeholder="z. B. Pinguin, Rote Telefonzelle, Leuchtreklame"></textarea></label>
+        <div class="full libbar"><span class="listtag hidden" id="sListName"></span><span class="grow"></span>
+          <button class="small" id="sLibLoad">📚 Aus Bibliothek laden</button><button class="small" id="sLibSave">💾 Als Liste speichern</button></div>
         <label class="sw full"><input type="checkbox" id="sDraft"><span><b>Wort-Draft</b><small>Vor der Runde stimmen alle über die Begriffe ab</small></span></label>
         <label id="sDtW"><span class="lbl">Zeit für den Draft</span>${sel('sDt', [30,45,60,90,120,180,0].map(n => [n, n ? (n < 60 ? n + ' Sekunden' : n / 60 + ' Min.') : 'Bis alle fertig sind']))}</label>
       </div>
@@ -1375,7 +1521,9 @@ function mountSettingsForm() {
   $('#sDraft').onchange = e => { s().draft = e.target.checked; save(); };
   $('#sDt').onchange = e => { s().draftTime = +e.target.value; save(); };
   $('#sWm').onchange = e => { s().wordMode = e.target.value; save(); };
-  $('#sCustom').oninput = e => { s().custom = e.target.value.slice(0, 5000); save(true); };
+  $('#sCustom').oninput = e => { s().custom = e.target.value.slice(0, 5000); s().listName = ''; save(true); };
+  $('#sLibLoad').onclick = () => openLibrary();
+  $('#sLibSave').onclick = () => { if (!cleanWords(s().custom).length) return toast('Trag zuerst ein paar Begriffe ein.', '#ff5d6c'); openLibrary(s().custom); };
 }
 function syncSettingsForm() {
   const s = H.settings; const a = document.activeElement;
@@ -1394,6 +1542,8 @@ function syncSettingsForm() {
   setv('sLock', s.lockout, 'checked'); setv('sVote', s.voting, 'checked');
   setv('sWm', s.wordMode); setv('sCustom', s.custom);
   $('#customW').classList.toggle('hidden', s.wordMode === 'std');
+  $('.libbar').classList.toggle('hidden', s.wordMode === 'std');
+  $('#sListName').classList.toggle('hidden', !s.listName); $('#sListName').textContent = s.listName ? '📚 ' + s.listName : '';
 }
 
 /* ---------- Chat ---------- */
