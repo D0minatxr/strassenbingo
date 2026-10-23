@@ -559,60 +559,60 @@ const WORDS = [
 /* ---------------- Orte (keine API nötig) ---------------- */
 // [Region, Land, Ort, Breite, Länge]
 const LOCS = [
-  ['de','Deutschland','Berlin',52.5170,13.3889],['de','Deutschland','Hamburg',53.5527,9.9925],['de','Deutschland','München',48.1374,11.5755],
-  ['de','Deutschland','Köln',50.9413,6.9583],['de','Deutschland','Frankfurt',50.1146,8.6845],['de','Deutschland','Stuttgart',48.7784,9.1800],
-  ['de','Deutschland','Leipzig',51.3397,12.3747],['de','Deutschland','Dresden',51.0500,13.7383],['de','Deutschland','Nürnberg',49.4540,11.0775],
-  ['de','Deutschland','Bremen',53.0758,8.8072],['de','Deutschland','Freiburg',47.9952,7.8494],['de','Deutschland','Rostock',54.0887,12.1405],
-  ['de','Deutschland','Garmisch-Partenkirchen',47.4925,11.0955],['de','Deutschland','Westerland (Sylt)',54.9079,8.3105],['de','Deutschland','Heidelberg',49.4106,8.6981],
-  ['de','Deutschland','Münster',51.9625,7.6280],['de','Deutschland','Lübeck',53.8670,10.6850],['de','Deutschland','Görlitz',51.1550,14.9890],
-  ['de','Deutschland','Trier',49.7560,6.6410],['de','Deutschland','Konstanz',47.6600,9.1750],['de','Deutschland','Bamberg',49.8916,10.8870],
-  ['de','Deutschland','Kiel',54.3230,10.1350],['de','Deutschland','Erfurt',50.9780,11.0290],
-  ['eu','Frankreich','Paris',48.8566,2.3522],['eu','Frankreich','Lyon',45.7640,4.8357],['eu','Frankreich','Marseille',43.2965,5.3698],['eu','Frankreich','Nizza',43.6960,7.2700],
-  ['eu','Vereinigtes Königreich','London',51.5080,-0.1281],['eu','Vereinigtes Königreich','Manchester',53.4808,-2.2426],['eu','Vereinigtes Königreich','Edinburgh',55.9520,-3.1960],
-  ['eu','Irland','Dublin',53.3498,-6.2603],['eu','Irland','Galway',53.2720,-9.0530],['eu','Niederlande','Amsterdam',52.3702,4.8952],
-  ['eu','Belgien','Brüssel',50.8467,4.3525],['eu','Belgien','Brügge',51.2093,3.2247],['eu','Österreich','Wien',48.2082,16.3738],
-  ['eu','Österreich','Salzburg',47.8000,13.0440],['eu','Schweiz','Zürich',47.3769,8.5417],['eu','Schweiz','Luzern',47.0502,8.3093],
-  ['eu','Italien','Rom',41.9028,12.4964],['eu','Italien','Florenz',43.7700,11.2550],['eu','Italien','Neapel',40.8518,14.2681],['eu','Italien','Palermo',38.1157,13.3615],
-  ['eu','Spanien','Barcelona',41.3874,2.1686],['eu','Spanien','Madrid',40.4168,-3.7038],['eu','Spanien','Sevilla',37.3891,-5.9845],['eu','Spanien','Valencia',39.4699,-0.3763],
-  ['eu','Portugal','Lissabon',38.7110,-9.1390],['eu','Portugal','Porto',41.1496,-8.6110],['eu','Dänemark','Kopenhagen',55.6761,12.5683],
-  ['eu','Schweden','Stockholm',59.3326,18.0649],['eu','Norwegen','Oslo',59.9139,10.7522],['eu','Norwegen','Bergen',60.3929,5.3241],
-  ['eu','Finnland','Helsinki',60.1699,24.9384],['eu','Island','Reykjavík',64.1466,-21.9426],['eu','Estland','Tallinn',59.4370,24.7536],
-  ['eu','Lettland','Riga',56.9496,24.1052],['eu','Litauen','Vilnius',54.6872,25.2797],['eu','Tschechien','Prag',50.0755,14.4378],
-  ['eu','Polen','Krakau',50.0614,19.9366],['eu','Polen','Warschau',52.2297,21.0122],['eu','Ungarn','Budapest',47.4979,19.0402],
-  ['eu','Slowakei','Bratislava',48.1486,17.1077],['eu','Slowenien','Ljubljana',46.0511,14.5051],['eu','Kroatien','Zagreb',45.8150,15.9819],
-  ['eu','Kroatien','Split',43.5081,16.4402],['eu','Serbien','Belgrad',44.8176,20.4569],['eu','Bulgarien','Sofia',42.6977,23.3219],
-  ['eu','Rumänien','Bukarest',44.4268,26.1025],['eu','Griechenland','Athen',37.9838,23.7275],['eu','Griechenland','Thessaloniki',40.6401,22.9444],
-  ['eu','Ukraine','Lwiw',49.8397,24.0297],['eu','Malta','Valletta',35.8989,14.5146],
-  ['world','USA','New York',40.7580,-73.9855],['world','USA','Los Angeles',34.0522,-118.2437],['world','USA','Chicago',41.8781,-87.6298],
-  ['world','USA','Miami',25.7617,-80.1918],['world','USA','San Francisco',37.7749,-122.4194],['world','USA','Seattle',47.6062,-122.3321],
-  ['world','USA','New Orleans',29.9511,-90.0715],['world','USA','Las Vegas',36.1147,-115.1728],['world','USA','Boston',42.3601,-71.0589],
-  ['world','USA','Austin',30.2672,-97.7431],['world','USA','Denver',39.7392,-104.9903],['world','USA','Nashville',36.1627,-86.7816],
-  ['world','USA','Honolulu',21.2793,-157.8292],['world','USA','Anchorage',61.2181,-149.9003],
-  ['world','Kanada','Toronto',43.6532,-79.3832],['world','Kanada','Vancouver',49.2827,-123.1207],['world','Kanada','Montréal',45.5017,-73.5673],['world','Kanada','Québec',46.8139,-71.2080],
-  ['world','Mexiko','Mexiko-Stadt',19.4326,-99.1332],['world','Mexiko','Guadalajara',20.6767,-103.3475],['world','Mexiko','Oaxaca',17.0654,-96.7237],
-  ['world','Guatemala','Antigua',14.5586,-90.7295],['world','Costa Rica','San José',9.9325,-84.0796],
-  ['world','Brasilien','Rio de Janeiro',-22.9711,-43.1822],['world','Brasilien','São Paulo',-23.5505,-46.6333],['world','Brasilien','Salvador',-12.9714,-38.5014],
-  ['world','Argentinien','Buenos Aires',-34.6037,-58.3816],['world','Argentinien','Mendoza',-32.8895,-68.8458],['world','Argentinien','Ushuaia',-54.8019,-68.3030],
-  ['world','Chile','Santiago',-33.4489,-70.6693],['world','Chile','Valparaíso',-33.0472,-71.6127],['world','Peru','Lima',-12.0464,-77.0428],
-  ['world','Peru','Cusco',-13.5170,-71.9785],['world','Kolumbien','Bogotá',4.5981,-74.0758],['world','Kolumbien','Medellín',6.2442,-75.5812],
-  ['world','Kolumbien','Cartagena',10.4236,-75.5478],['world','Ecuador','Quito',-0.2200,-78.5120],['world','Uruguay','Montevideo',-34.9060,-56.1913],
-  ['world','Bolivien','La Paz',-16.4955,-68.1336],
-  ['world','Japan','Tokio',35.6595,139.7005],['world','Japan','Kyoto',35.0036,135.7681],['world','Japan','Osaka',34.6687,135.5013],
-  ['world','Japan','Sapporo',43.0621,141.3544],['world','Japan','Hiroshima',34.3955,132.4596],['world','Taiwan','Taipeh',25.0330,121.5654],
-  ['world','Thailand','Bangkok',13.7563,100.5018],['world','Thailand','Chiang Mai',18.7883,98.9853],['world','Malaysia','Kuala Lumpur',3.1478,101.6953],
-  ['world','Singapur','Singapur',1.2840,103.8510],['world','Indonesien','Jakarta',-6.1754,106.8272],['world','Indonesien','Ubud (Bali)',-8.5069,115.2625],
-  ['world','Philippinen','Manila',14.5995,120.9842],['world','Sri Lanka','Colombo',6.9271,79.8612],['world','Indien','Mumbai',18.9220,72.8347],
-  ['world','Mongolei','Ulaanbaatar',47.9184,106.9177],['world','Kirgisistan','Bischkek',42.8746,74.6122],['world','Israel','Tel Aviv',32.0853,34.7818],
-  ['world','Israel','Jerusalem',31.7767,35.2345],['world','Jordanien','Amman',31.9539,35.9106],['world','Türkei','Istanbul',41.0082,28.9784],
-  ['world','Türkei','Ankara',39.9208,32.8541],['world','VAE','Dubai',25.2048,55.2708],['world','Russland','Moskau',55.7558,37.6173],
-  ['world','Russland','Sankt Petersburg',59.9343,30.3351],
-  ['world','Südafrika','Kapstadt',-33.9249,18.4241],['world','Südafrika','Johannesburg',-26.2041,28.0473],['world','Südafrika','Durban',-29.8587,31.0218],
-  ['world','Kenia','Nairobi',-1.2864,36.8172],['world','Uganda','Kampala',0.3136,32.5811],['world','Ghana','Accra',5.5600,-0.2057],
-  ['world','Nigeria','Lagos',6.4541,3.3947],['world','Senegal','Dakar',14.6928,-17.4467],['world','Botswana','Gaborone',-24.6282,25.9231],
-  ['world','Namibia','Windhuk',-22.5609,17.0658],['world','Tunesien','Tunis',36.8065,10.1815],
-  ['world','Australien','Sydney',-33.8688,151.2093],['world','Australien','Melbourne',-37.8136,144.9631],['world','Australien','Perth',-31.9523,115.8613],
-  ['world','Australien','Brisbane',-27.4698,153.0251],['world','Australien','Hobart',-42.8821,147.3272],['world','Neuseeland','Auckland',-36.8485,174.7633],
-  ['world','Neuseeland','Wellington',-41.2865,174.7762],['world','Neuseeland','Queenstown',-45.0312,168.6626]
+  ['de','Deutschland','Berlin',52.53047,13.3889],['de','Deutschland','Hamburg',53.56617,9.9925],['de','Deutschland','München',48.15087,11.5755],
+  ['de','Deutschland','Köln',50.95477,6.9583],['de','Deutschland','Frankfurt',50.12807,8.6845],['de','Deutschland','Stuttgart',48.7784,9.15955],
+  ['de','Deutschland','Leipzig',51.35317,12.3747],['de','Deutschland','Dresden',51.03653,13.7383],['de','Deutschland','Nürnberg',49.46747,11.0775],
+  ['de','Deutschland','Bremen',53.08927,8.8072],['de','Deutschland','Freiburg',48.00867,7.8494],['de','Deutschland','Rostock',54.07523,12.1405],
+  ['de','Deutschland','Kempten (Allgäu)',47.73,10.315],['de','Deutschland','Westerland (Sylt)',54.92137,8.3105],['de','Deutschland','Heidelberg',49.42407,8.6981],
+  ['de','Deutschland','Münster',51.97597,7.628],['de','Deutschland','Lübeck',53.88047,10.685],['de','Deutschland','Görlitz',51.16847,14.989],
+  ['de','Deutschland','Trier',49.74253,6.641],['de','Deutschland','Konstanz',47.6625,9.166],['de','Deutschland','Bamberg',49.87813,10.887],
+  ['de','Deutschland','Kiel',54.33647,10.135],['de','Deutschland','Erfurt',50.99147,11.029],
+  ['eu','Frankreich','Paris',48.84313,2.3522],['eu','Frankreich','Lyon',45.77747,4.8357],['eu','Frankreich','Marseille',43.30997,5.3698],['eu','Frankreich','Nizza',43.70947,7.27],
+  ['eu','Vereinigtes Königreich','London',51.508,-0.14975],['eu','Vereinigtes Königreich','Manchester',53.49427,-2.2426],['eu','Vereinigtes Königreich','Edinburgh',55.93853,-3.196],
+  ['eu','Irland','Dublin',53.36327,-6.2603],['eu','Irland','Galway',53.272,-9.07553],['eu','Niederlande','Amsterdam',52.35673,4.8952],
+  ['eu','Belgien','Brüssel',50.86017,4.3525],['eu','Belgien','Brügge',51.22277,3.2247],['eu','Österreich','Wien',48.22167,16.3738],
+  ['eu','Österreich','Salzburg',47.81347,13.044],['eu','Schweiz','Zürich',47.39037,8.5417],['eu','Schweiz','Luzern',47.03673,8.3093],
+  ['eu','Italien','Rom',41.91627,12.4964],['eu','Italien','Florenz',43.78347,11.255],['eu','Italien','Neapel',40.86527,14.2681],['eu','Italien','Palermo',38.10223,13.3615],
+  ['eu','Spanien','Barcelona',41.3874,2.17818],['eu','Spanien','Madrid',40.43027,-3.7038],['eu','Spanien','Sevilla',37.40257,-5.9845],['eu','Spanien','Valencia',39.48337,-0.3763],
+  ['eu','Portugal','Lissabon',38.711,-9.15627],['eu','Portugal','Porto',41.16307,-8.611],['eu','Dänemark','Kopenhagen',55.6761,12.5444],
+  ['eu','Schweden','Stockholm',59.34607,18.0649],['eu','Norwegen','Oslo',59.92737,10.7522],['eu','Norwegen','Bergen',60.40637,5.3241],
+  ['eu','Finnland','Helsinki',60.15643,24.9384],['eu','Island','Reykjavík',64.16007,-21.9426],['eu','Estland','Tallinn',59.42353,24.7536],
+  ['eu','Lettland','Riga',56.96307,24.1052],['eu','Litauen','Vilnius',54.70067,25.2797],['eu','Tschechien','Prag',50.06203,14.4378],
+  ['eu','Polen','Krakau',50.04793,19.9366],['eu','Polen','Warschau',52.2297,20.9902],['eu','Ungarn','Budapest',47.48443,19.0402],
+  ['eu','Slowakei','Bratislava',48.1486,17.1279],['eu','Slowenien','Ljubljana',46.03763,14.5051],['eu','Kroatien','Zagreb',45.82847,15.9819],
+  ['eu','Kroatien','Split',43.52157,16.4402],['eu','Serbien','Belgrad',44.80413,20.4569],['eu','Bulgarien','Sofia',42.68423,23.3219],
+  ['eu','Rumänien','Bukarest',44.44027,26.1025],['eu','Griechenland','Athen',37.9838,23.7104],['eu','Griechenland','Thessaloniki',40.65357,22.9444],
+  ['eu','Ukraine','Lwiw',49.85317,24.0297],['eu','Malta','Valletta',35.8989,14.50573],
+  ['world','USA','New York',40.74453,-73.9855],['world','USA','Los Angeles',34.03873,-118.2437],['world','USA','Chicago',41.86463,-87.6298],
+  ['world','USA','Miami',25.77517,-80.1918],['world','USA','San Francisco',37.78837,-122.4194],['world','USA','Seattle',47.61967,-122.3321],
+  ['world','USA','New Orleans',29.93763,-90.0715],['world','USA','Las Vegas',36.10123,-115.1728],['world','USA','Boston',42.34663,-71.0589],
+  ['world','USA','Austin',30.28067,-97.7431],['world','USA','Denver',39.72573,-104.9903],['world','USA','Nashville',36.17617,-86.7816],
+  ['world','USA','Honolulu',21.29277,-157.8292],['world','USA','Anchorage',61.2181,-149.87231],
+  ['world','Kanada','Toronto',43.66667,-79.3832],['world','Kanada','Vancouver',49.2827,-123.10004],['world','Kanada','Montréal',45.48823,-73.5673],['world','Kanada','Québec',46.8139,-71.22769],
+  ['world','Mexiko','Mexiko-Stadt',19.44607,-99.1332],['world','Mexiko','Guadalajara',20.69017,-103.3475],['world','Mexiko','Oaxaca',17.05193,-96.7237],
+  ['world','Guatemala','Antigua',14.54513,-90.7295],['world','Costa Rica','San José',9.94597,-84.0796],
+  ['world','Brasilien','Rio de Janeiro',-22.952,-43.188],['world','Brasilien','São Paulo',-23.56397,-46.6333],['world','Brasilien','Salvador',-12.98487,-38.5014],
+  ['world','Argentinien','Buenos Aires',-34.59023,-58.3816],['world','Argentinien','Mendoza',-32.90297,-68.8458],['world','Argentinien','Ushuaia',-54.8019,-68.31547],
+  ['world','Chile','Santiago',-33.43543,-70.6693],['world','Chile','Valparaíso',-33.06067,-71.6127],['world','Peru','Lima',-12.05987,-77.0428],
+  ['world','Peru','Cusco',-13.517,-71.99236],['world','Kolumbien','Bogotá',4.61157,-74.0758],['world','Kolumbien','Medellín',6.23073,-75.5812],
+  ['world','Kolumbien','Cartagena',10.4236,-75.5341],['world','Ecuador','Quito',-0.20653,-78.512],['world','Uruguay','Montevideo',-34.89253,-56.1913],
+  ['world','Bolivien','La Paz',-16.50897,-68.1336],
+  ['world','Japan','Tokio',35.6595,139.70934],['world','Japan','Kyoto',34.99013,135.7681],['world','Japan','Osaka',34.65523,135.5013],
+  ['world','Japan','Sapporo',43.07557,141.3544],['world','Japan','Hiroshima',34.38203,132.4596],['world','Taiwan','Taipeh',25.02581,121.5654],
+  ['world','Thailand','Bangkok',13.74283,100.5018],['world','Thailand','Chiang Mai',18.80177,98.9853],['world','Malaysia','Kuala Lumpur',3.13433,101.6953],
+  ['world','Singapur','Singapur',1.284,103.83752],['world','Indonesien','Jakarta',-6.16193,106.8272],['world','Indonesien','Ubud (Bali)',-8.5069,115.24888],
+  ['world','Philippinen','Manila',14.61297,120.9842],['world','Sri Lanka','Colombo',6.9271,79.87477],['world','Indien','Mumbai',18.92919,72.8347],
+  ['world','Mongolei','Ulaanbaatar',47.90493,106.9177],['world','Kirgisistan','Bischkek',42.88807,74.6122],['world','Israel','Tel Aviv',32.07183,34.7818],
+  ['world','Israel','Jerusalem',31.7767,35.25035],['world','Jordanien','Amman',31.96737,35.9106],['world','Türkei','Istanbul',41.0082,28.96888],
+  ['world','Türkei','Ankara',39.9208,32.87167],['world','VAE','Dubai',25.21827,55.2708],['world','Russland','Moskau',55.76927,37.6173],
+  ['world','Russland','Sankt Petersburg',59.94777,30.3351],
+  ['world','Südafrika','Kapstadt',-33.93837,18.4241],['world','Südafrika','Johannesburg',-26.19063,28.0473],['world','Südafrika','Durban',-29.8587,31.00626],
+  ['world','Kenia','Nairobi',-1.27293,36.8172],['world','Uganda','Kampala',0.30013,32.5811],['world','Ghana','Accra',5.57347,-0.2057],
+  ['world','Nigeria','Lagos',6.4541,3.40826],['world','Senegal','Dakar',14.70627,-17.4467],['world','Botswana','Gaborone',-24.64167,25.9231],
+  ['world','Namibia','Windhuk',-22.57437,17.0658],['world','Tunesien','Tunis',36.81997,10.1815],
+  ['world','Australien','Sydney',-33.879,151.186],['world','Australien','Melbourne',-37.8136,144.94604],['world','Australien','Perth',-31.93883,115.8613],
+  ['world','Australien','Brisbane',-27.45633,153.0251],['world','Australien','Hobart',-42.89557,147.3272],['world','Neuseeland','Auckland',-36.86197,174.7633],
+  ['world','Neuseeland','Wellington',-41.27303,174.7762],['world','Neuseeland','Queenstown',-45.033,168.672]
 ];
 const REGION_NAMES = {world:'Ganze Welt', eu:'Europa', de:'Deutschland'};
 const regionLocs = r => LOCS.filter(l => r === 'world' || (r === 'eu' ? l[0] !== 'world' : l[0] === 'de'));
@@ -1458,6 +1458,11 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-spawns', date:'23.10.2026', title:'Bessere Startpunkte', items:[
+    'Alle 156 Orte haben jetzt einzeln geprüfte Startpunkte auf echten Straßen – kein Start mehr in Läden, Restaurants oder an Stellen, an denen man sich nicht bewegen kann.',
+    'Neu: 🏠 Startpunkt – nach einem Teleport kommst du jederzeit zum geprüften Startpunkt zurück.',
+    'Garmisch-Partenkirchen wurde durch Kempten (Allgäu) ersetzt (dort gibt es keine Google-Straßenaufnahmen).'
+  ] },
   { id:'2026-10-23-1v1', date:'23.10.2026', title:'Neu: Ranked 1v1', items:[
     'Neu: ⚔️ Ranked 1v1 – du gegen einen Gegner mit ähnlicher Elo. Eigene Elo, eigene Bestenliste.',
     'Gleiche Regeln wie die anderen Ranked-Modi: 4×4-Karte, 10 Minuten, meiste Punkte gewinnen, +3 pro Bingo.'
@@ -1976,9 +1981,9 @@ function pickLocs(pid, n, batch) {
   const used = new Set((H.locs[pid] || []).map(l => l.n));
   let avail = pool.filter(l => !used.has(l[2]));
   if (avail.length < n) avail = pool;
-  const j = () => (Math.random() - .5) * 0.003;
+  // Feste, geprüfte Startpunkte (Google-Außenaufnahme mit Straße, kein 360°-Foto aus Läden) – nur die Blickrichtung ist zufällig
   return shuffle(avail).slice(0, n).map(l => ({
-    id: uid(8), c: l[1], n: l[2], lat: +(l[3] + j()).toFixed(6), lng: +(l[4] + j()).toFixed(6), h: Math.floor(Math.random() * 360), b: batch
+    id: uid(8), c: l[1], n: l[2], lat: l[3], lng: l[4], h: Math.floor(Math.random() * 360), b: batch
   }));
 }
 function giveBatch() {
@@ -2492,7 +2497,13 @@ function renderChat() {
 }
 
 /* ---------- Spiel ---------- */
+/* Street View: mit Schlüssel über die offizielle Maps Embed API (kostenlos, unbegrenzt).
+   source=outdoor → nur Google-Außenaufnahmen (keine 360°-Fotos aus Läden/Innenräumen, immer begehbar),
+   radius → im Umkreis nach der nächsten Straße suchen. Ohne Schlüssel: alte Einbettung als Rückfall. */
+const SV_KEY = '';
+const SV_RADIUS = 1000;
 function svURL(l) {
+  if (SV_KEY) return `https://www.google.com/maps/embed/v1/streetview?key=${encodeURIComponent(SV_KEY)}&location=${l.lat},${l.lng}&heading=${l.h}&pitch=0&fov=90&radius=${SV_RADIUS}&source=outdoor&language=de`;
   return `https://maps.google.com/maps?q=&layer=c&cbll=${l.lat},${l.lng}&cbp=11,${l.h},0,0,0&source=embed&output=svembed`;
 }
 const allLocs = () => (S.state && S.state.locs && S.state.locs[S.me.pid]) || [];
@@ -2510,7 +2521,8 @@ function teleport() {
   const lng = loc.lng + (r * Math.sin(a)) / (111.32 * Math.cos(loc.lat * Math.PI / 180));
   S.tp[loc.id] = { lat: +lat.toFixed(6), lng: +lng.toFixed(6), h: Math.floor(Math.random() * 360) };
   showLoc(loc.id, true);
-  toast(`🎯 Teleportiert (${(r).toFixed(1).replace('.', ',')} km vom Startpunkt)`);
+  renderLocUI();
+  toast(`🎯 Teleportiert (${(r).toFixed(1).replace('.', ',')} km vom Startpunkt) – kein Bild? Nochmal teleportieren oder 🏠 zurück zum Startpunkt.`);
 }
 /* Zwei-Klick-Lösung: Google Street View erst nach Zustimmung laden */
 function needSVConsent(id) {
@@ -2719,6 +2731,7 @@ function renderLocUI() {
   const tb = $('#tpBtn'); const R = st.settings.tpRadius;
   tb.classList.toggle('hidden', !R); tb.disabled = !cur || st.phase !== 'game';
   tb.textContent = `🎯 Teleport (${String(R).replace('.', ',')} km)`;
+  $('#homeBtn').classList.toggle('hidden', !cur || !S.tp[cur.id]);
   // Marker
   if (S.map) {
     S.map.items = [
@@ -2757,6 +2770,7 @@ MOUNT.game = () => {
         </div>
       </div>
       <div class="vhint"><span class="grow" id="curLabel"></span>
+        <button class="small hidden" id="homeBtn" title="Zurück zum geprüften Startpunkt dieses Orts">🏠 Startpunkt</button>
         <button class="small" id="tpBtn" title="Springt an einen zufälligen Punkt in der Nähe deines Startpunkts – z. B. wenn du feststeckst"></button>
         <button class="small" id="reloadBtn" title="Street View an dieser Stelle neu laden">↻ Neu laden</button>
         <a id="gm" class="btnlike small" target="_blank" rel="noopener">Google Maps ↗</a>
@@ -2781,6 +2795,7 @@ MOUNT.game = () => {
   $('#locChips').onclick = pickLoc; $('#mapList').onclick = pickLoc;
   $('#reloadBtn').onclick = () => { if (S.curLoc) showLoc(S.curLoc, true); };
   $('#tpBtn').onclick = teleport;
+  $('#homeBtn').onclick = () => { if (!S.curLoc) return; delete S.tp[S.curLoc]; showLoc(S.curLoc, true); renderLocUI(); toast('🏠 Zurück am Startpunkt'); };
   $('#svAccept').onclick = acceptSV;
   $('#board').onclick = e => { const b = e.target.closest('.cell'); if (b && !b.disabled) openCapture(+b.dataset.cell); };
   bindChat();
