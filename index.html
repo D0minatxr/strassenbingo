@@ -551,15 +551,25 @@ function boardLines(size) {
   L.push([...Array(size)].map((_, i) => i * size + (size - 1 - i)));
   return L;
 }
-function lineInfo(size, set) {
-  const full = boardLines(size).filter(l => l.every(i => set.has(i)));
+/* Jede Seite (Team bzw. Einzelspieler) hat eine eigene zufällige Anordnung derselben Begriffe:
+   layout[Position] = Index des Begriffs in st.board. Funde speichern den Begriffs-Index. */
+function layoutOf(st, sideId) {
+  const L = st.layouts && st.layouts[sideId];
+  return L && L.length === st.board.length ? L : st.board.map((_, i) => i);
+}
+function ensureLayouts() {
+  H.layouts = H.layouts || {};
+  for (const sd of sides(H)) if (!H.layouts[sd.id]) H.layouts[sd.id] = shuffle(H.board.map((_, i) => i));
+}
+function lineInfo(size, set, layout) {
+  const full = boardLines(size).map(l => layout ? l.map(p => layout[p]) : l).filter(l => l.every(i => set.has(i)));
   return { count: full.length, cells: new Set(full.flat()) };
 }
 function standings(st) {
   const n = st.board.length, size = Math.round(Math.sqrt(n));
   const cmp = (a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i]; return 0; };
   const res = sides(st).map(sd => {
-    const set = claimed(st, sd.id, true); const li = lineInfo(size, set);
+    const set = claimed(st, sd.id, true); const li = lineInfo(size, set, layoutOf(st, sd.id));
     const cells = set.size - (st.free != null ? 1 : 0);
     return { ...sd, set, lines: li.count, lineCells: li.cells, cells, full: set.size === n };
   });
@@ -656,6 +666,7 @@ function hostHandle(cid, msg) {
       }
     }
     p.name = name; p.online = true;
+    if (H.phase === 'game' || H.phase === 'intermission') ensureLayouts();
     if ((H.phase === 'game' || H.phase === 'intermission') && !(H.locs[pid] || []).length) {
       for (let b = 0; b < Math.max(1, H.locBatch); b++) H.locs[pid] = (H.locs[pid] || []).concat(pickLocs(pid, H.settings.locCount, b));
     }
@@ -709,7 +720,7 @@ function hostHandle(cid, msg) {
     case 'remove': {
       if (H.phase !== 'game') return;
       const f = H.findings[msg.fid]; if (!f || f.pid !== pid) return;
-      delete H.findings[msg.fid]; H.lineCount[f.side] = Math.min(H.lineCount[f.side] || 0, lineInfo(Math.round(Math.sqrt(H.board.length)), claimed(H, f.side, true)).count);
+      delete H.findings[msg.fid]; H.lineCount[f.side] = Math.min(H.lineCount[f.side] || 0, lineInfo(Math.round(Math.sqrt(H.board.length)), claimed(H, f.side, true), layoutOf(H, f.side)).count);
       commit(); return;
     }
     case 'choose': {
@@ -758,7 +769,7 @@ function hostHandle(cid, msg) {
 function hostCheckLines() {
   const size = Math.round(Math.sqrt(H.board.length));
   for (const sd of sides(H)) {
-    const set = claimed(H, sd.id, true); const li = lineInfo(size, set);
+    const set = claimed(H, sd.id, true); const li = lineInfo(size, set, layoutOf(H, sd.id));
     const prev = H.lineCount[sd.id] || 0;
     if (li.count > prev) {
       H.lineCount[sd.id] = li.count;
@@ -806,11 +817,13 @@ function hostBeginGame(words) {
   if (H.free != null) H.board.splice(H.free, 0, 'FREI');
   H.board = H.board.slice(0, n);
   H.draftWords = []; H.draftVotes = {}; H.draftReady = {}; H.draftEnds = 0;
+  H.layouts = {};
   H.findings = {}; H.votes = {}; H.voteOrder = []; H.voteIdx = 0; H.lineCount = {}; H.endReason = '';
   H.reviewed = {}; H.sinceReview = 0; H.pausedAt = 0; H.jokers = {}; H.locs = {}; H.locBatch = 0;
   S.images = {};
   for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
   H.phase = 'game'; H.round++; H.startedAt = Date.now();
+  ensureLayouts();
   H.endsAt = s.minutes ? Date.now() + s.minutes * 60000 : 0;
   giveBatch();
   H.nextLocAt = s.locEvery && s.maxLocs !== 1 ? Date.now() + s.locEvery * 60000 : 0;
@@ -859,7 +872,7 @@ function hostResume() {
   H.phase = 'game'; H.pausedAt = 0; H.voteOrder = []; H.voteIdx = 0;
   const size = Math.round(Math.sqrt(H.board.length));
   const rejected = Object.keys(H.reviewed).filter(f => H.findings[f] && !isValid(H, f)).length;
-  for (const sd of sides(H)) H.lineCount[sd.id] = lineInfo(size, claimed(H, sd.id, true)).count;
+  for (const sd of sides(H)) H.lineCount[sd.id] = lineInfo(size, claimed(H, sd.id, true), layoutOf(H, sd.id)).count;
   announce('▶ Weiter geht’s!' + (rejected ? ' ' + rejected + ' Foto' + (rejected === 1 ? ' wurde' : 's wurden') + ' abgelehnt.' : ''), '#ffb020', true);
   commit();
 }
@@ -1521,7 +1534,7 @@ UPDATE.game = () => {
   // Punktestand
   const ss = sides(st);
   $('#scores').innerHTML = ss.map(sd => {
-    const set = claimed(st, sd.id, true); const li = lineInfo(size, set);
+    const set = claimed(st, sd.id, true); const li = lineInfo(size, set, layoutOf(st, sd.id));
     const c = set.size - (st.free != null ? 1 : 0);
     return `<div class="score ${sd.id === side ? 'me' : ''}" style="--c:${sd.color}"><span class="dot"></span>${esc(sd.name)} <b>${c}</b>${li.count ? `<span class="bingo">BINGO${li.count > 1 ? ' ×' + li.count : ''}</span>` : ''}</div>`;
   }).join('');
@@ -1532,11 +1545,13 @@ UPDATE.game = () => {
   const sd = side ? sideInfo(st, side) : null;
   $('#boardTitle').textContent = sd ? (st.settings.mode === 'team' ? 'Karte von ' + sd.name : 'Deine Karte') : 'Bingo-Karte';
   const mine = side ? claimed(st, side, true) : new Set();
-  const li = lineInfo(size, mine);
+  const lay = layoutOf(st, side);
+  const li = lineInfo(size, mine, lay);
   $('#myprog').textContent = side ? `${mine.size - (st.free != null ? 1 : 0)} / ${st.board.length - (st.free != null ? 1 : 0)} Felder · ${li.count} Reihe${li.count === 1 ? '' : 'n'}` : '';
   const board = $('#board'); board.style.setProperty('--n', size);
   board.style.setProperty('--fs', size === 3 ? '15px' : size === 4 ? '13px' : '11.5px');
-  board.innerHTML = st.board.map((w, i) => {
+  board.innerHTML = lay.map(i => {
+    const w = st.board[i];
     if (i === st.free) return `<button class="cell free" disabled><span class="w">FREI</span></button>`;
     const team = Object.entries(st.findings).filter(([, f]) => f.side === side && f.cell === i);
     const ok = team.filter(([fid]) => isValid(st, fid));
@@ -1785,7 +1800,8 @@ UPDATE.results = () => {
         <div class="rh"><span class="rank">#${r.rank}</span><span class="pill" style="--c:${r.color}">${esc(r.name)}</span>${r.win ? '<span>🏆</span>' : ''}</div>
         ${st.settings.mode === 'team' ? `<div class="muted" style="font-size:13px">${r.members.map(p => esc(st.players[p]?.name)).join(', ') || '–'}</div>` : ''}
         <div class="stats"><div><b>${r.cells}</b>Felder</div><div><b>${r.lines}</b>Reihen</div><div><b>${Object.values(st.findings).filter(f => f.side === r.id).length}</b>Fotos</div></div>
-        <div class="mini" style="--n:${size}">${st.board.map((w, i) => {
+        <div class="mini" style="--n:${size}">${layoutOf(st, r.id).map(i => {
+          const w = st.board[i];
           if (i === st.free) return '<span class="f" title="FREI"></span>';
           const all = Object.entries(st.findings).filter(([, f]) => f.side === r.id && f.cell === i);
           const ok = all.some(([fid]) => isValid(st, fid));
