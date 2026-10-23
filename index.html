@@ -221,6 +221,11 @@ label.dim{opacity:.45}
 .flist li[data-fprof]{cursor:pointer}
 .flist li[data-fprof]:hover{background:var(--panel2)}
 .flist.big li{padding:8px 10px;flex-wrap:wrap}
+.pres{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
+.pres i{width:9px;height:9px;border-radius:50%;background:#ff5d6c;flex:none}
+.pres.online{color:#35c873}.pres.online i{background:#35c873;box-shadow:0 0 0 3px rgba(53,200,115,.2)}
+.pres.away{color:#ffb020}.pres.away i{background:#ffb020}
+.fname{display:flex;flex-direction:column;gap:2px;min-width:0}.fname b,.fname>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .favatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);font-weight:800;flex:none;color:var(--accent)}
 .fbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:999px;background:var(--ok);color:#06210f;font-size:11px;padding:0 5px}
 .fnote{font-size:13px;color:var(--ok);margin-bottom:8px}
@@ -861,6 +866,7 @@ async function loadProfile() {
     await ensureProfile();
     const [me, friends] = await Promise.all([rpc('get_profile', { p_user: null }), rpc('list_friends')]);
     PROF.me = me; PROF.friends = friends || [];
+    presenceTick(false);
     if (me && me.name && $('#nm') && (!$('#nm').value || $('#nm').value === (account() || {}).uname)) { $('#nm').value = me.name; S.me.name = me.name; store.set('name', me.name); }
   } catch (e) { PROF.err = e.message; }
   PROF.loading = false;
@@ -905,7 +911,7 @@ function renderProfileCard() {
     <div class="pfriends">
       <div class="row" style="margin-bottom:8px"><h3 class="psub grow" style="margin:0">👥 Freunde <span class="muted">${fr.length}</span></h3><button class="small" id="pcFriends">Verwalten${inc.length ? ` <span class="fbadge">${inc.length}</span>` : ''}</button></div>
       ${inc.length ? `<div class="fnote">📨 ${inc.length} neue Freundschaftsanfrage${inc.length === 1 ? '' : 'n'}</div>` : ''}
-      ${fr.length ? `<ul class="flist">${fr.slice(0, 6).map(f => `<li data-fprof="${f.id}">${avatarHTML(f.avatar_url, f.name, 'sm')}<span class="grow">${esc(f.name || 'Spieler')}</span><span class="muted">${fmtCode(f.friend_code)}</span></li>`).join('')}</ul>`
+      ${fr.length ? `<ul class="flist">${sortFriends(fr).slice(0, 6).map(f => `<li data-fprof="${f.id}">${avatarHTML(f.avatar_url, f.name, 'sm')}<span class="grow fname"><span>${esc(f.name || 'Spieler')}</span>${presenceHTML(f)}</span></li>`).join('')}</ul>`
         : '<div class="muted" style="font-size:13px">Noch keine Freunde. Gib deinen Code weiter oder trag den Code eines Freundes ein.</div>'}
     </div></div>`;
   $('#pcCopy').onclick = async () => { try { await navigator.clipboard.writeText(me.friend_code); toast('Freundescode ' + fmtCode(me.friend_code) + ' kopiert'); } catch { prompt('Freundescode:', me.friend_code); } };
@@ -920,7 +926,7 @@ async function openProfile(uid) {
     const p = await rpc('get_profile', { p_user: uid });
     const s = p.stats;
     $('#modal .modal-box').innerHTML = `<div class="row" style="margin-bottom:12px">${avatarHTML(p.avatar_url, p.name, 'big')}<h2 class="grow" style="margin:0">${esc(p.name || 'Spieler')}</h2><button class="small" id="prClose" aria-label="Schließen">✕</button></div>
-      <div class="pcode" style="margin-bottom:14px">Freundescode <b>${fmtCode(p.friend_code)}</b><span class="muted">· dabei seit ${new Date(p.since).toLocaleDateString('de-DE')}</span></div>
+      <div class="pcode" style="margin-bottom:14px">${p.is_me ? `Dein Freundescode <b>${fmtCode(p.friend_code)}</b>` : presenceHTML(p)}<span class="muted">· dabei seit ${new Date(p.since).toLocaleDateString('de-DE')}</span></div>
       <div class="pstats">${statTiles(s)}</div>
       <h3 class="psub">🏆 Ranked-Elo</h3><div class="elorow">${['solo', '2v2', '3v3', '4v4'].map(m => { const r = (p.ratings || {})[m] || { elo:0, games:0 }; return `<div class="elochip"><small>${RANKED_NAMES[m]}</small><b>${r.elo}</b><small>${r.games} Spiele</small></div>`; }).join('')}</div>
       <div class="pmodes"><div><b>Team</b> ${s.team_wins} / ${s.team_matches} Siegen</div><div><b>Solo</b> ${s.solo_wins} / ${s.solo_matches} Siegen</div><div><b>Felder</b> ${s.cells} gefunden</div></div>
@@ -950,6 +956,35 @@ function openFriends() {
   };
   renderFriendsBody();
 }
+/* Online-Status: Grün = online, Gelb = 10 Min. keine Eingabe, Rot = zuletzt online.
+   Nur mit Konto: die Seite meldet sich jede Minute bei der Datenbank. */
+const PRES_RANK = { online:0, away:1, offline:2 };
+function lastSeenText(t) {
+  if (!t) return 'Offline';
+  const m = Math.max(1, Math.round((Date.now() - new Date(t)) / 60000));
+  if (m < 60) return `Zuletzt online vor ${m} Min.`;
+  const h = Math.floor(m / 60); if (h < 24) return `Zuletzt online vor ${h} Std.`;
+  const d = Math.floor(h / 24); if (d < 7) return `Zuletzt online vor ${d} Tag${d === 1 ? '' : 'en'}`;
+  return 'Zuletzt online am ' + new Date(t).toLocaleDateString('de-DE');
+}
+function presenceHTML(f) {
+  const p = PRES_RANK[f.presence] !== undefined ? f.presence : 'offline';
+  return `<span class="pres ${p}"><i></i>${p === 'online' ? 'Online' : p === 'away' ? 'Abwesend' : lastSeenText(f.last_seen)}</span>`;
+}
+const sortFriends = list => [...list].sort((a, b) => (PRES_RANK[a.presence] ?? 2) - (PRES_RANK[b.presence] ?? 2) || new Date(b.last_seen || 0) - new Date(a.last_seen || 0) || String(a.name).localeCompare(String(b.name)));
+const PRES = { lastInput: Date.now(), sent: 0, busy: false };
+['pointerdown', 'keydown', 'wheel', 'touchstart', 'mousemove'].forEach(ev => addEventListener(ev, () => { PRES.lastInput = Date.now(); }, { passive:true, capture:true }));
+async function presenceTick(withFriends = true) {
+  if (!account() || !supaReady() || PRES.busy) return;
+  PRES.busy = true;
+  const t = Date.now(), active = PRES.lastInput > PRES.sent;
+  try { await rpc('heartbeat', { p_active: active }); PRES.sent = t; } catch {}
+  if (withFriends && PROF.me && ($('#profileCard') || $('#frBody'))) {
+    try { PROF.friends = await rpc('list_friends') || []; renderFriendsBody(); if ($('#profileCard')) renderProfileCard(); } catch {}
+  }
+  PRES.busy = false;
+}
+setInterval(presenceTick, 60000);
 async function refreshFriends() {
   try { PROF.friends = await rpc('list_friends') || []; } catch {}
   renderFriendsBody(); renderProfileCard();
@@ -957,9 +992,9 @@ async function refreshFriends() {
 function renderFriendsBody() {
   const body = $('#frBody'); if (!body) return;
   const g = k => PROF.friends.filter(f => f.kind === k);
-  const sec = (title, items, btns) => items.length ? `<h3 class="psub">${title} <span class="muted">${items.length}</span></h3><ul class="flist big">${items.map(f => `<li>${avatarHTML(f.avatar_url, f.name, 'sm')}<span class="grow"><b>${esc(f.name || 'Spieler')}</b>${f.friend_code ? `<small class="muted"> · ${fmtCode(f.friend_code)}</small>` : ''}</span>${btns(f)}</li>`).join('')}</ul>` : '';
+  const sec = (title, items, btns) => items.length ? `<h3 class="psub">${title} <span class="muted">${items.length}</span></h3><ul class="flist big">${items.map(f => `<li>${avatarHTML(f.avatar_url, f.name, 'sm')}<span class="grow fname"><b>${esc(f.name || 'Spieler')}</b>${f.kind === 'friend' ? presenceHTML(f) : ''}</span>${btns(f)}</li>`).join('')}</ul>` : '';
   const html = sec('📨 Anfragen an dich', g('incoming'), f => `<button class="small btn-primary" data-facc="${f.id}">Annehmen</button><button class="small" data-fdec="${f.id}">Ablehnen</button>`)
-    + sec('Freunde', g('friend'), f => `<button class="small" data-fprof="${f.id}">Profil</button><button class="small danger" data-frem="${f.id}" data-fname="${esc(f.name)}">Entfernen</button>`)
+    + sec('Freunde', sortFriends(g('friend')), f => `<button class="small" data-fprof="${f.id}">Profil</button><button class="small danger" data-frem="${f.id}" data-fname="${esc(f.name)}">Entfernen</button>`)
     + sec('Gesendet – wartet auf Antwort', g('outgoing'), f => `<button class="small" data-frem="${f.id}" data-fname="${esc(f.name)}">Zurückziehen</button>`);
   body.innerHTML = html || '<div class="empty-state">Noch keine Freunde. Gib oben den Code eines Freundes ein.</div>';
   $$('[data-facc]', body).forEach(b => b.onclick = async () => { await rpc('respond_friend_request', { p_other: b.dataset.facc, p_accept: true }).catch(e => toast(e.message, '#ff5d6c')); toast('🤝 Freundschaft angenommen', '#35c873'); refreshFriends(); });
@@ -1261,6 +1296,11 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-presence', date:'23.10.2026', title:'Online-Status in der Freundesliste', items:[
+    'Neu: In der Freundesliste siehst du, wer gerade da ist – 🟢 Online, 🟡 Abwesend (10 Min. keine Eingabe), 🔴 zuletzt online vor …',
+    'Freunde, die gerade online sind, stehen ganz oben.',
+    'Dein Freundescode ist jetzt nur noch für dich selbst sichtbar.'
+  ] },
   { id:'2026-10-23-ranked', date:'23.10.2026', title:'Online spielen, Ranked & Bestenliste', items:[
     'Neu: 🌍 Online spielen – das Spiel sucht automatisch Mitspieler, jeder gegen jeden.',
     'Neu: 🏆 Ranked in vier Modi (Solo mit 10 Spielern, 2v2, 3v3, 4v4) – jeder mit eigener Elo. Alle starten bei 0, weniger als 0 geht nicht.',
