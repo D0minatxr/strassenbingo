@@ -259,7 +259,8 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2p
 .mkn{fill:#fff;font:700 12px 'DM Sans',sans-serif;text-anchor:middle;pointer-events:none}
 .mkg.cur .mkn{fill:var(--accent-ink)}
 .mkg.new .mkn{fill:#06210f}
-.mkl{fill:#fff;font:700 12px 'DM Sans',sans-serif;paint-order:stroke;stroke:#0e1217;stroke-width:3px;stroke-linejoin:round;pointer-events:auto}
+.mkl{fill:#fff;font:700 12px 'DM Sans',sans-serif;paint-order:stroke;stroke:#0e1217;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.mkg:hover .mkl{fill:var(--accent)}
 .wzoom{position:absolute;right:10px;top:10px;display:grid;gap:4px;z-index:2}
 .wzoom button{width:34px;height:34px;padding:0;font-size:18px}
 .wattr{position:absolute;left:8px;bottom:6px;font-size:10px;color:var(--muted)}
@@ -1342,9 +1343,14 @@ function layoutMap() {
   if (w === M.w && h === M.h) return;
   M.w = w; M.h = h;
   M.svg.attr('viewBox', `0 0 ${w} ${h}`).attr('width', w).attr('height', h);
-  M.proj.fitExtent([[10, 10], [w - 10, h - 10]], {type:'Sphere'});
+  // Karte füllt das ganze Fenster (keine leeren Streifen); verschieben/zoomen bleibt innerhalb der Weltkugel
+  M.proj.fitExtent([[0, 0], [w, h]], {type:'Sphere'});
+  let b = d3.geoPath(M.proj).bounds({type:'Sphere'});
+  const cover = Math.max(w / (b[1][0] - b[0][0]), h / (b[1][1] - b[0][1]));
+  M.proj.scale(M.proj.scale() * cover).translate([w / 2, h / 2]);
   M.path = d3.geoPath(M.proj);
-  M.zoom.extent([[0, 0], [w, h]]).translateExtent([[0, 0], [w, h]]);
+  b = M.path.bounds({type:'Sphere'});
+  M.zoom.extent([[0, 0], [w, h]]).translateExtent(b);
   drawBase(); placeMarkers(); S.fitSig = ''; fitMap(true);
 }
 function drawBase() {
@@ -1358,7 +1364,7 @@ function drawBase() {
 function placeMarkers() {
   const M = S.map; if (!M || !M.path) return;
   const sel = M.gMk.selectAll('g.mkg').data(M.items, d => d.key).join(enter => {
-    const g = enter.append('g').on('click', (e, d) => { e.stopPropagation(); d.fn(); });
+    const g = enter.append('g').on('click', (e, d) => { e.stopPropagation(); d.fn(); }).on('mouseenter', function () { d3.select(this).raise(); });
     g.append('title'); g.append('circle').attr('r', 13);
     g.append('text').attr('class', 'mkn').attr('dy', '0.35em');
     g.append('text').attr('class', 'mkl').attr('x', 18).attr('dy', '0.35em');
