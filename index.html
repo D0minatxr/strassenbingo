@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-4/K2jI6s0glZy2igm1rF0bxJikvM6OsMDRraaF9x6Ds='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-L3coER3lISfDkg1+9DTfwjVzoL4p5ba5w6U7a8BBUiY='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -1028,7 +1028,7 @@ const regionLocs = r => LOCS.filter(l => r === 'world' || (r === 'eu' ? l[0] !==
 const DEFAULT_SETTINGS = {
   mode:'team', teamNames:['Team Rot','Team Blau'], size:5, free:false, minutes:10, win:'line',
   voting:true, lockout:false, region:'world', wordMode:'std', custom:'',
-  locCount:3, locEvery:3, maxLocs:4, interEvery:6, jokers:0, draft:true, draftTime:90, tpRadius:1
+  locCount:3, locEvery:3, maxLocs:4, interEvery:6, jokers:0, draft:true, draftTime:90, tpRadius:1, minimap:true
 };
 const WIN_NAMES = {line:'Erste Reihe (Bingo)', full:'Volle Karte', most:'Meiste Felder bei Zeitende'};
 const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'};
@@ -2006,7 +2006,7 @@ const isCasual = m => m === 'casual' || /^c\dv\d$/.test(m);
 const modeLabel = m => m === 'solo' ? 'Solo' : m === 'casual' ? 'Jeder gegen jeden' : m.replace(/^c/, '');
 function rankedSettings(mode) {
   return { ...DEFAULT_SETTINGS, teamNames:['Team Rot', 'Team Blau'], mode: isTeamMode(mode) ? 'team' : 'solo', size:4, minutes:10, win:'most',
-    voting:true, interEvery:6, draft:false, lockout:false, locCount:3, locEvery:3, maxLocs:4, tpRadius:1, region:'world', wordMode:'std', custom:'', listName:'', bingoBonus:true };
+    voting:true, interEvery:6, draft:false, lockout:false, locCount:3, locEvery:3, maxLocs:4, tpRadius:1, minimap:false, region:'world', wordMode:'std', custom:'', listName:'', bingoBonus:true };
 }
 const LB = { mode:'solo', data:{}, loading:false };
 function renderOnlineCard() { const p = S.playPick || (account() ? 'casual' : 'custom'); if (S.homeView === 'play' && (p === 'casual' || p === 'ranked')) renderModePanel(p); }
@@ -2316,8 +2316,8 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
-  { id:'2026-10-24-minimap-casual', date:'24.10.2026', title:'Minimap nur noch in Casual', items:[
-    'Die Minimap gibt es jetzt nur noch in Casual. In Ranked und eigenen Lobbys orientierst du dich wieder nur in Street View.'
+  { id:'2026-10-24-minimap-custom', date:'24.10.2026', title:'Minimap nur in eigenen Lobbys', items:[
+    'Die Minimap gibt es jetzt nur noch in eigenen Lobbys – der Host kann sie dort an- oder abschalten. In Casual und Ranked orientierst du dich nur in Street View.'
   ] },
   { id:'2026-10-24-help', date:'24.10.2026', title:'Anleitung & Regeln', items:[
     'Neu: „So spielst du“ erklärt Schritt für Schritt, wie eine Runde abläuft, welche Modi es gibt und wie man gewinnt.',
@@ -2880,8 +2880,8 @@ function helpPlayHTML() {
   <div class="help-table">
     <div><b>Casual</b><span>Ohne Elo. Jeder gegen jeden (3–8 Spieler), 1v1 oder Teams bis 4v4. Teams werden fair aufgeteilt.</span></div>
     <div><b>Ranked</b><span>Solo (bis 10 Spieler), 1v1, 2v2, 3v3, 4v4 – jede Warteschlange hat ihre eigene Elo. Siege gegen Stärkere bringen mehr, Niederlagen gegen Schwächere kosten mehr.</span></div>
-    <div><b>Casual &amp; Ranked</b><span>4×4-Karte, 10 Minuten. <b>1 Punkt pro Feld, +${BINGO_BONUS} pro Bingo</b> (volle Reihe, Spalte oder Diagonale), die meisten Punkte gewinnen.</span></div>
-    <div><b>Benutzerdefiniert</b><span>Der Host stellt alles ein: Team oder jeder für sich, Kartengröße 3×3 bis 5×5, Zeit, Siegbedingung, Wortlisten, Orte, Teleport, Abstimmung und Lockout.</span></div>
+    <div><b>Casual &amp; Ranked</b><span>4×4-Karte, 10 Minuten, ohne Minimap. <b>1 Punkt pro Feld, +${BINGO_BONUS} pro Bingo</b> (volle Reihe, Spalte oder Diagonale), die meisten Punkte gewinnen.</span></div>
+    <div><b>Benutzerdefiniert</b><span>Der Host stellt alles ein: Team oder jeder für sich, Kartengröße 3×3 bis 5×5, Zeit, Siegbedingung, Wortlisten, Orte, Teleport, Minimap, Abstimmung und Lockout.</span></div>
   </div>
   <h3>Siegbedingungen (eigene Lobby)</h3>
   <ul class="help-list">
@@ -2896,7 +2896,7 @@ function helpPlayHTML() {
   <ul class="help-list">
     <li><b>🎯 Teleport:</b> springt an einen zufälligen Punkt in der Nähe deines Startpunkts – z. B. wenn du feststeckst. <b>🏠 Startpunkt</b> bringt dich zurück.</li>
     <li><b>↻ Neu laden:</b> lädt Street View an der Stelle neu, falls es hängt.</li>
-    <li><b>Minimap (nur Casual):</b> zeigt die Straßen rund um deinen Startpunkt (nicht, wo du gerade stehst).</li>
+    <li><b>Minimap (nur in eigenen Lobbys, wenn der Host sie anlässt):</b> zeigt die Straßen rund um deinen Startpunkt (nicht, wo du gerade stehst).</li>
     <li><b>📚 Wortlisten:</b> eigene Begriffe speichern, Listen anderer nutzen, liken und favorisieren.</li>
     <li><b>Gruppe:</b> Lade Freunde rechts in deine Gruppe ein, dann sucht ihr in Casual oder Ranked zusammen.</li>
   </ul>
@@ -3709,7 +3709,7 @@ UPDATE.lobby = () => {
 };
 
 /* Regeln als Kacheln – für alle Spieler */
-function ruleTiles(s) {
+function ruleTiles(s, ranked) {
   const team = s.mode === 'team';
   const words = s.wordMode === 'std' ? 'Standard' : (s.listName ? '„' + s.listName + '“' : s.wordMode === 'custom' ? 'Eigene Liste' : 'Eigene') + (s.wordMode === 'mix' ? ' + Standard' : '');
   const customN = s.wordMode === 'std' ? 0 : wordPool({...s, wordMode:'custom'}).length;
@@ -3724,13 +3724,14 @@ function ruleTiles(s) {
     { k:'locs', i:'🗺️', l:'Orte', v: `1 aus ${s.locCount} wählen`, sub: s.maxLocs === 1 ? 'ein Ort für die ganze Runde' : `alle ${s.locEvery} Min. ein weiterer · max. ${s.maxLocs || '∞'}` },
     { k:'region', i:'🌍', l:'Gebiet', v: REGION_NAMES[s.region], sub: regionLocs(s.region).length + ' mögliche Orte' },
     { k:'tp', i:'🎯', l:'Teleport', v: s.tpRadius ? String(s.tpRadius).replace('.', ',') + ' km' : 'Aus', sub: s.tpRadius ? 'Umkreis um den Startpunkt' : 'kein Springen möglich', off: !s.tpRadius },
+    { k:'mm', i:'🗺️', l:'Minimap', v: s.minimap !== false ? 'An' : 'Aus', sub: s.minimap !== false ? 'Karte rund um den Startpunkt' : 'nur Street View', off: s.minimap === false },
     { k:'vote', i:'✅', l:'Fotos prüfen', v: s.voting ? 'An' : 'Aus', sub: s.voting ? 'die Gegner stimmen ab' : 'alle Fotos zählen', off: !s.voting },
     { k:'inter', i:'⏸️', l:'Zwischenrunde', v: inter ? `nach ${s.interEvery} Fotos` : 'Aus', sub: inter ? 'Zeit pausiert beim Prüfen' : 'nur am Ende prüfen', off: !inter },
     { k:'lock', i:'🔒', l:'Lockout', v: s.lockout ? 'An' : 'Aus', sub: s.lockout ? 'jedes Feld nur einmal' : 'alle Felder für alle offen', off: !s.lockout }
   ];
 }
 function renderRules(st) {
-  const tiles = ruleTiles(st.settings);
+  const tiles = ruleTiles(st.settings, st.ranked).filter(t => !(st.ranked && t.k === 'mm'));
   const box = $('#rules'); const prev = S.prevRules; const now = {};
   const inner = t => `<div class="ri" aria-hidden="true">${t.i}</div>
       <div class="rt"><div class="rl">${esc(t.l)}</div><div class="rv">${esc(t.v)}</div><div class="rs">${esc(t.sub || '')}</div></div>`;
@@ -3827,6 +3828,7 @@ function mountSettingsForm() {
         <label><span class="lbl">Max. Orte pro Spieler</span>${sel('sLocMax', [1,2,3,4,5,6,0].map(n => [n, n ? n + (n === 1 ? ' Ort (ganze Runde)' : ' Orte') : 'Unbegrenzt']))}</label>
         <label><span class="lbl">Gebiet</span>${sel('sReg', Object.entries(REGION_NAMES))}</label>
         <label class="full"><span class="lbl">🎯 Teleport-Radius</span>${sel('sTp', [0,0.5,1,2,5].map(n => [n, n ? String(n).replace('.', ',') + ' km um den Startpunkt' : 'Aus']))}</label>
+        <label class="sw full"><input type="checkbox" id="sMm"><span><b>Minimap</b><small>Kleine Karte mit den Straßen rund um den Startpunkt</small></span></label>
       </div>
     </section>
     <section class="sgrp"><h3><span>✅</span>Fotos prüfen</h3>
@@ -3852,6 +3854,7 @@ function mountSettingsForm() {
   $('#sLock').onchange = e => { s().lockout = e.target.checked; save(); };
   $('#sVote').onchange = e => { s().voting = e.target.checked; save(); };
   $('#sTp').onchange = e => { s().tpRadius = +e.target.value; save(); };
+  $('#sMm').onchange = e => { s().minimap = e.target.checked; save(); };
   $('#sDraft').onchange = e => { s().draft = e.target.checked; save(); };
   $('#sDt').onchange = e => { s().draftTime = +e.target.value; save(); };
   $('#sWm').onchange = e => { s().wordMode = e.target.value; save(); };
@@ -3871,7 +3874,7 @@ function syncSettingsForm() {
   $('#sInter').disabled = !s.voting;
   $('#sInter').closest('label').classList.toggle('dim', !s.voting);
   $('#sLocE').closest('label').classList.toggle('dim', s.maxLocs === 1);
-  setv('sTp', String(s.tpRadius ?? 1)); setv('sDraft', s.draft, 'checked'); setv('sDt', String(s.draftTime));
+  setv('sTp', String(s.tpRadius ?? 1)); setv('sMm', s.minimap !== false, 'checked'); setv('sDraft', s.draft, 'checked'); setv('sDt', String(s.draftTime));
   $('#sDtW').classList.toggle('hidden', !s.draft);
   setv('sLock', s.lockout, 'checked'); setv('sVote', s.voting, 'checked');
   setv('sWm', s.wordMode); setv('sCustom', s.custom);
@@ -3978,7 +3981,7 @@ function mmURL(l, R) {
   const z = !R ? 16 : R <= .5 ? 16 : R <= 1 ? 15 : R <= 2 ? 14 : 13;
   return `https://maps.google.com/maps?q=${l.lat},${l.lng}&ll=${l.lat},${l.lng}&z=${z}&t=m&hl=de&output=embed`;
 }
-const minimapOn = st => !!(st && st.ranked && isCasual(st.ranked.mode)); // Minimap gibt es nur in Casual
+const minimapOn = st => !!(st && !st.ranked && st.settings.minimap !== false); // nur in eigenen Lobbys (Option des Hosts)
 function updateMinimap() {
   const box = $('#minimap'); if (!box || !S.state) return;
   const st = S.state, base = S.curLoc && myLocs().find(l => l.id === S.curLoc);
@@ -4194,7 +4197,7 @@ MOUNT.game = () => {
         <div id="svEmpty" class="svempty">Wähle auf der Weltkarte einen deiner Orte.</div>
         <div id="svConsent" class="svconsent hidden"><div class="card">
           <h3>Google Street View laden?</h3>
-          <p>Für die Straßenansicht (und in Casual die Minimap) werden Inhalte von Google geladen. Dabei wird u. a. deine IP-Adresse an Google übertragen und Google kann Cookies setzen. Mehr dazu in der <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
+          <p>Für die Straßenansicht und die Minimap werden Inhalte von Google geladen. Dabei wird u. a. deine IP-Adresse an Google übertragen und Google kann Cookies setzen. Mehr dazu in der <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
           <label class="chk"><input type="checkbox" id="svRemember" checked> Auf diesem Gerät merken</label>
           <button class="btn-primary" id="svAccept">Street View laden</button>
         </div></div>
