@@ -266,7 +266,7 @@ label.dim{opacity:.45}
 .ogrid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:22px}
 .oplay .btn-primary.big{width:100%;padding:14px;font-size:17px;flex-direction:column;gap:2px}
 .oplay .btn-primary.big small{font-size:12px;font-weight:600;opacity:.75}
-.rqgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.rqgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.rqgrid>[data-queue]{grid-column:span 2}.rqgrid>[data-queue=solo],.rqgrid>[data-queue='1v1']{grid-column:span 3}
 .rqtile{flex-direction:column;align-items:flex-start;gap:2px;padding:12px;border-radius:12px;background:var(--panel2);text-align:left}
 .rqtile:hover:not(:disabled){border-color:var(--accent)}
 .rqname{font-family:'Bricolage Grotesque';font-size:20px;font-weight:800}
@@ -281,7 +281,7 @@ label.dim{opacity:.45}
 .lbgames{font-size:12px}
 .lbelo{font-family:'Bricolage Grotesque';font-size:17px;min-width:44px;text-align:right}
 .lbme{margin-top:10px;font-size:13px;padding:8px 10px;border:1px dashed var(--line);border-radius:10px}
-.elorow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.elorow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .elochip{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:grid}
 .elochip b{font-family:'Bricolage Grotesque';font-size:22px}
 .elochip small{font-size:11px;color:var(--muted)}
@@ -300,7 +300,7 @@ label.dim{opacity:.45}
 .rkbanner{display:grid;gap:4px;border-color:rgba(255,176,32,.45);background:color-mix(in srgb,var(--accent) 7%,var(--panel))}
 .rankedbox{text-align:center;font-size:16px}
 .rankedbox .up{color:var(--ok);font-weight:800}.rankedbox .down{color:var(--bad);font-weight:800}
-@media (max-width:860px){.ogrid{grid-template-columns:1fr}.olb{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:16px}.rqgrid,.elorow{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:860px){.ogrid{grid-template-columns:1fr}.olb{border-left:0;padding-left:0;border-top:1px solid var(--line);padding-top:16px}.rqgrid{grid-template-columns:repeat(2,1fr)}.rqgrid>[data-queue]{grid-column:auto}.rqgrid>[data-queue=solo]{grid-column:span 2}.elorow{grid-template-columns:repeat(3,1fr)}}
 
 /* Neuigkeiten */
 .newsbtn{position:relative}
@@ -942,7 +942,7 @@ async function openProfile(uid) {
     $('#modal .modal-box').innerHTML = `<div class="row" style="margin-bottom:12px">${avatarHTML(p.avatar_url, p.name, 'big')}<h2 class="grow" style="margin:0">${esc(p.name || 'Spieler')}</h2><button class="small" id="prClose" aria-label="Schließen">✕</button></div>
       <div class="pcode" style="margin-bottom:14px">${p.is_me ? `Dein Freundescode <b>${fmtCode(p.friend_code)}</b>` : presenceHTML(p)}<span class="muted">· dabei seit ${new Date(p.since).toLocaleDateString('de-DE')}</span></div>
       <div class="pstats">${statTiles(s)}</div>
-      <h3 class="psub">🏆 Ranked-Elo</h3><div class="elorow">${['solo', '2v2', '3v3', '4v4'].map(m => { const r = (p.ratings || {})[m] || { elo:0, games:0 }; return `<div class="elochip"><small>${RANKED_NAMES[m]}</small><b>${r.elo}</b><small>${r.games} Spiele</small></div>`; }).join('')}</div>
+      <h3 class="psub">🏆 Ranked-Elo</h3><div class="elorow">${['solo', '1v1', '2v2', '3v3', '4v4'].map(m => { const r = (p.ratings || {})[m] || { elo:0, games:0 }; return `<div class="elochip"><small>${RANKED_NAMES[m]}</small><b>${r.elo}</b><small>${r.games} Spiele</small></div>`; }).join('')}</div>
       <div class="pmodes"><div><b>Team</b> ${s.team_wins} / ${s.team_matches} Siegen</div><div><b>Solo</b> ${s.solo_wins} / ${s.solo_matches} Siegen</div><div><b>Felder</b> ${s.cells} gefunden</div></div>
       <h3 class="psub">Letzte Matches</h3>${recentHTML(p.recent, 10)}`;
     $('#prClose').onclick = closeModal;
@@ -1151,8 +1151,8 @@ function renderFriendsBody() {
   $$('[data-fprof]', body).forEach(b => b.onclick = () => openProfile(b.dataset.fprof));
 }
 /* ---------------- Online spielen & Ranked ---------------- */
-const RANKED_NAMES = { casual:'Online · jeder gegen jeden', solo:'Ranked Solo', '2v2':'Ranked 2v2', '3v3':'Ranked 3v3', '4v4':'Ranked 4v4' };
-const RANKED_NEED = { casual:'3–8 Spieler', solo:'10 Spieler · ab 4 nach 3 Min', '2v2':'4 Spieler', '3v3':'6 Spieler', '4v4':'8 Spieler' };
+const RANKED_NAMES = { casual:'Online · jeder gegen jeden', solo:'Ranked Solo', '1v1':'Ranked 1v1', '2v2':'Ranked 2v2', '3v3':'Ranked 3v3', '4v4':'Ranked 4v4' };
+const RANKED_NEED = { casual:'3–8 Spieler', solo:'10 Spieler · ab 4 nach 3 Min', '1v1':'2 Spieler · Duell', '2v2':'4 Spieler', '3v3':'6 Spieler', '4v4':'8 Spieler' };
 const isTeamMode = m => m === '2v2' || m === '3v3' || m === '4v4';
 function rankedSettings(mode) {
   return { ...DEFAULT_SETTINGS, teamNames:['Team Rot', 'Team Blau'], mode: isTeamMode(mode) ? 'team' : 'solo', size:4, minutes:10, win:'most',
@@ -1173,13 +1173,13 @@ function renderOnlineCard() {
       <p class="muted" style="margin:0 0 12px;font-size:14px">${acc ? 'Finde automatisch Mitspieler aus der ganzen Welt.' : 'Melde dich an, um online und ranked zu spielen.'}</p>
       <button class="btn-primary big" data-queue="casual" ${acc ? '' : 'disabled'}>🌍 Jeder gegen jeden <small>${RANKED_NEED.casual} · ohne Elo</small></button>
       <h3 class="psub">🏆 Ranked – jeder Modus mit eigener Elo</h3>
-      <div class="rqgrid">${['solo', '2v2', '3v3', '4v4'].map(tile).join('')}</div>
+      <div class="rqgrid">${['solo', '1v1', '2v2', '3v3', '4v4'].map(tile).join('')}</div>
       ${acc ? '<div id="partyBox"></div>' : ''}
       ${acc ? '' : '<button style="margin-top:10px" id="ocLogin">Anmelden</button>'}
     </div>
     <div class="olb">
       <div class="row" style="margin-bottom:8px"><h2 class="grow" style="margin:0">🥇 Bestenliste</h2></div>
-      <div class="seg" id="lbTabs" style="margin:0 0 10px">${['solo', '2v2', '3v3', '4v4'].map(m => `<button data-lb="${m}" class="${LB.mode === m ? 'on' : ''}">${m === 'solo' ? 'Solo' : m}</button>`).join('')}</div>
+      <div class="seg" id="lbTabs" style="margin:0 0 10px">${['solo', '1v1', '2v2', '3v3', '4v4'].map(m => `<button data-lb="${m}" class="${LB.mode === m ? 'on' : ''}">${m === 'solo' ? 'Solo' : m}</button>`).join('')}</div>
       <div id="lbBody"></div>
     </div></div>`;
   $$('[data-queue]', box).forEach(b => b.onclick = () => startSearch(b.dataset.queue));
@@ -1458,6 +1458,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-1v1', date:'23.10.2026', title:'Neu: Ranked 1v1', items:[
+    'Neu: ⚔️ Ranked 1v1 – du gegen einen Gegner mit ähnlicher Elo. Eigene Elo, eigene Bestenliste.',
+    'Gleiche Regeln wie die anderen Ranked-Modi: 4×4-Karte, 10 Minuten, meiste Punkte gewinnen, +3 pro Bingo.'
+  ] },
   { id:'2026-10-23-party', date:'23.10.2026', title:'Mit Freunden spielen: Gruppen & Einladungen', items:[
     'Neu: 👥 Gruppen für Ranked 2v2, 3v3 und 4v4 – lade Freunde ein, sucht zusammen und spielt im selben Team. Die Gegner werden so gewählt, dass die Teams nach Elo möglichst ausgeglichen sind.',
     'Neu: In jeder Lobby gibt es „👥 Freunde einladen“ – deine Freunde bekommen eine Einladung mit Beitreten-Knopf.',
