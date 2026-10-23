@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-BIDtcz555a0onmqA37PgrcNGSr+8DkwfSiLWTWisLIU='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-iau3+AFN3/L2Rg5KBPYJ2/0U+s68VF2Cr8vYWy9mptc='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -808,6 +808,28 @@ kbd{border-radius:0}
 .seg.chatscope{margin:0;flex:none}
 .seg.chatscope button{padding:3px 12px;font-size:13px}
 .chat form input{flex:1}
+/* Vorbereitung */
+.prepov{position:absolute;inset:0;z-index:6;background:var(--bg);overflow:auto;padding:18px;display:grid;gap:16px;align-content:start}
+.prep-head{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.prep-head h2{font-size:28px;margin:2px 0 4px}.prep-head p{margin:0;max-width:52ch}
+.prep-count{display:grid;justify-items:center;background:#0f0c20;padding:8px 18px;box-shadow:inset 0 0 0 3px #0a0816,inset 0 0 0 6px #3d3670}
+.prep-count b{font-family:var(--pxf);font-size:44px;line-height:1;color:var(--accent)}.prep-count small{color:var(--muted);font-size:12px}
+.prep-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start}
+.prep-grid h3{font-size:16px;margin:0 0 10px}
+.prep-board{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:4px;background:var(--paper);padding:6px;box-shadow:0 0 0 3px #0a0816}
+.prep-board span{aspect-ratio:1;display:grid;place-items:center;text-align:center;padding:3px;background:#fffaf0;color:var(--ink);font-weight:700;font-size:13px;line-height:1.1;overflow-wrap:anywhere;hyphens:auto;box-shadow:inset 0 -3px 0 rgba(0,0,0,.08)}
+.prep-board span.free{background:var(--accent);font-family:var(--pxf)}
+.prep-locs{display:grid;gap:8px}
+.prep-loc{justify-content:flex-start;text-align:left;gap:10px;padding:6px 10px;font-family:'Instrument Sans',system-ui,sans-serif;letter-spacing:0}
+.prep-loc .n{display:grid;place-items:center;width:28px;height:28px;background:var(--accent);color:var(--accent-ink);font-family:var(--pxf);flex:none}
+.prep-loc b{display:block;font-size:15px}.prep-loc small{display:block;color:var(--muted);font-weight:500}
+.prep-loc .go{font-family:var(--pxf);color:var(--accent);font-size:13px}
+.prep-picked{display:flex;gap:8px;align-items:center;padding:10px 12px;margin-bottom:10px;background:#16321f;box-shadow:inset 0 0 0 3px #0a0816,inset 0 0 0 6px #35c873}
+.prep-picked .ic{color:var(--ok)}
+.prep-side{display:grid;justify-items:stretch;gap:6px;text-align:center}
+.prep-side button{padding:6px 16px;font-size:16px}
+.game.prepping .vtools #mapBtn{visibility:hidden}
+@media (max-width:760px){.prepov{position:fixed;inset:0;z-index:45;padding:14px}.prep-grid{grid-template-columns:1fr}.prep-head{flex-wrap:nowrap}.prep-head h2{font-size:22px}.prep-head p{font-size:13px}.prep-count b{font-size:32px}.prep-board span{font-size:11px}}
 /* Minimap */
 .minimap{position:absolute;left:10px;bottom:10px;z-index:3;width:250px;height:190px;display:flex;flex-direction:column;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,0 0 0 6px #3d3670,0 8px 0 6px rgba(0,0,0,.35)}
 .minimap.big{width:min(480px,calc(100% - 20px));height:min(360px,calc(100% - 20px))}
@@ -861,7 +883,7 @@ function cleanState(st) {
   num(se, ['size', 'minutes', 'locCount', 'locEvery', 'maxLocs', 'interEvery', 'jokers', 'draftTime', 'tpRadius']);
   se.size = [3, 4, 5].includes(se.size) ? se.size : 4;
   se.teamNames = Array.isArray(se.teamNames) ? se.teamNames.slice(0, 2).map(x => String(x ?? '').slice(0, 20)) : ['Team 1', 'Team 2'];
-  num(st, ['free', 'endsAt', 'nextLocAt', 'voteIdx', 'voteEndsAt', 'pausedAt', 'draftEnds', 'rankedStartAt', 'startedAt', 'round', 'createdAt', 'locBatch', 'nextCi'], -1);
+  num(st, ['prepUntil', 'free', 'endsAt', 'nextLocAt', 'voteIdx', 'voteEndsAt', 'pausedAt', 'draftEnds', 'rankedStartAt', 'startedAt', 'round', 'createdAt', 'locBatch', 'nextCi'], -1);
   st.board = Array.isArray(st.board) ? st.board.map(w => String(w ?? '').slice(0, 80)) : [];
   if (st.layouts && typeof st.layouts === 'object') for (const k of Object.keys(st.layouts)) st.layouts[k] = Array.isArray(st.layouts[k]) ? st.layouts[k].map(x => x | 0) : [];
   for (const p of Object.values(st.players || {})) if (p && typeof p === 'object') { p.name = String(p.name ?? '').slice(0, 20); if (p.ci != null) p.ci = p.ci | 0; p.avatar = okAvatar(p.avatar); }
@@ -2214,6 +2236,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-prep', date:'23.10.2026', title:'60 Sekunden Vorbereitung', items:[
+    'Vor jeder Runde – in allen Modi – gibt es jetzt 60 Sekunden Vorbereitung: Du siehst die Bingo-Karte und deine möglichen Startorte und kannst deinen Startort schon auswählen.',
+    'Die Spielzeit startet erst danach. Sind alle vorher bereit, geht es sofort los.'
+  ] },
   { id:'2026-10-23-security', date:'23.10.2026', title:'Sicherheits-Update', items:[
     'Fotos von Mitspielern werden jetzt streng geprüft: Nur echte Bilddaten kommen durch – über ein präpariertes „Bild“ lässt sich kein Code mehr einschleusen.',
     'Jeder Spielerplatz ist mit einem geheimen Schlüssel gesichert, niemand kann mehr den Platz eines anderen übernehmen.',
@@ -2683,6 +2709,7 @@ function hostHandle(cid, msg) {
     }
     case 'capture': {
       if (H.phase !== 'game') return hostSendTo(pid, {t:'toast', text:'Das Spiel läuft gerade nicht.'});
+      if (H.prepUntil) return hostSendTo(pid, {t:'toast', text:'Fotos gibt es erst nach der Vorbereitung.'});
       const cell = msg.cell | 0; const side = sideOf(H, pid);
       if (!side) return hostSendTo(pid, {t:'toast', text:'Wähle zuerst ein Team.'});
       if (cell < 0 || cell >= H.board.length || cell === H.free) return;
@@ -2728,6 +2755,14 @@ function hostHandle(cid, msg) {
       const repl = pickLocs(pid, 1, list[i].b)[0]; if (!repl) return;
       repl.ch = true; list[i] = repl; H.jokers[pid] = (H.jokers[pid] || 0) + 1;
       hostSendTo(pid, {t:'joker', from:msg.id, to:repl.id});
+      commit(); return;
+    }
+    case 'pready': {
+      if (H.phase !== 'game' || !H.prepUntil) return;
+      H.prepReady = H.prepReady || {};
+      if (msg.r) H.prepReady[pid] = true; else delete H.prepReady[pid];
+      const online = Object.keys(H.players).filter(q => H.players[q].online);
+      if (online.length && online.every(q => H.prepReady[q])) return hostEndPrep();
       commit(); return;
     }
     case 'dvote': {
@@ -2825,12 +2860,21 @@ function hostBeginGame(words) {
   for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
   H.phase = 'game'; H.round++; H.startedAt = Date.now();
   ensureLayouts();
-  H.endsAt = s.minutes ? Date.now() + s.minutes * 60000 : 0;
   giveBatch();
+  // Vorbereitung: 60 Sekunden Karte und Startorte ansehen – die Spielzeit startet erst danach
+  H.prepUntil = Date.now() + PREP_SECS * 1000; H.prepReady = {}; H.endsAt = 0; H.nextLocAt = 0;
+  hostBroadcast({t:'reset'});
+  announce('Vorbereitung: Schau dir die Bingo-Karte und deine möglichen Startorte an!', '#ffb020', true, 'draft');
+  commit();
+}
+const PREP_SECS = 60;
+function hostEndPrep() {
+  if (!H || H.phase !== 'game' || !H.prepUntil) return;
+  const s = H.settings; H.prepUntil = 0; H.prepReady = {}; H.startedAt = Date.now();
+  H.endsAt = s.minutes ? Date.now() + s.minutes * 60000 : 0;
   H.nextLocAt = s.locEvery && s.maxLocs !== 1 ? Date.now() + s.locEvery * 60000 : 0;
   if (H.endsAt && H.nextLocAt >= H.endsAt) H.nextLocAt = 0;
-  hostBroadcast({t:'reset'});
-  announce('Los geht’s! Wähle auf der Weltkarte einen deiner Orte.', '#ffb020', true, 'start');
+  announce('Los geht’s! Die Zeit läuft.', '#ffb020', true, 'start');
   commit();
 }
 
@@ -2946,6 +2990,7 @@ function hostKick(pid) {
 setInterval(() => {
   if (S.isHost && H && H.phase === 'draft' && H.draftEnds && Date.now() >= H.draftEnds) return hostFinishDraft();
   if (!S.isHost || !H || H.phase !== 'game') return;
+  if (H.prepUntil) { if (Date.now() >= H.prepUntil) hostEndPrep(); return; }
   if (H.endsAt && Date.now() >= H.endsAt) return hostEnd('⏰ Die Zeit ist abgelaufen!');
   if (H.nextLocAt && Date.now() >= H.nextLocAt) {
     giveBatch();
@@ -3561,8 +3606,10 @@ function acceptSV() {
   $('#svConsent').classList.add('hidden');
   if (S.svPending) { const id = S.svPending; S.svPending = null; showLoc(id); }
 }
+const inPrep = () => !!(S.state && S.state.phase === 'game' && S.state.prepUntil);
 function showLoc(id, fresh) {
   const base = myLocs().find(l => l.id === id); if (!base) return;
+  if (inPrep()) { S.curLoc = id; S.prepShow = id; renderPrep(); return; } // Street View erst nach der Vorbereitung
   if (needSVConsent(id)) { S.curLoc = id; toggleMap(false); renderLocUI(); return; }
   const loc = { ...base, ...(S.tp[id] || {}) };
   const wrap = $('#svwrap'); if (!wrap) return;
@@ -3593,7 +3640,7 @@ function mmURL(l, R) {
 function updateMinimap() {
   const box = $('#minimap'); if (!box || !S.state) return;
   const st = S.state, base = S.curLoc && myLocs().find(l => l.id === S.curLoc);
-  const on = st.settings.minimap !== false && !!base && !S.mapOpen && (S.svOk || store.get('svConsent', false));
+  const on = st.settings.minimap !== false && !!base && !S.mapOpen && !inPrep() && (S.svOk || store.get('svConsent', false));
   box.classList.toggle('hidden', !on); if (!on) return;
   box.classList.toggle('min', !!S.mmMin); box.classList.toggle('big', !!S.mmBig && !S.mmMin);
   const tp = S.tp[S.curLoc], loc = { ...base, ...(tp || {}) };
@@ -3744,7 +3791,9 @@ function renderLocUI() {
     }
   }
   if (S.curLoc && !locs.some(l => l.id === S.curLoc)) { S.curLoc = null; S.frames.forEach(f => f.classList.add('off')); $('#svEmpty').classList.remove('hidden'); }
-  if (opts.length && !S.seenOpts?.includes(opts[0].b)) { S.seenOpts = (S.seenOpts || []).concat(opts[0].b); if (!locs.length) toggleMap(true); }
+  if (!inPrep() && S.prepShow) { const id = S.prepShow; S.prepShow = null; if (locs.some(l => l.id === id)) { S.curLoc = null; return showLoc(id); } }
+  if (inPrep()) { renderPrep(); }
+  else if (opts.length && !S.seenOpts?.includes(opts[0].b)) { S.seenOpts = (S.seenOpts || []).concat(opts[0].b); if (!locs.length) toggleMap(true); }
   const mb = $('#mapBtn');
   mb.innerHTML = opts.length ? `🗺 ${locs.length + 1}. Ort wählen` : '🗺 Weltkarte';
   mb.classList.toggle('pulse', !!opts.length);
@@ -3789,7 +3838,7 @@ function renderLocUI() {
 
 MOUNT.game = () => {
   const st = S.state;
-  S.frames = new Map(); S.lru = []; S.curLoc = null; S.visited = new Set(); S.map = null; S.markers = null; S.jokerSwap = null; S.lastPhase = null; S.autoShow = null; S.seenOpts = []; S.tp = {};
+  S.frames = new Map(); S.lru = []; S.curLoc = null; S.visited = new Set(); S.map = null; S.markers = null; S.jokerSwap = null; S.lastPhase = null; S.autoShow = null; S.seenOpts = []; S.tp = {}; S.prepShow = null;
   app.innerHTML = `
   <header class="top game-top">${logoHTML(true)}<div id="timer" class="timer">--:--</div><div id="scores" class="scores"></div><div id="hostCtl" class="row"></div></header>
   <main class="game">
@@ -3817,6 +3866,7 @@ MOUNT.game = () => {
             <button class="iconbtn sm" id="mmMin" title="Ein- / ausklappen" aria-label="Minimap ein- oder ausklappen">${ic('down')}</button></div>
           <iframe id="mmFrame" title="Minimap" referrerpolicy="no-referrer-when-downgrade" loading="lazy"></iframe>
         </div>
+        <div id="prepOv" class="prepov hidden" aria-live="polite"></div>
       </div>
       <div class="vhint"><span class="grow" id="curLabel"></span>
         <button class="small hidden" id="homeBtn" title="Zurück zum geprüften Startpunkt dieses Orts">🏠 Startpunkt</button>
@@ -3849,17 +3899,49 @@ MOUNT.game = () => {
   $('#mmBig').onclick = () => { S.mmBig = !S.mmBig; store.set('mmBig', S.mmBig); if (S.mmMin) { S.mmMin = false; store.set('mmMin', false); } updateMinimap(); };
   $('#homeBtn').onclick = () => { if (!S.curLoc) return; delete S.tp[S.curLoc]; showLoc(S.curLoc, true); renderLocUI(); toast('🏠 Zurück am Startpunkt'); };
   $('#svAccept').onclick = acceptSV;
-  $('#board').onclick = e => { const b = e.target.closest('.cell'); if (b && !b.disabled) openCapture(+b.dataset.cell); };
+  $('#board').onclick = e => { const b = e.target.closest('.cell'); if (!b || b.disabled) return; if (inPrep()) return toast('Fotos gibt es erst nach der Vorbereitung – noch kurz Karte und Orte anschauen!'); openCapture(+b.dataset.cell); };
   bindChat();
   S.chatScope = st.settings.mode === 'team' ? 'team' : 'all'; $$('#chatScope [data-sc]').forEach(b => b.classList.toggle('on', b.dataset.sc === S.chatScope));
   toggleMap(true);
 };
 
+/* Vorbereitung (60 s): Bingo-Karte und mögliche Startorte ansehen, Startort wählen, „Bereit“ drücken */
+function renderPrep() {
+  const ov = $('#prepOv'); if (!ov) return;
+  const st = S.state, on = inPrep(); ov.classList.toggle('hidden', !on); $('.game') && $('.game').classList.toggle('prepping', on); if (!on) { ov.innerHTML = ''; return; }
+  const side = mySide(), lay = layoutOf(st, side), opts = myOptions(), locs = myLocs();
+  const online = Object.keys(st.players).filter(q => st.players[q].online), rd = st.prepReady || {};
+  const ready = !!rd[S.me.pid], nReady = online.filter(q => rd[q]).length;
+  const sz = Math.round(Math.sqrt(st.board.length));
+  const pick = locs[0];
+  ov.innerHTML = `<div class="prep-head"><div><span class="kicker">Vorbereitung</span><h2>Gleich geht’s los</h2>
+      <p class="muted">Präg dir die Begriffe ein und such dir deinen Startort aus. Die Spielzeit startet erst danach.</p></div>
+      <div class="prep-side"><div class="prep-count"><b id="prepCount">${fmtTime(st.prepUntil - (Date.now() + S.offset))}</b><small>bis zum Start</small></div>
+        <button class="${ready ? '' : 'btn-primary'}" id="prepReady">${ready ? 'Doch noch nicht' : `${ic('check')}Bereit`}</button>
+        <small class="muted">${nReady} von ${online.length} bereit</small></div></div>
+    <div class="prep-grid">
+      <section><h3>${st.settings.mode === 'team' && side ? 'Eure Bingo-Karte' : 'Deine Bingo-Karte'}</h3>
+        <div class="prep-board" style="--n:${sz}">${lay.map(i => `<span class="${i === st.free ? 'free' : ''}">${esc(st.board[i])}</span>`).join('')}</div></section>
+      <section><h3>Mögliche Startorte</h3>
+        ${pick ? `<div class="prep-picked">${ic('check')}<span>Dein Startort: <b>${esc(pick.c)}</b> · ${esc(pick.n)}</span></div>` : ''}
+        ${opts.length ? `<div class="prep-locs">${opts.map((l, i) => `<button class="prep-loc" data-opt="${esc(l.id)}"><span class="n">${String.fromCharCode(65 + i)}</span><span class="grow"><b>${esc(l.c)}</b><small>${esc(l.n)}</small></span><span class="go">wählen</span></button>`).join('')}</div>
+          <p class="hint">Wählst du keinen, öffnet sich nach dem Start die Weltkarte.</p>` : pick ? '' : '<p class="hint">Deine Orte kommen gleich.</p>'}
+      </section></div>
+    <p class="hint">Sind alle bereit, startet die Runde sofort.</p>`;
+  $$('[data-opt]', ov).forEach(b => b.onclick = () => chooseLoc(b.dataset.opt));
+  $('#prepReady').onclick = () => act({t:'pready', r: !ready});
+}
 function fmtTime(ms) { ms = Math.max(0, ms); const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 function tickTimer() {
   const el = $('#timer'); if (!el || !S.state) return;
   const st = S.state; const paused = st.phase === 'intermission';
   const now = paused ? st.pausedAt : Date.now() + S.offset;
+  if (inPrep()) {
+    const left = fmtTime(st.prepUntil - now); el.textContent = 'Start ' + left; el.title = 'Vorbereitung – die Spielzeit startet danach'; el.classList.remove('warn'); el.classList.add('paused');
+    const pc = $('#prepCount'); if (pc) pc.textContent = left;
+    const nl = $('#nextLoc'); if (nl) nl.innerHTML = '';
+    return;
+  }
   if (!st.endsAt) { el.textContent = paused ? '⏸ ∞' : '∞'; el.title = 'Ohne Zeitlimit'; }
   else { const left = st.endsAt - now; el.textContent = (paused ? '⏸ ' : '') + fmtTime(left); el.classList.toggle('warn', !paused && left < 60000); }
   el.classList.toggle('paused', paused);
@@ -3873,7 +3955,7 @@ setInterval(tickTimer, 250);
 
 UPDATE.game = () => {
   const st = S.state; const side = mySide(); const size = Math.round(Math.sqrt(st.board.length));
-  tickTimer();
+  tickTimer(); renderPrep();
   // Punktestand
   const ss = sides(st);
   $('#scores').innerHTML = standings(st).sort((a, b) => ss.findIndex(x => x.id === a.id) - ss.findIndex(x => x.id === b.id)).map(r => {
