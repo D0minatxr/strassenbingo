@@ -348,6 +348,20 @@ label.dim{opacity:.45}
 .cell.got{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8)}
 .cell.got:before{content:"";position:absolute;inset:0;background:linear-gradient(color-mix(in srgb,var(--c) 55%,transparent),color-mix(in srgb,var(--c) 80%,transparent))}
 .cell.line{box-shadow:inset 0 0 0 3px var(--accent)}
+.cell.got.conf{box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px var(--c)}
+.cell.got.conf.line{box-shadow:inset 0 0 0 3px var(--accent),inset 0 0 0 5px #fff}
+.cell.got.pend{outline:2px dashed rgba(255,255,255,.9);outline-offset:-5px}
+.cell.got.pend:before{opacity:.75}
+.cell.pline{box-shadow:inset 0 0 0 3px rgba(255,194,46,.55)}
+.cell .okb,.cell .pdb{position:absolute;bottom:3px;right:3px;z-index:2;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;text-shadow:none}
+.cell .okb{background:#35c873;color:#06210f}.cell .pdb{background:rgba(0,0,0,.6);color:#fff}
+.cell .okb .ic,.cell .pdb .ic{width:12px;height:12px;margin:0}
+.score .pend{font-size:12px;color:var(--muted);margin-left:3px;font-weight:600}
+.score .bingo.maybe{background:transparent;color:var(--accent);outline:1px dashed var(--accent)}
+.sndbtn{margin-left:4px}
+.vtimer{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.vtimer span{display:block;height:100%;width:100%;background:var(--accent);border-radius:3px;transition:width .2s linear}
+.vtimer span.low{background:#ff5d6c}
 .cell.free{background:var(--accent);color:var(--accent-ink);font-family:'Bricolage Grotesque';font-weight:800}
 .cell.blocked{color:rgba(34,37,44,.55);background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--c) 22%,#fffaf0) 0 6px,#fffaf0 6px 12px)}
 .cell .cnt{position:absolute;top:3px;right:3px;z-index:1;background:rgba(0,0,0,.6);color:#fff;font-size:10px;border-radius:6px;padding:0 4px;text-shadow:none}
@@ -410,13 +424,20 @@ label.dim{opacity:.45}
 .results{max-width:1180px;margin:0 auto;padding:22px 20px;display:grid;gap:20px}
 .winner{text-align:center;padding:26px;border-radius:20px;background:linear-gradient(135deg,color-mix(in srgb,var(--c) 30%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,var(--c) 50%,transparent)}
 .winner .display{font-size:44px;font-weight:800;color:var(--c)}
-.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(330px,100%),1fr));gap:14px}
 .rcard{border-top:4px solid var(--c)}
 .rcard .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .rcard .rank{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:var(--muted)}
 .rcard .stats{display:flex;gap:16px;margin:8px 0 12px;font-size:14px}
 .rcard .stats b{font-size:20px;display:block;color:var(--text)}
 .mini{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;background:var(--paper);padding:5px;border-radius:9px}
+.mini.words{gap:4px;padding:6px}
+.mini.words span{display:flex;align-items:center;justify-content:center;padding:3px;font-size:var(--mfs,11px);font-weight:700;line-height:1.1;text-align:center;color:var(--ink);overflow:hidden;background-size:cover;background-position:center;word-break:normal;overflow-wrap:anywhere;-webkit-hyphens:auto;hyphens:auto}
+.mini.words span i{font-style:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;position:relative;z-index:1}
+.mini.words span.v{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+.mini.words span.v:before{content:"";position:absolute;inset:0;border-radius:4px;background:color-mix(in srgb,var(--c) 70%,transparent)}
+.mini.words span.x{color:#9b5b62;text-decoration:line-through}
+.mini.words span.l{box-shadow:inset 0 0 0 3px var(--accent)}
 .mini span{aspect-ratio:1;border-radius:4px;background:#fffaf0;position:relative}
 .mini span.v{background:var(--c)}
 .mini span.x{background:repeating-linear-gradient(45deg,#ffd5d8 0 3px,#fffaf0 3px 6px)}
@@ -990,7 +1011,9 @@ const ICONS = {
   car:'<path d="M19 17h2v-4l-2-5H5l-2 5v4h2"/><circle cx="7.5" cy="17.5" r="2"/><circle cx="16.5" cy="17.5" r="2"/><path d="M9.5 17h5M4 13h16"/>',
   bike:'<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2ZM12 17.5V14l-3-3 4-3 2 3h2"/>',
   coffee:'<path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4ZM6 2v2M10 2v2M14 2v2"/>',
-  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  volume:'<path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
+  mute:'<path d="M11 5 6 9H2v6h4l5 4Z"/><path d="m22 9-6 6M16 9l6 6"/>'
 };
 const ic = (n, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
 
@@ -1318,7 +1341,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden && ac
 const INV = { list: [], hidden: new Set(), seen: new Set() };
 function setInvites(list) {
   INV.list = list.filter(i => !INV.hidden.has(i.id));
-  for (const i of INV.list) if (!INV.seen.has(i.id)) { INV.seen.add(i.id); try { navigator.vibrate && navigator.vibrate(60); } catch {} }
+  for (const i of INV.list) if (!INV.seen.has(i.id)) { INV.seen.add(i.id); sfx('invite'); try { navigator.vibrate && navigator.vibrate(60); } catch {} }
   renderInvites();
 }
 function renderInvites() {
@@ -1544,6 +1567,7 @@ function handleQueue(r) {
   }
 }
 function matchFound(m) {
+  sfx('match');
   const myUid = account().uid; const team = isTeamMode(m.mode);
   const pl = m.players || [];
   const col = t => pl.filter(p => p.team === t).map(p => `<li>${avatarHTML(p.avatar_url, p.name, 'sm')}<span class="grow">${esc(p.name)}${p.uid === myUid ? ' <span class="tag you">Du</span>' : ''}</span>${isCasual(m.mode) ? '' : `<span class="muted">${p.elo}</span>`}</li>`).join('');
@@ -1740,6 +1764,13 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-bingocheck', date:'23.10.2026', title:'Bingo-Check, Klänge & bessere Ergebnisse', items:[
+    'Neue Fotos sind erst vorläufig und zählen erst, wenn sie geprüft sind. Wäre damit ein Bingo erreicht, startet ein Bingo-Check – werden die Fotos angenommen, gibt es einen Gewinner, sonst geht es weiter.',
+    'Geprüfte Felder haben einen durchgehenden Rahmen mit Haken, vorläufige einen gestrichelten Rahmen.',
+    'Kleine Klänge bei Zwischenrunde, möglichem Bingo, neuem Ort, Sieg und mehr – mit dem Lautsprecher-Knopf abschaltbar.',
+    'Im Ergebnis siehst du auf jeder Karte die Begriffe und die Fotos.',
+    'Abstimmung mit Zeitlimit: 15 Sekunden pro Foto, dann geht es automatisch weiter – haben alle abgestimmt, schon früher.'
+  ] },
   { id:'2026-10-23-casualmodes', date:'23.10.2026', title:'Casual mit allen Modi', items:[
     'Casual hat jetzt dieselben Modi wie Ranked: jeder gegen jeden, 1v1, 2v2, 3v3 und 4v4 – ohne Elo.',
     'Gruppen können auch Casual spielen: in der Gruppe einfach zwischen Ranked und Casual wählen.'
@@ -1953,17 +1984,27 @@ function sideInfo(st, sideId) {
   if (s) return s;
   return { id: sideId, name: '?', color: '#888', members: [] };
 }
-function isValid(st, fid) {
-  if (!st.settings.voting) return true;
-  if ((st.phase === 'game' || st.phase === 'intermission') && !(st.reviewed || {})[fid]) return true; // noch nicht geprüft
-  if (st.phase === 'lobby') return true;
+/* Fotos sind erst „vorläufig“ und zählen erst nach der Prüfung (Zwischenrunde, Bingo-Check oder Abstimmung am Ende). */
+function voteOk(st, fid) {
   const v = st.votes[fid] || {}; let y = 0, n = 0;
   for (const x of Object.values(v)) x > 0 ? y++ : n++;
-  return n <= y;
+  return n <= y; // Gleichstand zählt als gültig
 }
-function claimed(st, sideId, validOnly) {
+function isPending(st, fid) {
+  return !!st.settings.voting && (st.phase === 'game' || st.phase === 'intermission') && !(st.reviewed || {})[fid];
+}
+// nicht abgelehnt (vorläufige Fotos eingeschlossen)
+function isValid(st, fid) {
+  if (!st.settings.voting || st.phase === 'lobby') return true;
+  if (isPending(st, fid)) return true;
+  return voteOk(st, fid);
+}
+// geprüft und gültig – nur diese zählen für Sieg, Punkte und Bingos
+const isConfirmed = (st, fid) => isValid(st, fid) && !isPending(st, fid);
+function claimed(st, sideId, mode) {
   const set = new Set(); if (st.free != null) set.add(st.free);
-  for (const [fid, f] of Object.entries(st.findings)) if (f.side === sideId && (!validOnly || isValid(st, fid))) set.add(f.cell);
+  const ok = mode === 'confirmed' ? isConfirmed : mode ? isValid : null;
+  for (const [fid, f] of Object.entries(st.findings)) if (f.side === sideId && (!ok || ok(st, fid))) set.add(f.cell);
   return set;
 }
 function boardLines(size) {
@@ -1993,9 +2034,11 @@ function standings(st) {
   const n = st.board.length, size = Math.round(Math.sqrt(n));
   const cmp = (a, b) => { for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i]; return 0; };
   const res = sides(st).map(sd => {
-    const set = claimed(st, sd.id, true); const li = lineInfo(size, set, layoutOf(st, sd.id));
+    const set = claimed(st, sd.id, 'confirmed'); const li = lineInfo(size, set, layoutOf(st, sd.id));
+    const prov = claimed(st, sd.id, true); const pli = lineInfo(size, prov, layoutOf(st, sd.id));
     const cells = set.size - (st.free != null ? 1 : 0);
-    return { ...sd, set, lines: li.count, lineCells: li.cells, cells, full: set.size === n, score: cells + (st.ranked ? BINGO_BONUS * li.count : 0) };
+    return { ...sd, set, lines: li.count, lineCells: li.cells, cells, full: set.size === n, score: cells + (st.ranked ? BINGO_BONUS * li.count : 0),
+      pending: prov.size - set.size, plines: pli.count };
   });
   const w = st.settings.win;
   res.forEach(r => r.key = w === 'line' ? [r.lines > 0 ? 1 : 0, r.lines, r.cells] : w === 'full' ? [r.full ? 1 : 0, r.cells, r.lines] : [r.score, r.lines, r.cells]);
@@ -2065,7 +2108,46 @@ function commit() {
   S.state = H; render();
 }
 function commitSoon() { if (!commitTimer) commitTimer = setTimeout(commit, 150); }
-function announce(text, color, big) { hostBroadcast({t:'event', text, color, big}); }
+function announce(text, color, big, snd) { hostBroadcast({t:'event', text, color, big, snd}); }
+/* Kleine Klänge – werden im Browser erzeugt (keine Audiodateien). Abschaltbar über den Lautsprecher-Knopf. */
+const SOUNDS = {
+  found:  [[880, 0, .1], [1175, .07, .14]],
+  check:  [[659, 0, .16], [523, .14, .16], [392, .28, .3]],
+  maybe:  [[523, 0, .11], [659, .1, .11], [784, .2, .11], [988, .3, .32]],
+  bingo:  [[523, 0, .12], [659, .1, .12], [784, .2, .12], [1047, .3, .4]],
+  win:    [[523, 0, .13], [659, .12, .13], [784, .24, .13], [1047, .36, .22], [784, .58, .12], [1047, .7, .6]],
+  nope:   [[330, 0, .16, 'square', .06], [262, .15, .32, 'square', .06]],
+  loc:    [[988, 0, .09], [1319, .08, .2]],
+  resume: [[392, 0, .1], [523, .09, .22]],
+  start:  [[392, 0, .12], [523, .12, .12], [659, .24, .3]],
+  draft:  [[659, 0, .1], [784, .1, .2]],
+  invite: [[784, 0, .1], [988, .1, .1], [784, .2, .2]],
+  match:  [[523, 0, .1], [784, .1, .1], [1047, .2, .35]]
+};
+const SFX = { ctx: null, on: store.get('sound', true) };
+function audioCtx() {
+  try { SFX.ctx = SFX.ctx || new (window.AudioContext || window.webkitAudioContext)(); if (SFX.ctx.state === 'suspended') SFX.ctx.resume(); } catch { SFX.ctx = null; }
+  return SFX.ctx;
+}
+addEventListener('pointerdown', () => { if (SFX.on && (!SFX.ctx || SFX.ctx.state === 'suspended')) audioCtx(); }, { passive:true });
+function sfx(name) {
+  const seq = SOUNDS[name]; if (!SFX.on || !seq) return;
+  const c = audioCtx(); if (!c) return;
+  const t0 = c.currentTime + .02;
+  for (const [f, st, dur, type, vol] of seq) {
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'triangle'; o.frequency.setValueAtTime(f, t0 + st);
+    g.gain.setValueAtTime(.0001, t0 + st); g.gain.exponentialRampToValueAtTime(vol || .16, t0 + st + .015); g.gain.exponentialRampToValueAtTime(.0001, t0 + st + dur);
+    o.connect(g); g.connect(c.destination); o.start(t0 + st); o.stop(t0 + st + dur + .05);
+  }
+}
+function soundBtnHTML() { return `<button class="iconbtn sndbtn" data-snd title="${SFX.on ? 'Ton aus' : 'Ton an'}" aria-label="${SFX.on ? 'Ton aus' : 'Ton an'}">${ic(SFX.on ? 'volume' : 'mute')}</button>`; }
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('[data-snd]'); if (!b) return;
+  SFX.on = !SFX.on; store.set('sound', SFX.on);
+  $$('[data-snd]').forEach(x => x.outerHTML = soundBtnHTML());
+  if (SFX.on) sfx('resume');
+});
 
 function chatTargets(scope) {
   if (scope === 'all') return Object.keys(H.players);
@@ -2145,7 +2227,7 @@ function hostHandle(cid, msg) {
       H.findings[fid] = { pid, side, cell, ts:Date.now() };
       H.sinceReview++;
       const sd = sideInfo(H, side);
-      announce((H.settings.mode === 'team' ? p.name + ' (' + sd.name + ')' : p.name) + ' hat „' + H.board[cell] + '“ gefunden', sd.color);
+      announce((H.settings.mode === 'team' ? p.name + ' (' + sd.name + ')' : p.name) + ' hat „' + H.board[cell] + '“ gefunden – wird noch geprüft', sd.color, false, 'found');
       hostCheckLines();
       if (H.phase === 'game' && H.settings.voting && H.settings.interEvery && H.sinceReview >= H.settings.interEvery) return hostIntermission();
       commit(); return;
@@ -2153,7 +2235,9 @@ function hostHandle(cid, msg) {
     case 'remove': {
       if (H.phase !== 'game') return;
       const f = H.findings[msg.fid]; if (!f || f.pid !== pid) return;
-      delete H.findings[msg.fid]; H.lineCount[f.side] = Math.min(H.lineCount[f.side] || 0, lineInfo(Math.round(Math.sqrt(H.board.length)), claimed(H, f.side, true), layoutOf(H, f.side)).count);
+      delete H.findings[msg.fid]; const sz = Math.round(Math.sqrt(H.board.length));
+      H.lineCount[f.side] = Math.min(H.lineCount[f.side] || 0, lineInfo(sz, claimed(H, f.side, 'confirmed'), layoutOf(H, f.side)).count);
+      H.pLineCount = H.pLineCount || {}; H.pLineCount[f.side] = Math.min(H.pLineCount[f.side] || 0, lineInfo(sz, claimed(H, f.side, true), layoutOf(H, f.side)).count);
       commit(); return;
     }
     case 'choose': {
@@ -2194,22 +2278,34 @@ function hostHandle(cid, msg) {
       if (!eligibleVoters(H, f).includes(pid)) return;
       H.votes[msg.fid] = H.votes[msg.fid] || {};
       if (msg.v === 1 || msg.v === -1) H.votes[msg.fid][pid] = msg.v; else delete H.votes[msg.fid][pid];
+      if (H.voteOrder[H.voteIdx] === msg.fid && eligibleVoters(H, f).every(p => p in H.votes[msg.fid])) H.voteEndsAt = Math.min(H.voteEndsAt || Infinity, Date.now() + 1500);
       commit(); return;
     }
   }
 }
 
+/* Sieg nur mit geprüften Fotos. Wäre mit vorläufigen Fotos ein Bingo erreicht, startet ein Bingo-Check:
+   alle offenen Fotos werden geprüft – zählen sie, gibt es einen Gewinner, sonst geht das Spiel weiter. */
 function hostCheckLines() {
-  const size = Math.round(Math.sqrt(H.board.length));
+  const size = Math.round(Math.sqrt(H.board.length)), n = H.board.length, win = H.settings.win, vote = H.settings.voting;
+  H.pLineCount = H.pLineCount || {};
   for (const sd of sides(H)) {
-    const set = claimed(H, sd.id, true); const li = lineInfo(size, set, layoutOf(H, sd.id));
-    const prev = H.lineCount[sd.id] || 0;
-    if (li.count > prev) {
-      H.lineCount[sd.id] = li.count;
-      if (H.settings.win === 'line') return hostEnd('BINGO! ' + sd.name + ' hat eine volle Reihe!', sd.color);
-      announce('BINGO! ' + sd.name + ' hat ' + (li.count === 1 ? 'eine Reihe' : li.count + ' Reihen') + '!', sd.color, true);
+    const lay = layoutOf(H, sd.id);
+    const conf = claimed(H, sd.id, 'confirmed'), prov = claimed(H, sd.id, true);
+    const lc = lineInfo(size, conf, lay).count, lp = lineInfo(size, prov, lay).count;
+    if (lc > (H.lineCount[sd.id] || 0)) {
+      H.lineCount[sd.id] = lc;
+      if (win === 'line') return hostEnd('BINGO! ' + sd.name + ' hat eine volle Reihe!', sd.color);
+      announce('BINGO! ' + sd.name + ' hat ' + (lc === 1 ? 'eine Reihe' : lc + ' Reihen') + '!', sd.color, true, 'bingo');
     }
-    if (H.settings.win === 'full' && set.size === H.board.length) return hostEnd(sd.name + ' hat die volle Karte!', sd.color);
+    if (win === 'full' && conf.size === n) return hostEnd(sd.name + ' hat die volle Karte!', sd.color);
+    if (!vote) continue;
+    if (lp > Math.max(lc, H.pLineCount[sd.id] || 0)) {
+      H.pLineCount[sd.id] = lp;
+      if (win === 'line') return hostIntermission('bingo', sd);
+      announce('Mögliches Bingo für ' + sd.name + ' – zählt, sobald die Fotos geprüft sind.', sd.color, true, 'maybe');
+    }
+    if (win === 'full' && prov.size === n) return hostIntermission('bingo', sd);
   }
 }
 
@@ -2235,7 +2331,7 @@ function hostStart() {
   H.phase = 'draft'; H.draftWords = cands; H.draftVotes = {}; H.draftReady = {};
   H.draftEnds = s.draftTime ? Date.now() + s.draftTime * 1000 : 0;
   hostBroadcast({t:'reset'});
-  announce('🗳 Wort-Draft! Stimmt ab, welche Begriffe auf die Karte kommen.', '#ffb020', true);
+  announce('🗳 Wort-Draft! Stimmt ab, welche Begriffe auf die Karte kommen.', '#ffb020', true, 'draft');
   commit();
 }
 function hostFinishDraft() {
@@ -2251,7 +2347,7 @@ function hostBeginGame(words) {
   H.board = H.board.slice(0, n);
   H.draftWords = []; H.draftVotes = {}; H.draftReady = {}; H.draftEnds = 0;
   H.layouts = {};
-  H.findings = {}; H.votes = {}; H.voteOrder = []; H.voteIdx = 0; H.lineCount = {}; H.endReason = '';
+  H.findings = {}; H.votes = {}; H.voteOrder = []; H.voteIdx = 0; H.lineCount = {}; H.pLineCount = {}; H.checkKind = null; H.checkSide = null; H.endReason = '';
   H.reviewed = {}; H.sinceReview = 0; H.pausedAt = 0; H.jokers = {}; H.locs = {}; H.locBatch = 0;
   S.images = {};
   for (const pid of Object.keys(H.players)) if (!H.players[pid].online) delete H.players[pid];
@@ -2262,7 +2358,7 @@ function hostBeginGame(words) {
   H.nextLocAt = s.locEvery && s.maxLocs !== 1 ? Date.now() + s.locEvery * 60000 : 0;
   if (H.endsAt && H.nextLocAt >= H.endsAt) H.nextLocAt = 0;
   hostBroadcast({t:'reset'});
-  announce('Los geht’s! Wähle auf der Weltkarte einen deiner Orte.', '#ffb020', true);
+  announce('Los geht’s! Wähle auf der Weltkarte einen deiner Orte.', '#ffb020', true, 'start');
   commit();
 }
 
@@ -2289,11 +2385,26 @@ function unreviewed() {
   return Object.keys(H.findings).filter(f => !H.reviewed[f])
     .sort((a, b) => H.findings[a].cell - H.findings[b].cell || H.findings[a].side.localeCompare(H.findings[b].side) || H.findings[a].ts - H.findings[b].ts);
 }
-function hostIntermission() {
+/* Abstimmung: 15 Sekunden pro Foto, danach automatisch weiter (haben alle abgestimmt, schon nach 1,5 s) */
+const VOTE_SECS = 15;
+function hostSetVoteIdx(i) { H.voteIdx = i; H.voteEndsAt = Date.now() + VOTE_SECS * 1000; }
+function hostVoteFinish() {
+  if (H.phase === 'intermission') return hostResume();
+  if (H.phase === 'vote') { H.phase = 'results'; H.voteEndsAt = 0; commit(); }
+}
+function hostVoteTick() {
+  if (!S.isHost || !H || (H.phase !== 'vote' && H.phase !== 'intermission') || !H.voteEndsAt || Date.now() < H.voteEndsAt) return;
+  if (H.voteIdx < H.voteOrder.length - 1) { hostSetVoteIdx(H.voteIdx + 1); commit(); }
+  else hostVoteFinish();
+}
+setInterval(hostVoteTick, 250);
+function hostIntermission(kind, sd) {
   const order = unreviewed(); H.sinceReview = 0;
   if (!order.length) return commit();
-  H.phase = 'intermission'; H.pausedAt = Date.now(); H.voteOrder = order; H.voteIdx = 0;
-  announce('⏸ Zwischenrunde! Prüft die neuen Fotos.', '#ffb020', true);
+  H.phase = 'intermission'; H.pausedAt = Date.now(); H.voteOrder = order; hostSetVoteIdx(0);
+  H.checkKind = kind === 'bingo' ? 'bingo' : 'check'; H.checkSide = sd ? sd.id : null;
+  if (H.checkKind === 'bingo') announce('Mögliches Bingo von ' + sd.name + '! Prüft jetzt die Fotos – zählen sie, ist das Spiel gewonnen.', sd.color, true, 'maybe');
+  else announce('⏸ Zwischenrunde! Prüft die neuen Fotos.', '#ffb020', true, 'check');
   commit();
 }
 function hostResume() {
@@ -2301,12 +2412,29 @@ function hostResume() {
   const d = Date.now() - H.pausedAt;
   if (H.endsAt) H.endsAt += d;
   if (H.nextLocAt) H.nextLocAt += d;
+  const checked = H.voteOrder.slice();
   H.voteOrder.forEach(f => H.reviewed[f] = true);
-  H.phase = 'game'; H.pausedAt = 0; H.voteOrder = []; H.voteIdx = 0;
-  const size = Math.round(Math.sqrt(H.board.length));
-  const rejected = Object.keys(H.reviewed).filter(f => H.findings[f] && !isValid(H, f)).length;
-  for (const sd of sides(H)) H.lineCount[sd.id] = lineInfo(size, claimed(H, sd.id, true), layoutOf(H, sd.id)).count;
-  announce('▶ Weiter geht’s!' + (rejected ? ' ' + rejected + ' Foto' + (rejected === 1 ? ' wurde' : 's wurden') + ' abgelehnt.' : ''), '#ffb020', true);
+  const kind = H.checkKind; H.checkKind = null; H.checkSide = null;
+  H.phase = 'game'; H.pausedAt = 0; H.voteOrder = []; H.voteIdx = 0; H.voteEndsAt = 0;
+  const size = Math.round(Math.sqrt(H.board.length)), n = H.board.length, win = H.settings.win;
+  const rejected = checked.filter(f => H.findings[f] && !isValid(H, f)).length;
+  const rejTxt = rejected ? rejected + ' Foto' + (rejected === 1 ? ' wurde' : 's wurden') + ' abgelehnt.' : '';
+  // Gewinner nach der Prüfung?
+  const res = sides(H).map(sd => { const c = claimed(H, sd.id, 'confirmed'); return { sd, c, lc: lineInfo(size, c, layoutOf(H, sd.id)).count }; });
+  H.pLineCount = {};
+  const winners = win === 'line' ? res.filter(r => r.lc > 0) : win === 'full' ? res.filter(r => r.c.size === n) : [];
+  if (winners.length) {
+    res.forEach(r => { H.lineCount[r.sd.id] = r.lc; H.pLineCount[r.sd.id] = r.lc; });
+    const names = winners.map(r => r.sd.name).join(' & ');
+    return hostEnd(win === 'line' ? 'BINGO bestätigt! ' + names + (winners.length > 1 ? ' haben' : ' hat') + ' eine volle Reihe!' : names + (winners.length > 1 ? ' haben' : ' hat') + ' die volle Karte!', winners.length === 1 ? winners[0].sd.color : '#ffb020');
+  }
+  let bingoMsg = '';
+  for (const r of res) {
+    if (r.lc > (H.lineCount[r.sd.id] || 0)) bingoMsg = 'BINGO bestätigt für ' + r.sd.name + '! ';
+    H.lineCount[r.sd.id] = r.lc; H.pLineCount[r.sd.id] = r.lc;
+  }
+  if (kind === 'bingo') announce('Kein Bingo – ' + (rejTxt || 'die Reihe ist nicht vollständig.') + ' Weiter geht’s!', '#ff5d6c', true, 'nope');
+  else announce(bingoMsg + '▶ Weiter geht’s!' + (rejTxt ? ' ' + rejTxt : ''), '#ffb020', true, bingoMsg ? 'bingo' : 'resume');
   commit();
 }
 
@@ -2315,9 +2443,9 @@ function hostEnd(reason, color) {
   if (H.phase === 'intermission' && H.endsAt) H.endsAt += Date.now() - H.pausedAt;
   H.endReason = reason; H.pausedAt = 0;
   const fids = H.settings.voting ? unreviewed() : [];
-  H.voteOrder = fids; H.voteIdx = 0;
+  H.voteOrder = fids; hostSetVoteIdx(0);
   H.phase = fids.length ? 'vote' : 'results';
-  announce(reason, color || '#ffb020', true);
+  announce(reason, color || '#ffb020', true, 'win');
   commit();
 }
 
@@ -2344,7 +2472,7 @@ setInterval(() => {
     giveBatch();
     H.nextLocAt += H.settings.locEvery * 60000;
     if ((H.endsAt && H.nextLocAt >= H.endsAt) || (H.settings.maxLocs && H.locBatch >= H.settings.maxLocs)) H.nextLocAt = 0;
-    announce('🗺 Neue Auswahl: Wähle deinen ' + H.locBatch + '. Ort!', '#35c873', true);
+    announce('🗺 Neue Auswahl: Wähle deinen ' + H.locBatch + '. Ort!', '#35c873', true, 'loc');
     commit();
   }
 }, 500);
@@ -2382,7 +2510,7 @@ function clientMsg(msg) {
     case 'chathist':
       S.chat = msg.list || []; renderChat(); break;
     case 'event':
-      toast(msg.text, msg.color, msg.big); break;
+      toast(msg.text, msg.color, msg.big); if (msg.snd) sfx(msg.snd); break;
     case 'toast':
       toast(msg.text, '#ff5d6c'); break;
     case 'kicked':
@@ -2585,7 +2713,7 @@ MOUNT.home = () => {
         <button id="navLib">${ic('book')}Wortlisten</button>
         <button id="allNews">${ic('news')}Neuigkeiten${newsUnseen() ? '<span class="ndot"></span>' : ''}</button>
       </nav>
-      <div id="acctBox" class="cacct">${accountHTML()}</div>
+      <div id="acctBox" class="cacct">${accountHTML()}</div>${soundBtnHTML()}
     </header>
     ${LOCAL ? '<div class="localnote">Testmodus (?local): Spieler verbinden sich nur zwischen Tabs dieses Browsers.</div>' : ''}
     <div class="cbody"><main class="cmain" id="homeMain"></main><aside class="cside" id="socialSide" aria-label="Freunde"></aside></div>
@@ -2615,7 +2743,7 @@ MOUNT.kicked = () => {
 function topBar(extra) {
   return `<header class="top">${logoHTML(true)}
     <div class="codebox">Code <b>${esc(S.state.code)}</b><button class="small" id="copyLink">Code kopieren</button></div>
-    ${extra || ''}</header>`;
+    ${extra || ''}${soundBtnHTML()}</header>`;
 }
 function bindCopy() {
   const b = $('#copyLink'); if (!b) return;
@@ -3191,7 +3319,7 @@ MOUNT.game = () => {
   </main>
   <div id="teampick"></div>
   <div id="inter" class="inter hidden">
-    <header class="top">${logoHTML(true)}<h2 style="margin:0">⏸ Zwischenrunde</h2><span class="muted" id="vprog"></span><span class="grow"></span><span class="muted">Die Zeit ist pausiert.</span></header>
+    <header class="top">${logoHTML(true)}<h2 style="margin:0" id="interTitle">⏸ Zwischenrunde</h2><span class="muted" id="vprog"></span><span class="grow"></span><span class="muted" id="interInfo">Die Zeit ist pausiert.</span>${soundBtnHTML()}</header>
     <main class="vote"><div class="card vote-main" id="vmain"></div><div class="strip" id="vstrip"></div></main>
   </div>`;
   $('#mapBtn').onclick = () => toggleMap(!S.mapOpen);
@@ -3231,10 +3359,9 @@ UPDATE.game = () => {
   tickTimer();
   // Punktestand
   const ss = sides(st);
-  $('#scores').innerHTML = ss.map(sd => {
-    const set = claimed(st, sd.id, true); const li = lineInfo(size, set, layoutOf(st, sd.id));
-    const c = set.size - (st.free != null ? 1 : 0) + (st.ranked ? BINGO_BONUS * li.count : 0);
-    return `<div class="score ${sd.id === side ? 'me' : ''}" style="--c:${sd.color}"><span class="dot"></span>${esc(sd.name)} <b>${c}</b>${li.count ? `<span class="bingo">BINGO${li.count > 1 ? ' ×' + li.count : ''}</span>` : ''}</div>`;
+  $('#scores').innerHTML = standings(st).sort((a, b) => ss.findIndex(x => x.id === a.id) - ss.findIndex(x => x.id === b.id)).map(r => {
+    const c = st.ranked ? r.score : r.cells;
+    return `<div class="score ${r.id === side ? 'me' : ''}" style="--c:${r.color}" title="Nur geprüfte Fotos zählen${r.pending ? ` – ${r.pending} Foto${r.pending === 1 ? '' : 's'} noch offen` : ''}"><span class="dot"></span>${esc(r.name)} <b>${c}</b>${r.pending ? `<span class="pend">+${r.pending}?</span>` : ''}${r.lines ? `<span class="bingo">BINGO${r.lines > 1 ? ' ×' + r.lines : ''}</span>` : r.plines ? '<span class="bingo maybe">BINGO?</span>' : ''}</div>`;
   }).join('');
   $('#hostCtl').innerHTML = amHost() ? `<button class="small" id="endBtn">Runde beenden</button>` : '';
   if (amHost()) $('#endBtn').onclick = () => { if (confirm('Runde jetzt beenden?')) hostEnd('Der Host hat die Runde beendet.'); };
@@ -3242,10 +3369,11 @@ UPDATE.game = () => {
   // Karte
   const sd = side ? sideInfo(st, side) : null;
   $('#boardTitle').textContent = sd ? (st.settings.mode === 'team' ? 'Karte von ' + sd.name : 'Deine Karte') : 'Bingo-Karte';
-  const mine = side ? claimed(st, side, true) : new Set();
+  const mine = side ? claimed(st, side, 'confirmed') : new Set(), prov = side ? claimed(st, side, true) : new Set();
   const lay = layoutOf(st, side);
-  const li = lineInfo(size, mine, lay);
-  $('#myprog').textContent = side ? `${mine.size - (st.free != null ? 1 : 0)} / ${st.board.length - (st.free != null ? 1 : 0)} Felder · ${li.count} Reihe${li.count === 1 ? '' : 'n'}` : '';
+  const li = lineInfo(size, mine, lay), pli = lineInfo(size, prov, lay);
+  const fr = st.free != null ? 1 : 0, open = prov.size - mine.size;
+  $('#myprog').textContent = side ? `${mine.size - fr} / ${st.board.length - fr} Felder geprüft${open ? ` · ${open} vorläufig` : ''} · ${li.count} Reihe${li.count === 1 ? '' : 'n'}` : '';
   const board = $('#board'); board.style.setProperty('--n', size);
   board.style.setProperty('--fs', size === 3 ? '15px' : size === 4 ? '13px' : '11.5px');
   board.innerHTML = lay.map(i => {
@@ -3253,24 +3381,27 @@ UPDATE.game = () => {
     if (i === st.free) return `<button class="cell free" disabled><span class="w">FREI</span></button>`;
     const team = Object.entries(st.findings).filter(([, f]) => f.side === side && f.cell === i);
     const ok = team.filter(([fid]) => isValid(st, fid));
+    const conf = ok.filter(([fid]) => isConfirmed(st, fid));
     let cls = '', style = '', extra = '';
     if (ok.length) {
-      cls = 'got'; style = `--c:${sd.color};`;
-      const img = S.images[ok[ok.length - 1][0]];
+      cls = 'got ' + (conf.length ? 'conf' : 'pend'); style = `--c:${sd.color};`;
+      const img = S.images[(conf.length ? conf : ok)[(conf.length ? conf : ok).length - 1][0]];
       if (img) style += `background-image:url(${img});`;
-      if (team.length > 1) extra = `<span class="cnt">${team.length} 📷</span>`;
+      extra = conf.length ? `<span class="okb" title="Geprüft – zählt">${ic('check')}</span>` : `<span class="pdb" title="Vorläufig – wird noch geprüft">${ic('hourglass')}</span>`;
+      if (team.length > 1) extra += `<span class="cnt">${team.length} 📷</span>`;
     } else if (team.length) {
       extra = '<span class="bad" title="Foto wurde abgelehnt – nimm ein neues auf">✗</span>';
     } else if (st.settings.lockout) {
       const other = Object.entries(st.findings).map(([id, f]) => isValid(st, id) && f).find(f => f && f.cell === i && f.side !== side);
       if (other) { cls = 'blocked'; style = `--c:${sideInfo(st, other.side).color}`; }
     }
-    if (li.cells.has(i)) cls += ' line';
+    if (li.cells.has(i)) cls += ' line'; else if (pli.cells.has(i)) cls += ' pline';
     return `<button class="cell ${cls}" data-cell="${i}" style="${style}" ${!side || cls.includes('blocked') ? 'disabled' : ''} title="${esc(w)}"><span class="w">${esc(w)}</span>${extra}</button>`;
   }).join('');
   $('#boardHint').innerHTML = st.settings.mode === 'team'
     ? 'Ihr teilt euch diese Karte. Jedes Teammitglied kann für ein Feld ein eigenes Foto beisteuern – das Feld zählt, sobald eines davon gültig ist.'
     : 'Klicke auf ein Feld, um ein Foto dafür aufzunehmen.';
+  if (st.settings.voting) $('#boardHint').innerHTML += ' Neue Fotos sind erst <b>vorläufig</b> (gestrichelt) und zählen, sobald sie geprüft sind (durchgehender Rahmen).';
 
   // Teamwahl für Nachzügler
   const tp = $('#teampick');
@@ -3285,6 +3416,9 @@ UPDATE.game = () => {
   if (st.phase === 'intermission') {
     if (S.lastPhase !== 'intermission') { closeModal(); }
     inter.classList.remove('hidden'); renderVote(true);
+    const bc = st.checkKind === 'bingo', cs = bc && st.checkSide ? sideInfo(st, st.checkSide) : null;
+    $('#interTitle').textContent = bc ? 'Bingo-Check' + (cs ? ' – ' + cs.name : '') : '⏸ Zwischenrunde';
+    $('#interInfo').textContent = bc ? 'Zählen alle Fotos, ist das Spiel gewonnen – sonst geht es weiter. Die Zeit ist pausiert.' : 'Die Zeit ist pausiert.';
   } else inter.classList.add('hidden');
   S.lastPhase = st.phase;
   renderChat();
@@ -3442,6 +3576,15 @@ function voteKeys(e) {
   if (amHost() && e.key === 'ArrowLeft') $('#vPrev')?.click();
 }
 UPDATE.vote = () => renderVote(false);
+function tickVoteTimer() {
+  const st = S.state, bar = $('#vbar'); if (!bar || !st || !st.voteEndsAt) return;
+  const left = Math.max(0, st.voteEndsAt - (Date.now() + (S.offset || 0)));
+  bar.style.width = Math.min(100, left / (VOTE_SECS * 10)) + '%';
+  bar.classList.toggle('low', left < 5000);
+  const last = st.voteIdx >= st.voteOrder.length - 1;
+  $('#vsecs').textContent = `${Math.ceil(left / 1000)} s – dann ${last ? (st.phase === 'intermission' ? 'geht das Spiel weiter' : 'kommt das Ergebnis') : 'nächstes Foto'}`;
+}
+setInterval(tickVoteTimer, 200);
 function renderVote(isInter) {
   const st = S.state; const order = st.voteOrder; const idx = Math.min(st.voteIdx, order.length - 1);
   const fid = order[idx]; const f = st.findings[fid]; if (!f) return;
@@ -3460,27 +3603,29 @@ function renderVote(isInter) {
       <span class="grow"></span>
       <div class="tally"><span class="y">✓ ${y}</span><span class="n">✗ ${n}</span><span class="muted" style="font-weight:500">${y >= n ? 'zählt' : 'zählt nicht'}</span></div>
     </div>
-    <div class="muted" style="font-size:13px">${missing.length ? 'Noch offen: ' + esc(missing.join(', ')) : 'Alle haben abgestimmt.'} · Gleichstand zählt als gültig.</div>
+    <div class="vtimer"><span id="vbar"></span></div>
+    <div class="muted" style="font-size:13px"><b id="vsecs"></b> · ${missing.length ? 'Noch offen: ' + esc(missing.join(', ')) : 'Alle haben abgestimmt.'} · Gleichstand zählt als gültig.</div>
     ${amHost() ? `<div class="row" style="flex-wrap:wrap"><button id="vPrev" ${idx === 0 ? 'disabled' : ''}>◀ Zurück</button><button class="btn-primary" id="vNext" ${idx >= order.length - 1 ? 'disabled' : ''}>Nächstes Foto ▶</button><span class="grow"></span><button id="vFinish" class="${idx >= order.length - 1 ? 'btn-primary' : ''}">${isInter ? 'Weiter spielen ▶' : 'Ergebnis zeigen'}</button></div>`
       : '<div class="muted" style="font-size:13px">Der Host blättert durch die Fotos.</div>'}`;
   $$('.vote-bar [data-v]').forEach(b => b.onclick = () => act({t:'vote', fid, v: +b.dataset.v === myV ? 0 : +b.dataset.v}));
   $$('[data-zoom]').forEach(t => t.onclick = () => lightbox(t.dataset.zoom));
   if (amHost()) {
-    $('#vPrev').onclick = () => { H.voteIdx = Math.max(0, idx - 1); commit(); };
-    $('#vNext').onclick = () => { H.voteIdx = Math.min(order.length - 1, idx + 1); commit(); };
-    $('#vFinish').onclick = () => { if (isInter) hostResume(); else { H.phase = 'results'; commit(); } };
+    $('#vPrev').onclick = () => { hostSetVoteIdx(Math.max(0, idx - 1)); commit(); };
+    $('#vNext').onclick = () => { hostSetVoteIdx(Math.min(order.length - 1, idx + 1)); commit(); };
+    $('#vFinish').onclick = () => hostVoteFinish();
   }
   $('#vstrip').innerHTML = order.map((id, i) => {
     const ff = st.findings[id]; const vv = st.votes[id] || {}; const yy = Object.values(vv).filter(x => x > 0).length, nn = Object.values(vv).filter(x => x < 0).length;
     return `<button data-jump="${i}" class="${i === idx ? 'cur' : ''}" style="border-bottom:3px solid ${sideInfo(st, ff.side).color}" title="${esc(st.board[ff.cell])}">${S.images[id] ? `<img src="${S.images[id]}" alt="">` : '<div style="width:92px;height:58px"></div>'}<span class="st">${Object.keys(vv).length ? (yy >= nn ? '✓' : '✗') : '·'}</span></button>`;
   }).join('');
-  $$('[data-jump]').forEach(b => b.onclick = () => { if (amHost()) { H.voteIdx = +b.dataset.jump; commit(); } });
+  $$('[data-jump]').forEach(b => b.onclick = () => { if (amHost()) { hostSetVoteIdx(+b.dataset.jump); commit(); } });
   const cur = $('#vstrip .cur'); if (cur) cur.scrollIntoView({block:'nearest', inline:'center'});
+  tickVoteTimer();
 }
 
 /* ---------- Ergebnis ---------- */
 MOUNT.results = () => {
-  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">Ergebnis</h2><span class="grow"></span><span id="resCtl"></span></header><main class="results" id="res"></main>`;
+  app.innerHTML = `<header class="top">${logoHTML(true)}<h2 style="margin:0">Ergebnis</h2><span class="grow"></span><span id="resCtl"></span>${soundBtnHTML()}</header><main class="results" id="res"></main>`;
 };
 UPDATE.results = () => {
   const st = S.state; const res = standings(st); const n = st.board.length; const size = Math.round(Math.sqrt(n));
@@ -3504,12 +3649,13 @@ UPDATE.results = () => {
         <div class="rh"><span class="rank">#${r.rank}</span><span class="pill" style="--c:${r.color}">${esc(r.name)}</span>${r.win ? '<span>🏆</span>' : ''}</div>
         ${st.settings.mode === 'team' ? `<div class="muted" style="font-size:13px">${r.members.map(p => esc(st.players[p]?.name)).join(', ') || '–'}</div>` : ''}
         <div class="stats">${st.ranked ? `<div><b>${r.score}</b>Punkte</div>` : ''}<div><b>${r.cells}</b>Felder</div><div><b>${r.lines}</b>Reihen</div><div><b>${Object.values(st.findings).filter(f => f.side === r.id).length}</b>Fotos</div></div>
-        <div class="mini" style="--n:${size}">${layoutOf(st, r.id).map(i => {
+        <div class="mini words" style="--n:${size};--mfs:${size === 3 ? '13px' : size === 4 ? '11.5px' : '10px'}">${layoutOf(st, r.id).map(i => {
           const w = st.board[i];
-          if (i === st.free) return '<span class="f" title="FREI"></span>';
+          if (i === st.free) return '<span class="f" title="FREI"><i>FREI</i></span>';
           const all = Object.entries(st.findings).filter(([, f]) => f.side === r.id && f.cell === i);
-          const ok = all.some(([fid]) => isValid(st, fid));
-          return `<span class="${ok ? 'v' : all.length ? 'x' : ''} ${r.lineCells.has(i) ? 'l' : ''}" title="${esc(w)}"></span>`;
+          const okf = all.filter(([fid]) => isValid(st, fid)); const ok = okf.length > 0;
+          const img = ok && S.images[okf[okf.length - 1][0]];
+          return `<span class="${ok ? 'v' : all.length ? 'x' : ''} ${r.lineCells.has(i) ? 'l' : ''}" ${img ? `style="background-image:url(${img})"` : ''} title="${esc(w)}${ok ? ' – gefunden' : all.length ? ' – abgelehnt' : ''}"${ok ? ` data-zoom="${okf[okf.length - 1][0]}"` : ''}><i>${esc(w)}</i></span>`;
         }).join('')}</div>
       </div>`).join('')}</div>
     <h2>Alle Fotos</h2>
