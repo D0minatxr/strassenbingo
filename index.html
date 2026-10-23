@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-BIDtcz555a0onmqA37PgrcNGSr+8DkwfSiLWTWisLIU='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -835,6 +836,42 @@ kbd{border-radius:0}
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* Sicherheit: Fotos kommen von anderen Spielern. Nur echte Bilddaten (JPEG/PNG/WebP als Base64) werden angenommen –
+   damit kann über ein „Bild“ kein Code oder HTML in die Seite der anderen geschmuggelt werden. */
+const IMG_RE = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/;
+const okImg = d => typeof d === 'string' && d.length <= 600000 && IMG_RE.test(d) ? d : null;
+const SAFE_KEY = /^[A-Za-z0-9:_.-]{1,64}$/;
+const PHASES = new Set(['lobby', 'draft', 'game', 'intermission', 'vote', 'results']);
+/* Spielstand vom Host prüfen: ein manipulierter Host darf keine Bausteine einschleusen, die als HTML/CSS gelesen werden. */
+function cleanState(st) {
+  if (!st || typeof st !== 'object' || Array.isArray(st)) return null;
+  const walk = (o, d) => {
+    if (d > 8 || !o || typeof o !== 'object') return;
+    for (const k of Object.keys(o)) {
+      if (!Array.isArray(o) && !SAFE_KEY.test(k)) { delete o[k]; continue; }
+      const v = o[k];
+      if (typeof v === 'string' && v.length > 6000) o[k] = v.slice(0, 6000);
+      else if (v && typeof v === 'object') walk(v, d + 1);
+    }
+  };
+  walk(st, 0);
+  if (!PHASES.has(st.phase)) return null;
+  const num = (o, keys, def = 0) => { if (o) for (const k of keys) if (o[k] != null) { const n = Number(o[k]); o[k] = Number.isFinite(n) ? n : def; } };
+  const se = st.settings = st.settings && typeof st.settings === 'object' ? st.settings : {};
+  num(se, ['size', 'minutes', 'locCount', 'locEvery', 'maxLocs', 'interEvery', 'jokers', 'draftTime', 'tpRadius']);
+  se.size = [3, 4, 5].includes(se.size) ? se.size : 4;
+  se.teamNames = Array.isArray(se.teamNames) ? se.teamNames.slice(0, 2).map(x => String(x ?? '').slice(0, 20)) : ['Team 1', 'Team 2'];
+  num(st, ['free', 'endsAt', 'nextLocAt', 'voteIdx', 'voteEndsAt', 'pausedAt', 'draftEnds', 'rankedStartAt', 'startedAt', 'round', 'createdAt', 'locBatch', 'nextCi'], -1);
+  st.board = Array.isArray(st.board) ? st.board.map(w => String(w ?? '').slice(0, 80)) : [];
+  if (st.layouts && typeof st.layouts === 'object') for (const k of Object.keys(st.layouts)) st.layouts[k] = Array.isArray(st.layouts[k]) ? st.layouts[k].map(x => x | 0) : [];
+  for (const p of Object.values(st.players || {})) if (p && typeof p === 'object') { p.name = String(p.name ?? '').slice(0, 20); if (p.ci != null) p.ci = p.ci | 0; p.avatar = okAvatar(p.avatar); }
+  for (const f of Object.values(st.findings || {})) if (f && typeof f === 'object') { f.cell = f.cell | 0; f.ts = +f.ts || 0; }
+  for (const list of Object.values(st.locs || {})) if (Array.isArray(list)) list.forEach(l => { if (l && typeof l === 'object') { num(l, ['lat', 'lng', 'h', 'b']); l.id = String(l.id ?? '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40); } });
+  if (Array.isArray(st.voteOrder)) st.voteOrder = st.voteOrder.map(x => String(x ?? '')).filter(x => SAFE_KEY.test(x));
+  if (Array.isArray(st.draftWords)) st.draftWords = st.draftWords.map(w => String(w ?? '').slice(0, 80));
+  st.code = String(st.code ?? '').replace(/[^A-Z0-9]/g, '').slice(0, 5);
+  return st;
+}
 const uid = (n = 12) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
 const genCode = () => Array.from(crypto.getRandomValues(new Uint8Array(5)), b => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 32]).join('');
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -1520,7 +1557,7 @@ new MutationObserver(muts => {
   }
 }).observe(document.documentElement, { childList:true, subtree:true, characterData:true });
 
-const okAvatar = u => typeof u === 'string' && ((/^p:\d{1,2}$/.test(u) && PRESETS[+u.slice(2)]) || (u.startsWith(AVATAR_PREFIX()) && u.length < 300)) ? u : null;
+const okAvatar = u => typeof u === 'string' && ((/^p:\d{1,2}$/.test(u) && +u.slice(2) < PRESETS.length) || (u.startsWith(AVATAR_PREFIX()) && /^[0-9a-f-]{36}\.jpg(\?v=\d{1,15})?$/.test(u.slice(AVATAR_PREFIX().length)))) ? u : null;
 function avatarHTML(url, name, cls) {
   const u = okAvatar(url);
   if (u && u.startsWith('p:')) return `<span class="av preset ${cls || ''}">${presetSVG(+u.slice(2))}</span>`;
@@ -2177,6 +2214,11 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-security', date:'23.10.2026', title:'Sicherheits-Update', items:[
+    'Fotos von Mitspielern werden jetzt streng geprüft: Nur echte Bilddaten kommen durch – über ein präpariertes „Bild“ lässt sich kein Code mehr einschleusen.',
+    'Jeder Spielerplatz ist mit einem geheimen Schlüssel gesichert, niemand kann mehr den Platz eines anderen übernehmen.',
+    'Zusätzlicher Schutz im Browser: Die Seite führt nur noch ihren eigenen Code aus.'
+  ] },
   { id:'2026-10-23-minimap', date:'23.10.2026', title:'Minimap im Spiel', items:[
     'Unten links in Street View gibt es jetzt eine Minimap mit den Straßen rund um deinen Startpunkt bzw. Teleport-Punkt – vergrößern, verkleinern oder einklappen.',
     'Die Karte zeigt, wo du gestartet bist, nicht wo du gerade stehst: Ohne Google-Schlüssel kann die Seite deinen Weg in Street View nicht auslesen.',
@@ -2295,9 +2337,12 @@ const S = {
   isHost:false, code:null, state:null, images:{}, chat:[], net:null, offset:0, pos:null, chatScope:'team', err:''
 };
 store.set('pid', S.me.pid, true);
+/* Geheimer Schlüssel zur Spieler-Kennung: nur wer ihn kennt, kann einen Platz in der Lobby wieder einnehmen. */
+S.me.sec = store.get('psec', null, true) || uid(20); store.set('psec', S.me.sec, true);
 let H = null;            // Host: autoritativer Spielstand
 let hostChat = [];       // Host: Chatverlauf
 const connPid = {};      // Host: Verbindung -> Spieler
+const HSEC = Object.create(null); // Host: Spieler -> geheimer Schlüssel (wird nicht an andere gesendet)
 
 /* ============================================================
    Netzwerk
@@ -2499,7 +2544,7 @@ function startHost(name, opts = {}) {
     };
     const myAcc = account(); const rp = H.ranked && myAcc ? H.ranked.players.find(x => x.uid === myAcc.uid) : null;
     H.players[S.me.pid] = { name, team: rp && H.settings.mode === 'team' ? rp.team : null, online:true, ci: H.nextCi++, acct: myAcc ? myAcc.uid : null, avatar: myAvatar() };
-    connPid.self = S.me.pid;
+    connPid.self = S.me.pid; for (const k in HSEC) delete HSEC[k]; HSEC[S.me.pid] = S.me.sec;
     S.net = createHostNet(code, {
       onReady() { S.code = code; S.state = H; location.hash = code; render(); },
       onError(e) {
@@ -2586,7 +2631,10 @@ function hostHandle(cid, msg) {
   if (!H || !msg || typeof msg !== 'object') return;
   let pid = connPid[cid];
   if (msg.t === 'hello') {
-    pid = String(msg.pid || '').slice(0, 24) || uid();
+    pid = typeof msg.pid === 'string' && /^[a-z0-9]{6,24}$/.test(msg.pid) ? msg.pid : null;
+    const sec = typeof msg.sec === 'string' && /^[a-z0-9]{16,40}$/.test(msg.sec) ? msg.sec : null;
+    if (!pid || !sec || (HSEC[pid] && HSEC[pid] !== sec)) { S.net.send(cid, {t:'kicked', reason: !sec ? 'reload' : 'taken'}); S.net.close(cid); return; }
+    HSEC[pid] = sec;
     const name = String(msg.name || 'Gast').trim().slice(0, 20) || 'Gast';
     connPid[cid] = pid;
     const acct = typeof msg.acct === 'string' && /^[0-9a-f-]{36}$/.test(msg.acct) ? msg.acct : null;
@@ -2638,8 +2686,8 @@ function hostHandle(cid, msg) {
       const cell = msg.cell | 0; const side = sideOf(H, pid);
       if (!side) return hostSendTo(pid, {t:'toast', text:'Wähle zuerst ein Team.'});
       if (cell < 0 || cell >= H.board.length || cell === H.free) return;
-      const img = String(msg.img || '');
-      if (!/^data:image\/(jpeg|png|webp);base64,/.test(img) || img.length > 600000) return hostSendTo(pid, {t:'toast', text:'Bild ungültig oder zu groß.'});
+      const img = okImg(msg.img);
+      if (!img) return hostSendTo(pid, {t:'toast', text:'Bild ungültig oder zu groß.'});
       if (H.settings.lockout) {
         const other = Object.entries(H.findings).map(([id, f]) => isValid(H, id) && f).find(f => f && f.cell === cell && f.side !== side);
         if (other) return hostSendTo(pid, {t:'toast', text:'Zu spät – dieses Feld hat schon ' + sideInfo(H, other.side).name + '.'});
@@ -2917,7 +2965,7 @@ function joinGame(code, name, opts = {}) {
   S.me.name = name; store.set('name', name);
   S.isHost = false; S.code = code; S.view = 'connecting'; S.err = ''; render();
   S.net = createClientNet(code, {
-    onOpen() { const a = account(); S.net.send({t:'hello', pid:S.me.pid, name, acct: a ? a.uid : null, avatar: myAvatar()}); location.hash = code; },
+    onOpen() { const a = account(); S.net.send({t:'hello', pid:S.me.pid, sec:S.me.sec, name, acct: a ? a.uid : null, avatar: myAvatar()}); location.hash = code; },
     onMsg: clientMsg,
     onClose() { if (S.view === 'kicked') return; S.state = null; S.view = 'lost'; render(); },
     onError(e) {
@@ -2930,20 +2978,25 @@ function joinGame(code, name, opts = {}) {
 function clientMsg(msg) {
   if (!msg || typeof msg !== 'object') return;
   switch (msg.t) {
-    case 'state':
-      S.offset = msg.now - Date.now(); S.state = msg.state; render(); break;
-    case 'img':
-      S.images[msg.fid] = msg.data; if (S.state) render(); break;
+    case 'state': {
+      const st = cleanState(msg.state); if (!st) return;
+      S.offset = (+msg.now || Date.now()) - Date.now(); S.state = st; render(); break;
+    }
+    case 'img': {
+      const d = okImg(msg.data); if (!d || typeof msg.fid !== 'string' || !SAFE_KEY.test(msg.fid)) return;
+      S.images[msg.fid] = d; if (S.state) render(); break;
+    }
     case 'reset':
       if (!S.isHost) S.images = {}; break;
     case 'chat':
+      if (!msg.m || typeof msg.m !== 'object') return;
       S.chat.push(msg.m); if (S.chat.length > 200) S.chat.shift(); renderChat(); break;
     case 'chathist':
-      S.chat = msg.list || []; renderChat(); break;
+      S.chat = Array.isArray(msg.list) ? msg.list.filter(m => m && typeof m === 'object').slice(-200) : []; renderChat(); break;
     case 'event':
-      toast(msg.text, msg.color, msg.big); if (msg.snd) sfx(msg.snd); break;
+      toast(String(msg.text ?? '').slice(0, 300), typeof msg.color === 'string' && /^#[0-9a-f]{3,8}$/i.test(msg.color) ? msg.color : null, !!msg.big); if (typeof msg.snd === 'string' && Object.hasOwn(SOUNDS, msg.snd)) sfx(msg.snd); break;
     case 'toast':
-      toast(msg.text, '#ff5d6c'); break;
+      toast(String(msg.text ?? '').slice(0, 300), '#ff5d6c'); break;
     case 'kicked':
       S.kickReason = msg.reason || ''; S.state = null; S.view = 'kicked'; render(); break;
     case 'joker':
@@ -3167,7 +3220,7 @@ MOUNT.lost = () => {
   $('#hm').onclick = () => { S.view = 'home'; S.err = ''; render(); };
 };
 MOUNT.kicked = () => {
-  app.innerHTML = `<div class="center"><div class="card"><h2>${S.kickReason === 'ranked' ? 'Diese Lobby ist ein Online-Match – beitreten können nur die zugeteilten Spieler.' : 'Du wurdest aus der Lobby entfernt.'}</h2><p><button id="hm">Zur Startseite</button></p></div></div>`;
+  app.innerHTML = `<div class="center"><div class="card"><h2>${S.kickReason === 'ranked' ? 'Diese Lobby ist ein Online-Match – beitreten können nur die zugeteilten Spieler.' : S.kickReason === 'taken' ? 'Dieser Spielerplatz gehört schon jemand anderem.' : S.kickReason === 'reload' ? 'Bitte lade die Seite neu und tritt erneut bei.' : 'Du wurdest aus der Lobby entfernt.'}</h2><p><button id="hm">Zur Startseite</button></p></div></div>`;
   $('#hm').onclick = () => { history.replaceState(null, '', location.pathname + location.search); S.view = 'home'; render(); };
 };
 
