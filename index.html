@@ -4,11 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
+<script src="vendor/peerjs.min.js"></script>
 <style>
+@font-face{font-family:'Bricolage Grotesque';src:url(vendor/fonts/BricolageGrotesque-Regular.ttf) format('truetype');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Bricolage Grotesque';src:url(vendor/fonts/BricolageGrotesque-Bold.ttf) format('truetype');font-weight:600 900;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(vendor/fonts/InstrumentSans-Regular.ttf) format('truetype');font-weight:400 500;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(vendor/fonts/InstrumentSans-Bold.ttf) format('truetype');font-weight:600 900;font-display:swap}
 :root{
   --bg:#0e1217; --panel:#161c24; --panel2:#1f2833; --line:#2a3542; --text:#e8edf3; --muted:#8e9bab;
   --accent:#ffb020; --accent-ink:#1d1400; --paper:#f6efdf; --paper2:#ebe2cc; --ink:#22252c;
@@ -17,7 +19,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
 body{
-  background:var(--bg); color:var(--text); font:15px/1.45 'DM Sans',system-ui,sans-serif;
+  background:var(--bg); color:var(--text); font:15px/1.45 'Instrument Sans',system-ui,sans-serif;
   background-image:
     linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
     linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
@@ -79,7 +81,7 @@ kbd{background:var(--panel2);border:1px solid var(--line);border-bottom-width:2p
 .teamgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .team{border:2px solid color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 7%,var(--panel));border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px;min-height:220px}
 .team-h{display:flex;align-items:center;gap:8px;font-family:'Bricolage Grotesque';font-weight:800;font-size:19px;color:var(--c)}
-.team-h small{margin-left:auto;color:var(--muted);font-family:'DM Sans';font-size:13px;font-weight:500}
+.team-h small{margin-left:auto;color:var(--muted);font-family:'Instrument Sans';font-size:13px;font-weight:500}
 .plist{list-style:none;margin:0;padding:0;display:grid;gap:6px;flex:1;align-content:start}
 .plist li{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.22);border-radius:10px;padding:7px 9px}
 .plist li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
@@ -166,6 +168,11 @@ label.dim{opacity:.45}
 .libedit{display:grid;gap:12px}
 .empty-state{padding:26px 10px;text-align:center;color:var(--muted)}
 .empty-state.err{color:var(--bad)}
+
+.svconsent{position:absolute;inset:0;z-index:4;display:grid;place-items:center;padding:16px;background:#05080b}
+.svconsent .card{max-width:440px;display:grid;gap:12px}
+.svconsent h3{font-size:18px;margin:0}
+.svconsent p{margin:0;color:#c4cdd8;font-size:14px}
 
 /* Konto */
 .acct{display:flex;align-items:center;gap:10px;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18)}
@@ -354,10 +361,10 @@ label.dim{opacity:.45}
 .mkg.cur circle{fill:var(--accent)}
 .mkg.new circle{fill:var(--ok);animation:mkp 1.4s ease-in-out infinite}
 @keyframes mkp{50%{stroke:#35c873;stroke-width:7;stroke-opacity:.6}}
-.mkn{fill:#fff;font:700 12px 'DM Sans',sans-serif;text-anchor:middle;pointer-events:none}
+.mkn{fill:#fff;font:700 12px 'Instrument Sans',sans-serif;text-anchor:middle;pointer-events:none}
 .mkg.cur .mkn{fill:var(--accent-ink)}
 .mkg.new .mkn{fill:#06210f}
-.mkl{fill:#fff;font:700 12px 'DM Sans',sans-serif;paint-order:stroke;stroke:#0e1217;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.mkl{fill:#fff;font:700 12px 'Instrument Sans',sans-serif;paint-order:stroke;stroke:#0e1217;stroke-width:3px;stroke-linejoin:round;pointer-events:none}
 .mkg:hover .mkl{fill:var(--accent)}
 .wzoom{position:absolute;right:10px;top:10px;display:grid;gap:4px;z-index:2}
 .wzoom button{width:34px;height:34px;padding:0;font-size:18px}
@@ -372,7 +379,7 @@ label.dim{opacity:.45}
 .locbtn.cur .n{background:var(--accent);color:var(--accent-ink)}
 .badge{font-size:10px;font-weight:800;text-transform:uppercase;border-radius:5px;padding:1px 5px;background:var(--ok);color:#06210f;margin-left:auto;flex:none}
 .batchh{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:6px}
-.mk{width:28px;height:28px;border-radius:50%;background:#1f2833;border:2px solid #fff;color:#fff;display:grid;place-items:center;font:700 12px 'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer}
+.mk{width:28px;height:28px;border-radius:50%;background:#1f2833;border:2px solid #fff;color:#fff;display:grid;place-items:center;font:700 12px 'Instrument Sans',sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer}
 .mk.cur{background:var(--accent);color:var(--accent-ink);transform:scale(1.2)}
 .mk.new{background:var(--ok);color:#06210f;animation:pulse 1.4s ease-in-out infinite}
 .locbtn.opt{border-color:rgba(53,200,115,.45)}
@@ -765,6 +772,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-datenschutz', date:'23.10.2026', title:'Mehr Datenschutz', items:[
+    'Schriften, Bibliotheken und Kartendaten kommen jetzt direkt von dieser Seite – nichts mehr von Google Fonts oder fremden Servern.',
+    'Google Street View lädt erst, nachdem du zugestimmt hast (einmal pro Gerät).',
+    'Neu: Datenschutzerklärung (Link unten auf der Startseite).' ]},
   { id:'2026-10-23-login', date:'23.10.2026', title:'Optionaler Login', items:[
     'Neu: Anmelden mit Discord (Google folgt) – komplett freiwillig, spielen geht weiter ohne Konto.',
     'Mit Konto hast du deine Wortlisten auf jedem Gerät und dein Spielername ist schon eingetragen.',
@@ -831,7 +842,7 @@ function loadPeer() {
   return new Promise((res, rej) => {
     if (window.Peer) return res();
     const s = document.createElement('script');
-    s.src = 'https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';
+    s.src = 'vendor/peerjs.min.js';
     s.onload = () => window.Peer ? res() : rej(new Error('PeerJS fehlt'));
     s.onerror = () => rej(new Error('PeerJS konnte nicht geladen werden'));
     document.head.appendChild(s);
@@ -1749,8 +1760,22 @@ function teleport() {
   showLoc(loc.id, true);
   toast(`🎯 Teleportiert (${(r).toFixed(1).replace('.', ',')} km vom Startpunkt)`);
 }
+/* Zwei-Klick-Lösung: Google Street View erst nach Zustimmung laden */
+function needSVConsent(id) {
+  if (S.svOk || store.get('svConsent', false)) return false;
+  S.svPending = id;
+  $('#svEmpty').classList.add('hidden'); $('#svConsent').classList.remove('hidden');
+  return true;
+}
+function acceptSV() {
+  S.svOk = true;
+  if ($('#svRemember').checked) store.set('svConsent', true);
+  $('#svConsent').classList.add('hidden');
+  if (S.svPending) { const id = S.svPending; S.svPending = null; showLoc(id); }
+}
 function showLoc(id, fresh) {
   const base = myLocs().find(l => l.id === id); if (!base) return;
+  if (needSVConsent(id)) { S.curLoc = id; toggleMap(false); renderLocUI(); return; }
   const loc = { ...base, ...(S.tp[id] || {}) };
   const wrap = $('#svwrap'); if (!wrap) return;
   let fr = S.frames.get(id);
@@ -1783,8 +1808,7 @@ let d3P = null;
 function loadD3() {
   if (window.d3 && d3.geoNaturalEarth1 && d3.zoom) return Promise.resolve();
   if (d3P) return d3P;
-  d3P = addScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js')
-    .catch(() => addScript('https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js'))
+  d3P = addScript('vendor/d3.min.js')
     .then(() => { if (!window.d3) throw new Error('d3 fehlt'); });
   d3P.catch(() => { d3P = null; });
   return d3P;
@@ -1806,10 +1830,9 @@ function topoFeatures(topo, obj) {
 let worldP = null;
 function loadWorld() {
   if (worldP) return worldP;
-  worldP = fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')
-    .catch(() => fetch('https://unpkg.com/world-atlas@2.0.2/countries-110m.json'))
-    .then(r => r.json())
-    .then(t => topoFeatures(t, t.objects.countries));
+  // als Skript geladen, damit es auch beim Öffnen als lokale Datei funktioniert
+  worldP = (window.WORLD_TOPO ? Promise.resolve() : addScript('vendor/countries-110m.js'))
+    .then(() => { const t = window.WORLD_TOPO; if (!t) throw new Error('Kartendaten fehlen'); return topoFeatures(t, t.objects.countries); });
   worldP.catch(() => { worldP = null; });
   return worldP;
 }
@@ -1970,6 +1993,12 @@ MOUNT.game = () => {
       </div>
       <div class="svwrap" id="svwrap">
         <div id="svEmpty" class="svempty">Wähle auf der Weltkarte einen deiner Orte.</div>
+        <div id="svConsent" class="svconsent hidden"><div class="card">
+          <h3>Google Street View laden?</h3>
+          <p>Für die Straßenansicht werden Inhalte von Google geladen. Dabei wird u. a. deine IP-Adresse an Google übertragen und Google kann Cookies setzen. Mehr dazu in der <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
+          <label class="chk"><input type="checkbox" id="svRemember" checked> Auf diesem Gerät merken</label>
+          <button class="btn-primary" id="svAccept">Street View laden</button>
+        </div></div>
         <div id="mapOv" class="mapov">
           <div class="mapbox"><div id="wmap"></div><div id="mapFb" class="mapfb">Weltkarte wird geladen …</div></div>
           <div class="maplist" id="mapList"></div>
@@ -2000,6 +2029,7 @@ MOUNT.game = () => {
   $('#locChips').onclick = pickLoc; $('#mapList').onclick = pickLoc;
   $('#reloadBtn').onclick = () => { if (S.curLoc) showLoc(S.curLoc, true); };
   $('#tpBtn').onclick = teleport;
+  $('#svAccept').onclick = acceptSV;
   $('#board').onclick = e => { const b = e.target.closest('.cell'); if (b && !b.disabled) openCapture(+b.dataset.cell); };
   bindChat();
   S.chatScope = st.settings.mode === 'team' ? 'team' : 'all'; if ($('#chatScope')) $('#chatScope').value = S.chatScope;
