@@ -1,0 +1,27 @@
+name: Bibliotheken lokal ablegen
+on:
+  workflow_dispatch:
+  push:
+    paths: ['.github/workflows/vendor.yml']
+permissions:
+  contents: write
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dateien herunterladen
+        run: |
+          mkdir -p vendor
+          curl -fsSL https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js -o vendor/peerjs.min.js
+          curl -fsSL https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json -o vendor/countries-110m.json
+          curl -fsSL https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/LICENSE -o vendor/world-atlas-LICENSE.txt || true
+          curl -fsSL https://cdn.jsdelivr.net/npm/peerjs@1.5.4/LICENSE -o vendor/peerjs-LICENSE.txt || true
+          ls -la vendor
+      - name: Ins Repository übernehmen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add vendor
+          git diff --cached --quiet || git commit -m "Bibliotheken lokal abgelegt (PeerJS, Weltkarte)"
+          git push
