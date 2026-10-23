@@ -607,6 +607,7 @@ button .ic,.btnlike .ic{margin-right:6px}
 .loginnote{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:rgba(43,95,217,.12);border:1px solid rgba(43,95,217,.35);margin-top:12px}
 .loginnote .ic{color:#7fa2ff}
 .modepanel .rqgrid{grid-template-columns:repeat(5,1fr)}
+.rqelo.casual{color:var(--muted)}
 .modepanel .rqgrid>[data-queue]{grid-column:auto}
 .upcoming{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .upcoming li{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:var(--panel2)}
@@ -1325,7 +1326,7 @@ function renderInvites() {
   if (!box) { box = document.createElement('div'); box.id = 'invbox'; box.className = 'invbox'; document.body.appendChild(box); }
   box.innerHTML = INV.list.slice(0, 3).map(i => `<div class="invcard" data-inv="${i.id}">${avatarHTML(i.avatar_url, i.from, 'sm')}
     <div class="grow"><b>${esc(i.from)}</b> ${i.kind === 'lobby' ? 'lädt dich in eine Lobby ein' : `lädt dich in die Gruppe ein`}
-      <small>${i.kind === 'lobby' ? 'Lobby ' + esc(i.code || '') : 'Ranked ' + esc(i.mode || '') + ' · ihr spielt im selben Team'}</small></div>
+      <small>${i.kind === 'lobby' ? 'Lobby ' + esc(i.code || '') : esc(RANKED_NAMES[i.mode] || i.mode || '') + ' · ihr spielt im selben Team'}</small></div>
     <div class="invbtns"><button class="small btn-primary" data-iacc="${i.id}">${i.kind === 'lobby' ? 'Beitreten' : 'Annehmen'}</button><button class="small" data-idec="${i.id}" aria-label="Ablehnen">✕</button></div></div>`).join('');
   $$('[data-iacc]', box).forEach(b => b.onclick = () => answerInvite(b.dataset.iacc, true));
   $$('[data-idec]', box).forEach(b => b.onclick = () => answerInvite(b.dataset.idec, false));
@@ -1364,7 +1365,7 @@ async function openInvitePicker(kind) {
   const inParty = new Set(((PARTY.state && PARTY.state.members) || []).map(m => m.uid));
   const fr = sortFriends(PROF.friends.filter(f => f.kind === 'friend'));
   const body = $('#ipBody'); if (!body) return;
-  body.innerHTML = fr.length ? `<p class="hint" style="margin:0 0 10px">${kind === 'lobby' ? 'Deine Freunde bekommen eine Einladung mit einem Beitreten-Knopf (gültig 15 Minuten).' : 'Wer annimmt, kommt in deine Gruppe und landet in der Ranked-Suche in deinem Team.'}</p>
+  body.innerHTML = fr.length ? `<p class="hint" style="margin:0 0 10px">${kind === 'lobby' ? 'Deine Freunde bekommen eine Einladung mit einem Beitreten-Knopf (gültig 15 Minuten).' : 'Wer annimmt, kommt in deine Gruppe und spielt in der Suche in deinem Team.'}</p>
     <ul class="flist invlist">${fr.map(f => `<li>${avatarHTML(f.avatar_url, f.name, 'sm')}<span class="grow fname"><b>${esc(f.name)}</b>${presenceHTML(f)}</span>
       ${inParty.has(f.id) ? '<span class="muted">in deiner Gruppe</span>' : `<button class="small btn-primary" data-invite="${f.id}">Einladen</button>`}</li>`).join('')}</ul>`
     : '<div class="empty-state">Du hast noch keine Freunde. Füge Freunde über ihren Freundescode hinzu (Profil → Freunde verwalten).</div>';
@@ -1382,8 +1383,10 @@ async function openInvitePicker(kind) {
 }
 
 /* ---------------- Gruppe (Ranked 2v2 / 3v3 / 4v4) ---------------- */
-const RANKED_TEAM = { '2v2':2, '3v3':3, '4v4':4 };
-const PARTY = { state: null, pick: '2v2', sig: '' };
+const RANKED_TEAM = { '2v2':2, '3v3':3, '4v4':4, c2v2:2, c3v3:3, c4v4:4 };
+const PARTY = { state: null, pick: '2v2', kind: 'ranked', sig: '' };
+const partyMode = (kind, size) => (kind === 'casual' ? 'c' : '') + size;
+const kindSeg = (cur, attr) => `<div class="seg" style="margin:0">${[['ranked', 'Ranked'], ['casual', 'Casual']].map(([k, t]) => `<button ${attr}="${k}" class="${cur === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
 function setParty(p) {
   const was = PARTY.state;
   PARTY.state = p && p.id ? p : null;
@@ -1404,26 +1407,30 @@ function renderPartyBox() {
   const p = PARTY.state;
   if (!p) {
     box.innerHTML = `<div class="partybox"><div class="partyhead"><b class="grow">👥 Mit Freunden ins Team</b>
+      ${kindSeg(PARTY.kind, 'data-pk')}
       <div class="seg" id="ptPick" style="margin:0">${['2v2', '3v3', '4v4'].map(m => `<button data-pm="${m}" class="${PARTY.pick === m ? 'on' : ''}">${m}</button>`).join('')}</div></div>
       <div class="muted" style="font-size:13px;margin-bottom:8px">Lade Freunde in deine Gruppe ein – ihr sucht zusammen und spielt im selben Team.</div>
       <button class="small btn-primary" id="ptCreate">👥 Gruppe erstellen &amp; Freunde einladen</button></div>`;
     $$('[data-pm]', box).forEach(b => b.onclick = () => { PARTY.pick = b.dataset.pm; renderPartyBox(); });
+    $$('[data-pk]', box).forEach(b => b.onclick = () => { PARTY.kind = b.dataset.pk; renderPartyBox(); });
     $('#ptCreate').onclick = async () => {
-      try { setParty(await rpc('party_create', { p_mode: PARTY.pick })); openInvitePicker('party'); }
+      try { setParty(await rpc('party_create', { p_mode: partyMode(PARTY.kind, PARTY.pick) })); openInvitePicker('party'); }
       catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); }
     };
     return;
   }
   const lead = p.leader === me.uid, free = Math.max(0, p.size - p.members.length);
-  box.innerHTML = `<div class="partybox on"><div class="partyhead"><b class="grow">👥 Deine Gruppe · Ranked ${esc(p.mode)} <span class="muted">${p.members.length}/${p.size}</span></b>
-      ${lead ? `<div class="seg" style="margin:0">${['2v2', '3v3', '4v4'].map(m => `<button data-pmode="${m}" class="${p.mode === m ? 'on' : ''}" ${p.members.length > RANKED_TEAM[m] ? 'disabled' : ''}>${m}</button>`).join('')}</div>` : ''}</div>
+  const pk = isCasual(p.mode) ? 'casual' : 'ranked', psize = p.mode.replace(/^c/, '');
+  box.innerHTML = `<div class="partybox on"><div class="partyhead"><b class="grow">👥 Deine Gruppe · ${esc(RANKED_NAMES[p.mode])} <span class="muted">${p.members.length}/${p.size}</span></b>
+      ${lead ? kindSeg(pk, 'data-pkind') + `<div class="seg" style="margin:0">${['2v2', '3v3', '4v4'].map(m => `<button data-pmode="${partyMode(pk, m)}" class="${psize === m ? 'on' : ''}" ${p.members.length > RANKED_TEAM[m] ? 'disabled' : ''}>${m}</button>`).join('')}</div>` : ''}</div>
     <ul class="partyslots" style="list-style:none;padding:0">${p.members.map(m => `<li>${avatarHTML(m.avatar_url, m.name, 'sm')}<span class="grow fname"><span>${esc(m.name)}${m.uid === p.leader ? ' <span class="leadtag">Leiter</span>' : ''}${m.uid === me.uid ? ' <span class="tag you">Du</span>' : ''}</span>${presenceHTML(m)}</span>
-      <span class="muted">${m.elo} Elo</span>${lead && m.uid !== me.uid ? `<button class="small" data-pkick="${m.uid}" aria-label="Aus der Gruppe entfernen">✕</button>` : ''}</li>`).join('')}
+      ${isCasual(p.mode) ? '' : `<span class="muted">${m.elo} Elo</span>`}${lead && m.uid !== me.uid ? `<button class="small" data-pkick="${m.uid}" aria-label="Aus der Gruppe entfernen">✕</button>` : ''}</li>`).join('')}
       ${Array.from({ length: free }, () => '<li class="empty" data-pinv>+ Freund einladen</li>').join('')}</ul>
     <div class="row" style="gap:8px;flex-wrap:wrap">
-      ${p.searching ? '<span class="muted grow">🔎 Die Gruppe sucht gerade …</span>' : lead ? `<button class="btn-primary small grow" id="ptSearch">🔎 Ranked ${esc(p.mode)} suchen</button>` : '<span class="muted grow">Warte, bis der Leiter die Suche startet.</span>'}
+      ${p.searching ? '<span class="muted grow">🔎 Die Gruppe sucht gerade …</span>' : lead ? `<button class="btn-primary small grow" id="ptSearch">🔎 ${esc(RANKED_NAMES[p.mode])} suchen</button>` : '<span class="muted grow">Warte, bis der Leiter die Suche startet.</span>'}
       <button class="small" id="ptLeave">Gruppe verlassen</button></div></div>`;
   $$('[data-pinv]', box).forEach(b => b.onclick = () => openInvitePicker('party'));
+  $$('[data-pkind]', box).forEach(b => b.onclick = async () => { const m = partyMode(b.dataset.pkind, psize); if (m === p.mode) return; try { setParty(await rpc('party_set_mode', { p_mode: m })); } catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); } });
   $$('[data-pmode]', box).forEach(b => b.onclick = async () => { if (b.dataset.pmode === p.mode) return; try { setParty(await rpc('party_set_mode', { p_mode: b.dataset.pmode })); } catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); } });
   $$('[data-pkick]', box).forEach(b => b.onclick = async () => { try { setParty(await rpc('party_kick', { p_user: b.dataset.pkick })); } catch (e) { toast('Fehler: ' + e.message, '#ff5d6c'); } });
   if ($('#ptSearch')) $('#ptSearch').onclick = () => startSearch(p.mode);
@@ -1452,9 +1459,11 @@ function renderFriendsBody() {
   $$('[data-fprof]', body).forEach(b => b.onclick = () => openProfile(b.dataset.fprof));
 }
 /* ---------------- Online spielen & Ranked ---------------- */
-const RANKED_NAMES = { casual:'Online · jeder gegen jeden', solo:'Ranked Solo', '1v1':'Ranked 1v1', '2v2':'Ranked 2v2', '3v3':'Ranked 3v3', '4v4':'Ranked 4v4' };
-const RANKED_NEED = { casual:'3–8 Spieler', solo:'10 Spieler · ab 4 nach 3 Min', '1v1':'2 Spieler · Duell', '2v2':'4 Spieler', '3v3':'6 Spieler', '4v4':'8 Spieler' };
-const isTeamMode = m => m === '2v2' || m === '3v3' || m === '4v4';
+const RANKED_NAMES = { casual:'Casual · jeder gegen jeden', c1v1:'Casual 1v1', c2v2:'Casual 2v2', c3v3:'Casual 3v3', c4v4:'Casual 4v4', solo:'Ranked Solo', '1v1':'Ranked 1v1', '2v2':'Ranked 2v2', '3v3':'Ranked 3v3', '4v4':'Ranked 4v4' };
+const RANKED_NEED = { casual:'3–8 Spieler · ab 3 nach 30 s', c1v1:'2 Spieler · Duell', c2v2:'4 Spieler', c3v3:'6 Spieler', c4v4:'8 Spieler', solo:'10 Spieler · ab 4 nach 3 Min', '1v1':'2 Spieler · Duell', '2v2':'4 Spieler', '3v3':'6 Spieler', '4v4':'8 Spieler' };
+const isTeamMode = m => /^c?[234]v[234]$/.test(m);
+const isCasual = m => m === 'casual' || /^c\dv\d$/.test(m);
+const modeLabel = m => m === 'solo' ? 'Solo' : m === 'casual' ? 'Jeder gegen jeden' : m.replace(/^c/, '');
 function rankedSettings(mode) {
   return { ...DEFAULT_SETTINGS, teamNames:['Team Rot', 'Team Blau'], mode: isTeamMode(mode) ? 'team' : 'solo', size:4, minutes:10, win:'most',
     voting:true, interEvery:6, draft:false, lockout:false, locCount:3, locEvery:3, maxLocs:4, tpRadius:1, region:'world', wordMode:'std', custom:'', listName:'', bingoBonus:true };
@@ -1489,10 +1498,10 @@ async function startSearch(mode, opts = {}) {
   if (!account()) return openLogin();
   const party = PARTY.state;
   if (!opts.joined && party) {
-    if (!isTeamMode(mode)) return toast('Mit Gruppe geht nur Ranked 2v2, 3v3 oder 4v4. Verlasse sonst zuerst die Gruppe.', '#ff5d6c', true);
+    if (!isTeamMode(mode)) return toast('Mit Gruppe geht nur 2v2, 3v3 oder 4v4 (Ranked oder Casual). Verlasse sonst zuerst die Gruppe.', '#ff5d6c', true);
     if (party.leader !== account().uid) return toast(QUEUE_ERR.party_member, '#ff5d6c');
     if (mode !== party.mode) {
-      if (party.members.length > RANKED_TEAM[mode]) return toast(`Deine Gruppe ist zu groß für ${mode}.`, '#ff5d6c');
+      if (party.members.length > RANKED_TEAM[mode]) return toast(`Deine Gruppe ist zu groß für ${modeLabel(mode)}.`, '#ff5d6c');
       try { PARTY.state = await rpc('party_set_mode', { p_mode: mode }); renderPartyBox(); } catch (e) { return toast('Fehler: ' + e.message, '#ff5d6c'); }
     }
   }
@@ -1527,7 +1536,7 @@ function handleQueue(r) {
   if (Q.done || !r) return;
   if (r.status === 'waiting') {
     $('#qInfo') && ($('#qInfo').innerHTML = `<b>${r.in_queue}</b> von ${r.needed} Spielern gefunden`);
-    $('#qRange') && ($('#qRange').textContent = Q.mode === 'casual' ? (r.in_queue >= 3 ? 'Startet spätestens nach 30 Sekunden Wartezeit' : '') : (r.range >= 100000 ? `Deine Elo ${r.elo} · wird jetzt mit allen Elo-Stufen aufgefüllt (faire Punkte nach Elo-Unterschied)` : `Deine Elo ${r.elo} · Suche im Bereich ±${r.range} · ab 4 Min. mit jeder Elo`));
+    $('#qRange') && ($('#qRange').textContent = Q.mode === 'casual' ? (r.in_queue >= 3 ? 'Startet spätestens nach 30 Sekunden Wartezeit' : '') : isCasual(Q.mode) ? 'Casual – ohne Elo, Gegner aus allen Stufen' : (r.range >= 100000 ? `Deine Elo ${r.elo} · wird jetzt mit allen Elo-Stufen aufgefüllt (faire Punkte nach Elo-Unterschied)` : `Deine Elo ${r.elo} · Suche im Bereich ±${r.range} · ab 4 Min. mit jeder Elo`));
   } else if (r.status === 'matched' && r.match) {
     Q.done = true; stopSearch(false); modalCleanup = null; matchFound(r.match);
   } else if (r.status === 'idle') {
@@ -1537,11 +1546,11 @@ function handleQueue(r) {
 function matchFound(m) {
   const myUid = account().uid; const team = isTeamMode(m.mode);
   const pl = m.players || [];
-  const col = t => pl.filter(p => p.team === t).map(p => `<li>${avatarHTML(p.avatar_url, p.name, 'sm')}<span class="grow">${esc(p.name)}${p.uid === myUid ? ' <span class="tag you">Du</span>' : ''}</span>${m.mode === 'casual' ? '' : `<span class="muted">${p.elo}</span>`}</li>`).join('');
+  const col = t => pl.filter(p => p.team === t).map(p => `<li>${avatarHTML(p.avatar_url, p.name, 'sm')}<span class="grow">${esc(p.name)}${p.uid === myUid ? ' <span class="tag you">Du</span>' : ''}</span>${isCasual(m.mode) ? '' : `<span class="muted">${p.elo}</span>`}</li>`).join('');
   $('#modal .modal-box').innerHTML = `<div class="found"><div class="foundh">✅ Match gefunden!</div><h2 style="margin:0 0 10px">${esc(RANKED_NAMES[m.mode])}</h2>
     ${team ? `<div class="vsgrid"><div><div class="team-h" style="--c:${TEAMC[0]}"><span class="dot"></span>Team Rot</div><ul class="flist">${col(0)}</ul></div>
       <div class="vs">VS</div><div><div class="team-h" style="--c:${TEAMC[1]}"><span class="dot"></span>Team Blau</div><ul class="flist">${col(1)}</ul></div></div>`
-      : `<ul class="flist">${pl.map(p => `<li>${avatarHTML(p.avatar_url, p.name, 'sm')}<span class="grow">${esc(p.name)}${p.uid === myUid ? ' <span class="tag you">Du</span>' : ''}</span>${m.mode === 'casual' ? '' : `<span class="muted">${p.elo}</span>`}</li>`).join('')}</ul>`}
+      : `<ul class="flist">${pl.map(p => `<li>${avatarHTML(p.avatar_url, p.name, 'sm')}<span class="grow">${esc(p.name)}${p.uid === myUid ? ' <span class="tag you">Du</span>' : ''}</span>${isCasual(m.mode) ? '' : `<span class="muted">${p.elo}</span>`}</li>`).join('')}</ul>`}
     <div class="muted" style="margin-top:12px" id="fStatus">${m.host === myUid ? 'Du bist Host – Lobby wird erstellt …' : 'Verbinde mit der Lobby …'}</div></div>`;
   const ranked = { id: m.id, mode: m.mode, players: pl.map(p => ({ uid:p.uid, team:p.team, elo:p.elo, name:p.name })) };
   setTimeout(async () => {
@@ -1598,14 +1607,14 @@ async function reportRanked(st, res) {
     if (RK.status[id] !== 'pending') break;
     await new Promise(r => setTimeout(r, 5000));
   }
-  if (RK.status[id] === 'done' && st.ranked.mode !== 'casual') {
+  if (RK.status[id] === 'done' && !isCasual(st.ranked.mode)) {
     try { const p = await rpc('get_profile', { p_user: null }); PROF.me = p; RK.after = (p.ratings || {})[st.ranked.mode]; } catch {}
   }
   renderRankedBox();
 }
 function renderRankedBox() {
   const box = $('#rankedBox'); const st = S.state; if (!box || !st || !st.ranked) return;
-  const id = st.ranked.id, stt = RK.status[id], casual = st.ranked.mode === 'casual';
+  const id = st.ranked.id, stt = RK.status[id], casual = isCasual(st.ranked.mode);
   let html = `<b>${esc(RANKED_NAMES[st.ranked.mode])}</b> · `;
   if (!account()) html += 'Melde dich an, damit Ergebnisse zählen.';
   else if (!stt || stt === 'pending') html += '⏳ Ergebnis wird von den Spielern bestätigt …';
@@ -1731,6 +1740,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-casualmodes', date:'23.10.2026', title:'Casual mit allen Modi', items:[
+    'Casual hat jetzt dieselben Modi wie Ranked: jeder gegen jeden, 1v1, 2v2, 3v3 und 4v4 – ohne Elo.',
+    'Gruppen können auch Casual spielen: in der Gruppe einfach zwischen Ranked und Casual wählen.'
+  ] },
   { id:'2026-10-23-design', date:'23.10.2026', title:'Neues Design für Straßenbingo', items:[
     'Neuer Startbildschirm: Profil, Neuigkeiten, Bestenliste und Freunde auf einen Blick.',
     'Der gelbe Spielen-Knopf führt zur Modusauswahl: Casual, Ranked, Benutzerdefiniert – weitere Modi folgen.',
@@ -2496,8 +2509,11 @@ function renderModePanel(pick) {
   const acc = account(); const rt = (PROF.me && PROF.me.ratings) || {};
   const needLogin = `<div class="loginnote">${ic('lock')}<span class="grow">Für Online-Spiele brauchst du ein Konto (Discord oder Google).</span><button class="btn-primary small" id="ocLogin">${ic('login')}Anmelden</button></div>`;
   if (pick === 'casual') {
-    box.innerHTML = `<div class="mp-grid"><div><h2>Casual</h2><p class="muted">Das Spiel sucht automatisch 3 bis 8 Mitspieler. Jeder spielt für sich auf einer 4×4-Karte, 10 Minuten lang. Die Gegner prüfen deine Fotos.</p></div>
-      <div class="mp-act">${acc ? `<button class="btn-primary big" data-queue="casual">${ic('search')}Casual-Suche starten</button>` : needLogin}</div></div>`;
+    const ctile = m => `<button class="rqtile" data-queue="${m}" ${acc ? '' : 'disabled'}>
+        <span class="rqname">${modeLabel(m)}</span><span class="rqneed">${RANKED_NEED[m]}</span><span class="rqelo casual">ohne Elo</span></button>`;
+    box.innerHTML = `<h2>Casual</h2><p class="muted" style="margin-top:0">Die gleichen Modi wie Ranked – aber ohne Elo. Gegner aus allen Stufen, die Teams werden trotzdem fair aufgeteilt. 4×4-Karte, 10 Minuten, die meisten Punkte gewinnen.</p>
+      <div class="rqgrid">${['casual', 'c1v1', 'c2v2', 'c3v3', 'c4v4'].map(ctile).join('')}</div>
+      ${acc ? `<p class="muted mp-hint">${ic('users')}Mit Freunden ins Team? Erstelle rechts eine Gruppe und wähle dort „Casual“.</p>` : needLogin}`;
   } else if (pick === 'ranked') {
     const tile = m => `<button class="rqtile" data-queue="${m}" ${acc ? '' : 'disabled'}>
         <span class="rqname">${m === 'solo' ? 'Solo' : m}</span><span class="rqneed">${RANKED_NEED[m]}</span>
@@ -2620,7 +2636,7 @@ MOUNT.lobby = () => {
       ${host ? `<div class="tabs" role="tablist">
         <button class="tab" role="tab" data-tab="players">👥 Spieler &amp; Teams <span class="tcount" id="pCount"></span></button>
         <button class="tab" role="tab" data-tab="settings">⚙️ Einstellungen</button></div>` : ''}
-      ${S.state.ranked ? `<div class="card rkbanner"><b>${S.state.ranked.mode === 'casual' ? '🌍' : '🏆'} ${esc(RANKED_NAMES[S.state.ranked.mode])}</b><span class="muted">${isTeamMode(S.state.ranked.mode) ? 'Die Teams wurden nach Elo ausgeglichen.' : 'Jeder spielt gegen jeden.'} Die Einstellungen sind fest, das Match startet automatisch.</span></div>` : ''}
+      ${S.state.ranked ? `<div class="card rkbanner"><b>${isCasual(S.state.ranked.mode) ? '🌍' : '🏆'} ${esc(RANKED_NAMES[S.state.ranked.mode])}</b><span class="muted">${isTeamMode(S.state.ranked.mode) ? (isCasual(S.state.ranked.mode) ? 'Die Teams wurden ausgeglichen aufgeteilt, ohne Elo-Wertung.' : 'Die Teams wurden nach Elo ausgeglichen.') : S.state.ranked.mode.endsWith('1v1') ? 'Duell: du gegen einen Gegner.' : 'Jeder spielt gegen jeden.'} Die Einstellungen sind fest, das Match startet automatisch.</span></div>` : ''}
       <div class="card tabpanel" id="panelPlayers"><div class="panel-h"><h2>Spieler</h2><span class="muted" id="pInfo"></span></div><div id="teams"></div></div>
       ${host ? `<div class="card tabpanel" id="panelSettings"><div class="panel-h"><h2>Einstellungen</h2><span class="muted">Änderungen sehen alle sofort</span></div><div id="settings"></div></div>` : ''}
     </section>
