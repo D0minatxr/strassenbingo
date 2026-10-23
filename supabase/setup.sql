@@ -22,3 +22,14 @@ create or replace function public.use_word_list(list_id uuid) returns void langu
 revoke all on function public.use_word_list(uuid) from public;
 grant execute on function public.use_word_list(uuid) to anon, authenticated;
 -- Voraussetzung: Authentication > Sign In / Providers > "Allow anonymous sign-ins" ist eingeschaltet.
+
+-- Übernahme von Gast-Wortlisten in ein Konto (beim Anmelden)
+create table public.list_transfers (code uuid primary key default gen_random_uuid(), from_uid uuid not null, created_at timestamptz not null default now());
+alter table public.list_transfers enable row level security;
+create or replace function public.prepare_transfer() returns uuid language sql security definer set search_path = public as $$ insert into public.list_transfers (from_uid) values (auth.uid()) returning code; $$;
+create or replace function public.claim_transfer(c uuid) returns integer language plpgsql security definer set search_path = public as $$ declare f uuid; n integer := 0; begin if auth.uid() is null then return 0; end if; delete from public.list_transfers where code = c and created_at > now() - interval '1 day' returning from_uid into f; if f is null or f = auth.uid() then return 0; end if; update public.word_lists set owner = auth.uid() where owner = f; get diagnostics n = row_count; return n; end; $$;
+revoke all on function public.prepare_transfer() from public;
+revoke all on function public.claim_transfer(uuid) from public;
+grant execute on function public.prepare_transfer() to authenticated;
+grant execute on function public.claim_transfer(uuid) to authenticated;
+-- Auth-Einstellungen: Site URL = https://d0minatxr.github.io/strassenbingo/ , Redirect URL = https://d0minatxr.github.io/strassenbingo/**

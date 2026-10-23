@@ -167,6 +167,22 @@ label.dim{opacity:.45}
 .empty-state{padding:26px 10px;text-align:center;color:var(--muted)}
 .empty-state.err{color:var(--bad)}
 
+/* Konto */
+.acct{display:flex;align-items:center;gap:10px;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18)}
+.acct .muted{flex:1}
+.acct.on{border-color:rgba(53,200,115,.4)}
+.acct small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct .grow{min-width:0}
+.acav{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--panel2);flex:none}
+.lgbtns{display:grid;gap:8px}
+.lg{padding:12px;font-size:15px;justify-content:center;gap:10px}
+.lg.discord{background:#5865F2;border-color:#5865F2;color:#fff}
+.lg.discord:hover:not(:disabled){background:#4752c4;border-color:#4752c4}
+.lg.google{background:#fff;border-color:#fff;color:#1f1f1f}
+.lg.google:hover:not(:disabled){background:#eef0f3;border-color:#eef0f3}
+.lgi{display:inline-grid;place-items:center}
+.lgform{display:grid;gap:10px}
+
 /* Neuigkeiten */
 .newsbtn{position:relative}
 .ndot{position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 2px var(--bg)}
@@ -495,8 +511,18 @@ const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'}
    absichtlich öffentlich – die Zugriffsregeln (Row Level Security) liegen in der Datenbank. */
 const SUPA = { url: 'https://eaydvicdtlnkuniqeqte.supabase.co', key: 'sb_publishable_uwIVu_m7tRGESPC9wwHl5Q_t7Brxupn' };
 const supaReady = () => !!(SUPA.url && SUPA.key);
-const slimSession = x => ({ access_token: x.access_token, refresh_token: x.refresh_token,
-  expires_at: x.expires_at || Math.floor(Date.now() / 1000) + (x.expires_in || 3600), uid: x.user && x.user.id });
+// Welche Login-Anbieter in Supabase eingerichtet sind (nur diese werden angezeigt)
+const AUTH_PROVIDERS = { discord: true, google: false, email: true };
+const userInfo = u => {
+  if (!u) return {};
+  const m = u.user_metadata || {};
+  const prov = (u.app_metadata && u.app_metadata.provider) || '';
+  return { uid: u.id, anon: !!u.is_anonymous || (!u.email && !(u.identities || []).length && prov !== 'discord' && prov !== 'google'),
+    email: u.email || '', provider: prov, uname: m.custom_claims?.global_name || m.full_name || m.name || m.user_name || (u.email ? u.email.split('@')[0] : '') };
+};
+const slimSession = (x, prev) => ({ access_token: x.access_token, refresh_token: x.refresh_token,
+  expires_at: +x.expires_at || Math.floor(Date.now() / 1000) + (+x.expires_in || 3600), ...(x.user ? userInfo(x.user) : prev ? { uid: prev.uid, anon: prev.anon, email: prev.email, provider: prev.provider, uname: prev.uname } : {}) });
+const account = () => { const s = store.get('supaSession', null); return s && s.uid && !s.anon ? s : null; };
 async function supaAuth() {
   // Anonyme Anmeldung: jeder Browser bekommt eine eigene, unsichtbare Kennung → „meine Listen“
   let ses = store.get('supaSession', null);
@@ -504,7 +530,8 @@ async function supaAuth() {
   const post = (path, body) => fetch(SUPA.url + '/auth/v1/' + path, { method:'POST', headers:{ apikey:SUPA.key, 'Content-Type':'application/json' }, body: JSON.stringify(body) });
   if (ses && ses.refresh_token) {
     const r = await post('token?grant_type=refresh_token', { refresh_token: ses.refresh_token });
-    if (r.ok) { ses = slimSession(await r.json()); store.set('supaSession', ses); return ses; }
+    if (r.ok) { ses = slimSession(await r.json(), ses); store.set('supaSession', ses); return ses; }
+    if (!ses.anon) { store.set('supaSession', null); toast('Deine Anmeldung ist abgelaufen – bitte melde dich neu an.', '#ff5d6c'); }
   }
   const r = await post('signup', {});
   if (!r.ok) throw new Error('Anmeldung bei der Wortlisten-Datenbank fehlgeschlagen (' + r.status + ')');
@@ -519,6 +546,124 @@ async function supa(path, { method = 'GET', body, auth = false, prefer } = {}) {
   const t = await r.text(); return t ? JSON.parse(t) : null;
 }
 const myUid = () => (store.get('supaSession', null) || {}).uid || null;
+
+/* ---------------- Konto (optional): Discord, Google, E-Mail ----------------
+   Spielen geht ohne Konto. Wer sich anmeldet, nimmt die Wortlisten seines bisherigen
+   Gast-Profils mit (über einen einmaligen Übernahme-Code). */
+const authPost = (path, body, token) => fetch(SUPA.url + '/auth/v1/' + path, { method:'POST',
+  headers:{ apikey:SUPA.key, 'Content-Type':'application/json', ...(token ? { Authorization:'Bearer ' + token } : {}) }, body: JSON.stringify(body || {}) });
+async function authJSON(r) { let j = {}; try { j = await r.json(); } catch {} if (!r.ok) throw new Error(j.msg || j.error_description || j.message || ('Fehler ' + r.status)); return j; }
+async function prepareTransfer() {
+  // nur wenn bisher ein Gast-Profil existiert
+  const ses = store.get('supaSession', null); if (!ses || !ses.anon) return;
+  try { const code = await supa('rpc/prepare_transfer', { method:'POST', auth:true, body:{} }); if (code) store.set('listTransfer', code); } catch {}
+}
+async function claimTransfer() {
+  const code = store.get('listTransfer', null); if (!code) return;
+  store.set('listTransfer', null);
+  try { const n = await supa('rpc/claim_transfer', { method:'POST', auth:true, body:{ c: code } }); if (n > 0) toast(`📚 ${n} Wortliste${n === 1 ? '' : 'n'} in dein Konto übernommen`); } catch {}
+}
+async function finishLogin(tokens) {
+  const r = await fetch(SUPA.url + '/auth/v1/user', { headers:{ apikey:SUPA.key, Authorization:'Bearer ' + tokens.access_token } });
+  const user = await authJSON(r);
+  store.set('supaSession', slimSession({ ...tokens, user }));
+  await claimTransfer();
+  const acc = account();
+  if (acc && acc.uname && !S.me.name) { S.me.name = acc.uname.slice(0, 20); store.set('name', S.me.name); }
+  return acc;
+}
+async function loginWith(provider) {
+  if (!supaReady()) return;
+  await prepareTransfer();
+  const back = location.origin + location.pathname;
+  const code = ($('#code') && $('#code').value.trim()) || '';
+  if (code) store.set('afterLoginCode', code, true);
+  location.href = `${SUPA.url}/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(back)}`;
+}
+async function logout() {
+  const ses = store.get('supaSession', null);
+  if (ses) authPost('logout', {}, ses.access_token).catch(() => {});
+  store.set('supaSession', null);
+  toast('Abgemeldet'); render(); if (S.view === 'home' && !S.state) { S.mounted = null; render(); }
+}
+/* Rückkehr vom Login (Discord/Google): Tokens stehen im #-Teil der Adresse */
+async function handleAuthReturn() {
+  const h = location.hash.slice(1);
+  if (!/(^|&)(access_token|error)=/.test(h) && !/[?&]error=/.test(location.search)) return;
+  const p = new URLSearchParams(h.includes('=') ? h : location.search.slice(1));
+  const code = store.get('afterLoginCode', '', true); store.set('afterLoginCode', '', true);
+  history.replaceState(null, '', location.pathname + (code ? '#' + code : ''));
+  if (p.get('error')) { toast('Anmeldung abgebrochen: ' + (p.get('error_description') || p.get('error')).replace(/\+/g, ' '), '#ff5d6c'); return; }
+  try {
+    const acc = await finishLogin({ access_token: p.get('access_token'), refresh_token: p.get('refresh_token'), expires_at: p.get('expires_at'), expires_in: p.get('expires_in') });
+    toast(`✅ Angemeldet als ${acc ? acc.uname || acc.email : 'Spieler'}`, '#35c873');
+  } catch (e) { toast('Anmeldung fehlgeschlagen: ' + e.message, '#ff5d6c'); }
+  S.mounted = null; render();
+}
+function openLogin() {
+  openModal(`<div class="login">
+    <div class="row" style="margin-bottom:6px"><h2 class="grow" style="margin:0">Anmelden</h2><button class="small" id="lgClose" aria-label="Schließen">✕</button></div>
+    <p class="hint" style="margin:0 0 14px">Optional – spielen geht auch ohne Konto. Mit Konto hast du deine Wortlisten auf jedem Gerät und dein Name ist fest. Deine bisherigen Listen werden übernommen.</p>
+    ${AUTH_PROVIDERS.discord || AUTH_PROVIDERS.google ? `<div class="lgbtns">
+      ${AUTH_PROVIDERS.discord ? `<button class="lg discord" data-prov="discord"><span class="lgi">${ICON_DISCORD}</span>Weiter mit Discord</button>` : ''}
+      ${AUTH_PROVIDERS.google ? `<button class="lg google" data-prov="google"><span class="lgi">${ICON_GOOGLE}</span>Weiter mit Google</button>` : ''}
+    </div>
+    <div class="or" style="margin:14px 0">oder mit E-Mail</div>` : ''}
+    <div class="seg" id="lgMode" style="margin-bottom:10px"><button data-m="in" class="on">Anmelden</button><button data-m="up">Registrieren</button></div>
+    <form id="lgForm" class="lgform">
+      <label id="lgNameW" class="hidden"><span class="lbl">Spielername</span><input id="lgName" maxlength="20" autocomplete="nickname" value="${esc(S.me.name || '')}"></label>
+      <label><span class="lbl">E-Mail</span><input id="lgMail" type="email" autocomplete="email" required></label>
+      <label><span class="lbl">Passwort <small class="muted" id="lgPwHint"></small></span><input id="lgPw" type="password" autocomplete="current-password" minlength="6" required></label>
+      <div class="err" id="lgErr"></div>
+      <button class="btn-primary" id="lgSubmit">Anmelden</button>
+    </form></div>`);
+  $('#modal .modal-box').style.width = 'min(440px,100%)';
+  $('#lgClose').onclick = closeModal;
+  $$('[data-prov]').forEach(b => b.onclick = () => { b.disabled = true; loginWith(b.dataset.prov); });
+  let mode = 'in';
+  $$('#lgMode button').forEach(b => b.onclick = () => {
+    mode = b.dataset.m; $$('#lgMode button').forEach(x => x.classList.toggle('on', x === b));
+    $('#lgNameW').classList.toggle('hidden', mode !== 'up'); $('#lgSubmit').textContent = mode === 'up' ? 'Konto erstellen' : 'Anmelden';
+    $('#lgPw').autocomplete = mode === 'up' ? 'new-password' : 'current-password'; $('#lgPwHint').textContent = mode === 'up' ? '(mind. 6 Zeichen)' : '';
+  });
+  $('#lgForm').onsubmit = async e => {
+    e.preventDefault();
+    const email = $('#lgMail').value.trim(), password = $('#lgPw').value, btn = $('#lgSubmit');
+    btn.disabled = true; $('#lgErr').textContent = '';
+    try {
+      await prepareTransfer();
+      let tokens;
+      if (mode === 'up') {
+        const name = $('#lgName').value.trim().slice(0, 20);
+        const j = await authJSON(await authPost('signup', { email, password, data:{ name } }));
+        if (!j.access_token) { closeModal(); toast('📧 Fast geschafft: Bitte bestätige die E-Mail, die wir dir geschickt haben, und melde dich dann an.', '#ffb020', true); return; }
+        tokens = j;
+      } else {
+        tokens = await authJSON(await authPost('token?grant_type=password', { email, password }));
+      }
+      const acc = await finishLogin(tokens);
+      closeModal(); toast(`✅ Angemeldet als ${acc.uname || acc.email}`, '#35c873');
+      S.mounted = null; render();
+    } catch (err) {
+      btn.disabled = false;
+      const m = String(err.message || '');
+      $('#lgErr').textContent = /invalid login/i.test(m) ? 'E-Mail oder Passwort stimmt nicht.' : /already registered/i.test(m) ? 'Diese E-Mail hat schon ein Konto – melde dich an.' : /email not confirmed/i.test(m) ? 'Bitte bestätige zuerst deine E-Mail.' : m;
+    }
+  };
+}
+const ICON_DISCORD = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20.3 4.4A19.6 19.6 0 0 0 15.4 3l-.6 1.3a18.2 18.2 0 0 0-5.6 0L8.6 3a19.6 19.6 0 0 0-4.9 1.4C.6 9 0 13.6.3 18.1a19.8 19.8 0 0 0 6 3l1.3-2a12.8 12.8 0 0 1-2-1l.5-.4a14 14 0 0 0 12 0l.5.4-2 1 1.3 2a19.7 19.7 0 0 0 6-3c.4-5.2-.7-9.8-3.6-13.7ZM8.5 15.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4 2.2 1.1 2.1 2.4c0 1.3-.9 2.4-2.1 2.4Z"/></svg>';
+const ICON_GOOGLE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.7Z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2a7.2 7.2 0 0 1-6.7-5H1.3v3.1A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4-3.1Z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1a7.2 7.2 0 0 1 6.7-4.9Z"/></svg>';
+function accountHTML() {
+  if (!supaReady()) return '';
+  const acc = account();
+  if (!acc) return `<div class="acct"><span class="muted">Spielst als Gast</span><button class="small" id="loginBtn">Anmelden (optional)</button></div>`;
+  const icon = acc.provider === 'discord' ? ICON_DISCORD : acc.provider === 'google' ? ICON_GOOGLE : '✉️';
+  return `<div class="acct on"><span class="acav">${icon}</span><span class="grow"><b>${esc(acc.uname || acc.email)}</b><small>${acc.email ? esc(acc.email) : 'angemeldet'}</small></span><button class="small" id="logoutBtn">Abmelden</button></div>`;
+}
+function bindAccount() {
+  if ($('#loginBtn')) $('#loginBtn').onclick = openLogin;
+  if ($('#logoutBtn')) $('#logoutBtn').onclick = logout;
+}
 const cleanWords = txt => [...new Set(String(txt).split(/[\n,;]+/).map(w => w.trim().slice(0, 40)).filter(Boolean))].slice(0, 300);
 
 const LIB = { filter:'all', q:'', items:[], timer:null };
@@ -592,9 +737,9 @@ function libEditor(l, prefill) {
   const words = l ? l.words.join('\n') : (prefill || '');
   $('#libBody').innerHTML = `<div class="libedit">
     <label><span class="lbl">Name der Liste</span><input id="leName" maxlength="60" placeholder="z. B. Japan-Runde, Nur Tiere, Schwer" value="${esc(l ? l.name : '')}"></label>
-    <label><span class="lbl">Erstellt von</span><input id="leAuthor" maxlength="30" value="${esc(l ? l.author : S.me.name || '')}"></label>
+    <label><span class="lbl">Erstellt von</span><input id="leAuthor" maxlength="30" value="${esc(l ? l.author : (account() && account().uname) || S.me.name || '')}"></label>
     <label><span class="lbl">Begriffe (einer pro Zeile oder mit Komma getrennt) · <b id="leCount">0</b> Begriffe</span><textarea id="leWords" rows="10" placeholder="Pinguin&#10;Rote Telefonzelle&#10;Leuchtreklame">${esc(words)}</textarea></label>
-    <p class="hint">Alle können gespeicherte Listen sehen und laden. Bearbeiten und löschen kannst nur du (in diesem Browser).</p>
+    <p class="hint">Alle können gespeicherte Listen sehen und laden. Bearbeiten und löschen kannst nur du – ${account() ? 'auf jedem Gerät, auf dem du angemeldet bist' : 'in diesem Browser (mit Konto auf jedem Gerät)'}.</p>
     <div class="row"><button id="leBack">← Zurück</button><span class="grow"></span><button class="btn-primary" id="leSave">${l ? 'Änderungen speichern' : 'Liste speichern'}</button></div></div>`;
   const cnt = () => $('#leCount').textContent = cleanWords($('#leWords').value).length;
   $('#leWords').oninput = cnt; cnt();
@@ -614,6 +759,10 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-login', date:'23.10.2026', title:'Optionaler Login', items:[
+    'Neu: Anmelden mit Discord, Google oder E-Mail – komplett freiwillig, spielen geht weiter ohne Konto.',
+    'Mit Konto hast du deine Wortlisten auf jedem Gerät und dein Spielername ist schon eingetragen.',
+    'Listen, die du vorher als Gast angelegt hast, werden beim Anmelden automatisch übernommen.' ]},
   { id:'2026-10-23-wortlisten', date:'23.10.2026', title:'Wortlisten-Bibliothek', items:[
     'Neu: 📚 Wortlisten. Erstelle eigene Begriffslisten und speichere sie online – sie gehen nicht mehr verloren.',
     'Alle können die Listen durchsuchen; der Host lädt eine Liste mit einem Klick in die Lobby.',
@@ -1264,6 +1413,7 @@ MOUNT.home = () => {
     </div>
     <div class="card home-card">
       ${LOCAL ? '<div class="localnote">Testmodus (?local): Spieler verbinden sich nur zwischen Tabs dieses Browsers.</div>' : ''}
+      <div id="acctBox">${accountHTML()}</div>
       <label>Dein Name<input id="nm" maxlength="20" placeholder="z. B. Domi" autocomplete="nickname"></label>
       <button class="btn-primary big" id="create">Lobby erstellen</button>
       <div class="or">oder beitreten</div>
@@ -1276,8 +1426,9 @@ MOUNT.home = () => {
     </section>
   </div>`;
   $('#allNews').onclick = openNews;
+  bindAccount();
   store.set('newsSeen', CHANGELOG[0].id);
-  $('#nm').value = S.me.name || '';
+  $('#nm').value = S.me.name || (account() && account().uname ? account().uname.slice(0, 20) : '');
   const getName = () => { const n = $('#nm').value.trim(); if (!n) { S.err = 'Bitte gib einen Namen ein.'; UPDATE.home(); $('#nm').focus(); return null; } return n; };
   $('#create').onclick = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } startHost(n); };
   const join = async () => { const n = getName(); if (!n) return; if (!LOCAL) { try { await loadPeer(); } catch (e) { S.err = e.message; return UPDATE.home(); } } joinGame($('#code').value, n); };
@@ -2155,6 +2306,7 @@ UPDATE.results = () => {
 
 /* ---------- Start ---------- */
 addEventListener('beforeunload', e => { if (S.isHost && H && Object.keys(H.players).length > 1) { e.preventDefault(); e.returnValue = ''; } });
+handleAuthReturn(); // entfernt Login-Tokens aus der Adresse, bevor die Seite gezeichnet wird
 render();
 </script>
 </body>
