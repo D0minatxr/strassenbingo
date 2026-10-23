@@ -523,7 +523,7 @@ const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'}
 const SUPA = { url: 'https://eaydvicdtlnkuniqeqte.supabase.co', key: 'sb_publishable_uwIVu_m7tRGESPC9wwHl5Q_t7Brxupn' };
 const supaReady = () => !!(SUPA.url && SUPA.key);
 // Welche Login-Anbieter in Supabase eingerichtet sind (nur diese werden angezeigt)
-const AUTH_PROVIDERS = { discord: true, google: false, email: false };
+const AUTH_PROVIDERS = { discord: true, google: true, email: false };
 const userInfo = u => {
   if (!u) return {};
   const m = u.user_metadata || {};
@@ -777,7 +777,7 @@ const CHANGELOG = [
     'Google Street View lädt erst, nachdem du zugestimmt hast (einmal pro Gerät).',
     'Neu: Datenschutzerklärung (Link unten auf der Startseite).' ]},
   { id:'2026-10-23-login', date:'23.10.2026', title:'Optionaler Login', items:[
-    'Neu: Anmelden mit Discord (Google folgt) – komplett freiwillig, spielen geht weiter ohne Konto.',
+    'Neu: Anmelden mit Discord oder Google – komplett freiwillig, spielen geht weiter ohne Konto.',
     'Mit Konto hast du deine Wortlisten auf jedem Gerät und dein Spielername ist schon eingetragen.',
     'Listen, die du vorher als Gast angelegt hast, werden beim Anmelden automatisch übernommen.' ]},
   { id:'2026-10-23-wortlisten', date:'23.10.2026', title:'Wortlisten-Bibliothek', items:[
