@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-svxQwZAG3sGDkmuv2uzV4m8J6d7bsRyimOn6ge8l2s8='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-YipV1msDsXuoxDLhXt1lDIyXyTI96pHD3/2MT9DeDLo='; style-src 'self' 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data: blob: https://eaydvicdtlnkuniqeqte.supabase.co; connect-src 'self' https://eaydvicdtlnkuniqeqte.supabase.co wss://eaydvicdtlnkuniqeqte.supabase.co https://0.peerjs.com wss://0.peerjs.com; frame-src https://maps.google.com https://www.google.com; object-src 'none'; base-uri 'none'; form-action 'self'; worker-src 'none'; media-src 'none'">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Straßenbingo</title>
 <!-- Alle Schriften und Bibliotheken liegen auf dieser Seite selbst (vendor/) – keine Übertragung an Google Fonts oder CDNs -->
@@ -2745,13 +2745,20 @@ document.addEventListener('click', e => {
   if (t.hasAttribute('data-fb')) openFeedback(); else openMailbox();
 });
 const needAccount = what => { toast(what + ' geht nur mit Konto – so kann der Admin dir antworten.', '#ff5d6c'); openLogin(); };
-function reportContext() {
+/* Nur das Nötigste: Bugs bekommen Seite, Modus, Version und grob Browser/Gerät; Spieler-/Foto-Meldungen nur Lobby-Code und Modus; Ideen nichts. */
+function reportContext(kind) {
   const st = S.state;
-  return { page: phaseKey(), code: st ? st.code : '', mode: st ? st.settings.mode : '', ranked: st && st.ranked ? st.ranked.mode : '', ver: CHANGELOG[0].id, ua: navigator.userAgent.slice(0, 160), w: innerWidth };
+  if (kind === 'idea') return {};
+  const game = st ? { code: st.code, mode: st.ranked ? st.ranked.mode : st.settings.mode } : {};
+  if (kind !== 'bug') return game;
+  const ua = navigator.userAgent;
+  const browser = /OPR\//.test(ua) ? 'Opera' : /Edg\//.test(ua) ? 'Edge' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'anderer';
+  const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad|iPod/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'anderes';
+  return { ...game, seite: phaseKey(), version: CHANGELOG[0].id, browser: browser + ' · ' + os, ansicht: innerWidth < 760 ? 'Handy' : 'PC' };
 }
 async function sendReport(payload, okText) {
   try {
-    await rpc('submit_report', { p_kind: payload.kind, p_reason: payload.reason || '', p_body: payload.body || '', p_context: reportContext(),
+    await rpc('submit_report', { p_kind: payload.kind, p_reason: payload.reason || '', p_body: payload.body || '', p_context: reportContext(payload.kind),
       p_target: payload.target || null, p_target_name: payload.target_name || '', p_word: payload.word || '', p_image: payload.image || null, p_votes: payload.votes || [] });
     closeModal(); toast(okText || '✅ Danke! Deine Meldung ist beim Admin angekommen.', '#35c873');
   } catch (e) {
@@ -2770,12 +2777,13 @@ function openFeedback(kind) {
       ${others.length ? `<select id="fbTarget">${others.map(([pid, p]) => `<option value="${esc(p.acct)}" data-name="${esc(p.name)}">${esc(p.name)}</option>`).join('')}</select>`
         : `<input id="fbTargetName" maxlength="40" placeholder="Name des Spielers (und wenn möglich Lobby-Code)">`}</label></div>
     <label style="margin-top:12px"><span class="lbl" id="fbLbl"></span><textarea id="fbBody" maxlength="2000" rows="5"></textarea></label>
-    <p class="hint" style="margin-top:6px">Mitgeschickt werden dein Spielername, ${st ? 'der Lobby-Code, ' : ''}die Seite, auf der du gerade bist, und dein Browser. Der Admin kann dir über dein Postfach antworten.</p>
+    <p class="hint" style="margin-top:6px" id="fbInfo"></p>
     <div class="row" style="justify-content:flex-end;margin-top:12px"><button id="fbCancel">Abbrechen</button><button class="btn-primary" id="fbSend">${ic('mail')}Abschicken</button></div></div>`);
   const sync = () => {
     $$('#fbKind button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
     $('#fbPlayer').classList.toggle('hidden', k !== 'player');
     $('#fbLbl').textContent = k === 'bug' ? 'Was ist passiert? Was hast du gemacht, was hast du erwartet?' : k === 'idea' ? 'Deine Idee' : 'Was hat der Spieler gemacht?';
+    $('#fbInfo').textContent = 'Mitgeschickt wird dein Spielername' + (k === 'bug' ? ', ' + (st ? 'Lobby-Code, Modus, ' : '') + 'die Seite, auf der du bist, und grob dein Browser (z. B. „Chrome · Windows“)' : k === 'player' && st ? ', der Lobby-Code und der Modus' : '') + '. Der Admin kann dir über dein Postfach antworten.';
     $('#fbBody').placeholder = k === 'bug' ? 'z. B. „Nach der Zwischenrunde war mein Foto weg …“' : k === 'idea' ? 'z. B. „Ein Modus, bei dem …“' : 'z. B. „Lehnt absichtlich alle Fotos ab“';
   };
   $$('#fbKind button').forEach(b => b.onclick = () => { k = b.dataset.k; sync(); });
