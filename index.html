@@ -800,6 +800,16 @@ kbd{border-radius:0}
 .mini,.mini span,.mini.words span.v:before{border-radius:0!important}
 .lightbox img,.vote-img,.thumb img,.capprev{border-radius:0}
 .client .foot{border-top:0;box-shadow:inset 0 3px 0 #0a0816}
+
+/* Minimap */
+.minimap{position:absolute;left:10px;bottom:10px;z-index:3;width:250px;height:190px;display:flex;flex-direction:column;background:#0f0c20;box-shadow:0 0 0 3px #0a0816,0 0 0 6px #3d3670,0 8px 0 6px rgba(0,0,0,.35)}
+.minimap.big{width:min(480px,calc(100% - 20px));height:min(360px,calc(100% - 20px))}
+.minimap.min{height:auto;width:auto}
+.minimap.min iframe{display:none}
+.mmhead{display:flex;align-items:center;gap:2px;padding:2px 3px 2px 8px;background:#241f44;font-family:var(--pxf);font-size:13px;white-space:nowrap}
+.mmhead .grow{margin-right:6px}
+.svwrap .minimap iframe{position:static;inset:auto;flex:1;width:100%;height:auto;min-height:0;border:0;visibility:visible;pointer-events:auto;background:#e8e4d8}
+@media (max-width:560px){.minimap{width:150px;height:130px;left:6px;bottom:6px}.minimap.big{width:calc(100% - 12px);height:60%}.mmhead{font-size:11px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -910,7 +920,7 @@ const regionLocs = r => LOCS.filter(l => r === 'world' || (r === 'eu' ? l[0] !==
 const DEFAULT_SETTINGS = {
   mode:'team', teamNames:['Team Rot','Team Blau'], size:5, free:false, minutes:10, win:'line',
   voting:true, lockout:false, region:'world', wordMode:'std', custom:'',
-  locCount:3, locEvery:3, maxLocs:4, interEvery:6, jokers:0, draft:true, draftTime:90, tpRadius:1
+  locCount:3, locEvery:3, maxLocs:4, interEvery:6, jokers:0, draft:true, draftTime:90, tpRadius:1, minimap:true
 };
 const WIN_NAMES = {line:'Erste Reihe (Bingo)', full:'Volle Karte', most:'Meiste Felder bei Zeitende'};
 const WIN_SHORT = {line:'Erste Reihe', full:'Volle Karte', most:'Meiste Felder'};
@@ -1151,6 +1161,9 @@ const ICONS = {
   coffee:'<path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4ZM6 2v2M10 2v2M14 2v2"/>',
   music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
   volume:'<path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
+  expand:'<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
+  down:'<path d="m6 9 6 6 6-6"/>',
+  up:'<path d="m18 15-6-6-6 6"/>',
   mute:'<path d="M11 5 6 9H2v6h4l5 4Z"/><path d="m22 9-6 6M16 9l6 6"/>'
 };
 const ic = (n, cls) => `<svg class="ic ${cls || ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[n] || ''}</svg>`;
@@ -1883,7 +1896,7 @@ const isCasual = m => m === 'casual' || /^c\dv\d$/.test(m);
 const modeLabel = m => m === 'solo' ? 'Solo' : m === 'casual' ? 'Jeder gegen jeden' : m.replace(/^c/, '');
 function rankedSettings(mode) {
   return { ...DEFAULT_SETTINGS, teamNames:['Team Rot', 'Team Blau'], mode: isTeamMode(mode) ? 'team' : 'solo', size:4, minutes:10, win:'most',
-    voting:true, interEvery:6, draft:false, lockout:false, locCount:3, locEvery:3, maxLocs:4, tpRadius:1, region:'world', wordMode:'std', custom:'', listName:'', bingoBonus:true };
+    voting:true, interEvery:6, draft:false, lockout:false, locCount:3, locEvery:3, maxLocs:4, tpRadius:1, minimap:true, region:'world', wordMode:'std', custom:'', listName:'', bingoBonus:true };
 }
 const LB = { mode:'solo', data:{}, loading:false };
 function renderOnlineCard() { const p = S.playPick || (account() ? 'casual' : 'custom'); if (S.homeView === 'play' && (p === 'casual' || p === 'ranked')) renderModePanel(p); }
@@ -2158,6 +2171,11 @@ function libEditor(l, prefill) {
 
 /* ---------------- Neuigkeiten (Update-Feed) – neueste zuerst ---------------- */
 const CHANGELOG = [
+  { id:'2026-10-23-minimap', date:'23.10.2026', title:'Minimap im Spiel', items:[
+    'Unten links in Street View gibt es jetzt eine Minimap mit den Straßen rund um deinen Startpunkt bzw. Teleport-Punkt – vergrößern, verkleinern oder einklappen.',
+    'Die Karte zeigt, wo du gestartet bist, nicht wo du gerade stehst: Ohne Google-Schlüssel kann die Seite deinen Weg in Street View nicht auslesen.',
+    'Der Host kann die Minimap in den Lobby-Einstellungen unter „Orte & Street View“ abschalten.'
+  ] },
   { id:'2026-10-23-pixel', date:'23.10.2026', title:'Neuer Look: Pixel-Art', items:[
     'Die ganze Oberfläche ist jetzt im Pixel-Stil: neue Schrift, Pixel-Rahmen und Knöpfe.',
     'Neue Pixel-Bilder für Startseite und Spielmodi – und 24 neue Pixel-Avatare.',
@@ -3258,6 +3276,7 @@ function ruleTiles(s) {
     { k:'locs', i:'🗺️', l:'Orte', v: `1 aus ${s.locCount} wählen`, sub: s.maxLocs === 1 ? 'ein Ort für die ganze Runde' : `alle ${s.locEvery} Min. ein weiterer · max. ${s.maxLocs || '∞'}` },
     { k:'region', i:'🌍', l:'Gebiet', v: REGION_NAMES[s.region], sub: regionLocs(s.region).length + ' mögliche Orte' },
     { k:'tp', i:'🎯', l:'Teleport', v: s.tpRadius ? String(s.tpRadius).replace('.', ',') + ' km' : 'Aus', sub: s.tpRadius ? 'Umkreis um den Startpunkt' : 'kein Springen möglich', off: !s.tpRadius },
+    { k:'mm', i:'🗺️', l:'Minimap', v: s.minimap !== false ? 'An' : 'Aus', sub: s.minimap !== false ? 'Karte rund um den Startpunkt' : 'nur Street View', off: s.minimap === false },
     { k:'vote', i:'✅', l:'Fotos prüfen', v: s.voting ? 'An' : 'Aus', sub: s.voting ? 'die Gegner stimmen ab' : 'alle Fotos zählen', off: !s.voting },
     { k:'inter', i:'⏸️', l:'Zwischenrunde', v: inter ? `nach ${s.interEvery} Fotos` : 'Aus', sub: inter ? 'Zeit pausiert beim Prüfen' : 'nur am Ende prüfen', off: !inter },
     { k:'lock', i:'🔒', l:'Lockout', v: s.lockout ? 'An' : 'Aus', sub: s.lockout ? 'jedes Feld nur einmal' : 'alle Felder für alle offen', off: !s.lockout }
@@ -3361,6 +3380,7 @@ function mountSettingsForm() {
         <label><span class="lbl">Max. Orte pro Spieler</span>${sel('sLocMax', [1,2,3,4,5,6,0].map(n => [n, n ? n + (n === 1 ? ' Ort (ganze Runde)' : ' Orte') : 'Unbegrenzt']))}</label>
         <label><span class="lbl">Gebiet</span>${sel('sReg', Object.entries(REGION_NAMES))}</label>
         <label class="full"><span class="lbl">🎯 Teleport-Radius</span>${sel('sTp', [0,0.5,1,2,5].map(n => [n, n ? String(n).replace('.', ',') + ' km um den Startpunkt' : 'Aus']))}</label>
+        <label class="sw full"><input type="checkbox" id="sMm"><span><b>Minimap</b><small>Kleine Karte mit den Straßen rund um den Startpunkt</small></span></label>
       </div>
     </section>
     <section class="sgrp"><h3><span>✅</span>Fotos prüfen</h3>
@@ -3386,6 +3406,7 @@ function mountSettingsForm() {
   $('#sLock').onchange = e => { s().lockout = e.target.checked; save(); };
   $('#sVote').onchange = e => { s().voting = e.target.checked; save(); };
   $('#sTp').onchange = e => { s().tpRadius = +e.target.value; save(); };
+  $('#sMm').onchange = e => { s().minimap = e.target.checked; save(); };
   $('#sDraft').onchange = e => { s().draft = e.target.checked; save(); };
   $('#sDt').onchange = e => { s().draftTime = +e.target.value; save(); };
   $('#sWm').onchange = e => { s().wordMode = e.target.value; save(); };
@@ -3405,7 +3426,7 @@ function syncSettingsForm() {
   $('#sInter').disabled = !s.voting;
   $('#sInter').closest('label').classList.toggle('dim', !s.voting);
   $('#sLocE').closest('label').classList.toggle('dim', s.maxLocs === 1);
-  setv('sTp', String(s.tpRadius ?? 1)); setv('sDraft', s.draft, 'checked'); setv('sDt', String(s.draftTime));
+  setv('sTp', String(s.tpRadius ?? 1)); setv('sMm', s.minimap !== false, 'checked'); setv('sDraft', s.draft, 'checked'); setv('sDt', String(s.draftTime));
   $('#sDtW').classList.toggle('hidden', !s.draft);
   setv('sLock', s.lockout, 'checked'); setv('sVote', s.voting, 'checked');
   setv('sWm', s.wordMode); setv('sCustom', s.custom);
@@ -3500,12 +3521,31 @@ function showLoc(id, fresh) {
   $('#svEmpty').classList.add('hidden');
   $('#gm').href = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${loc.lat},${loc.lng}&heading=${loc.h}`;
   toggleMap(false);
-  renderLocUI();
+  renderLocUI(); updateMinimap();
+}
+/* Minimap: Google-Karte rund um den Startpunkt (bzw. Teleport-Punkt). Ohne Google-Schlüssel kann die Seite
+   nicht auslesen, wohin man in Street View läuft – die Karte zeigt daher den Punkt, an dem man gestartet ist. */
+function mmURL(l, R) {
+  const z = !R ? 16 : R <= .5 ? 16 : R <= 1 ? 15 : R <= 2 ? 14 : 13;
+  return `https://maps.google.com/maps?q=${l.lat},${l.lng}&ll=${l.lat},${l.lng}&z=${z}&t=m&hl=de&output=embed`;
+}
+function updateMinimap() {
+  const box = $('#minimap'); if (!box || !S.state) return;
+  const st = S.state, base = S.curLoc && myLocs().find(l => l.id === S.curLoc);
+  const on = st.settings.minimap !== false && !!base && !S.mapOpen && (S.svOk || store.get('svConsent', false));
+  box.classList.toggle('hidden', !on); if (!on) return;
+  box.classList.toggle('min', !!S.mmMin); box.classList.toggle('big', !!S.mmBig && !S.mmMin);
+  const tp = S.tp[S.curLoc], loc = { ...base, ...(tp || {}) };
+  $('#mmTitle').textContent = tp ? 'Minimap · Teleport-Punkt' : 'Minimap · Startpunkt';
+  $('#mmMin').innerHTML = ic(S.mmMin ? 'up' : 'down');
+  if (S.mmMin) return;
+  const key = `${loc.lat},${loc.lng}`, fr = $('#mmFrame');
+  if (box.dataset.key !== key) { box.dataset.key = key; fr.src = mmURL(loc, st.settings.tpRadius); }
 }
 function toggleMap(show) {
   const ov = $('#mapOv'); if (!ov) return;
   ov.classList.toggle('hidden', !show);
-  S.mapOpen = show;
+  S.mapOpen = show; updateMinimap();
   if (show) { initMap(); setTimeout(() => { if (S.map) { layoutMap(); fitMap(); } }, 60); }
 }
 
@@ -3702,13 +3742,19 @@ MOUNT.game = () => {
         <div id="svEmpty" class="svempty">Wähle auf der Weltkarte einen deiner Orte.</div>
         <div id="svConsent" class="svconsent hidden"><div class="card">
           <h3>Google Street View laden?</h3>
-          <p>Für die Straßenansicht werden Inhalte von Google geladen. Dabei wird u. a. deine IP-Adresse an Google übertragen und Google kann Cookies setzen. Mehr dazu in der <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
+          <p>Für die Straßenansicht und die Minimap werden Inhalte von Google geladen. Dabei wird u. a. deine IP-Adresse an Google übertragen und Google kann Cookies setzen. Mehr dazu in der <a href="datenschutz.html" target="_blank" rel="noopener">Datenschutzerklärung</a>.</p>
           <label class="chk"><input type="checkbox" id="svRemember" checked> Auf diesem Gerät merken</label>
           <button class="btn-primary" id="svAccept">Street View laden</button>
         </div></div>
         <div id="mapOv" class="mapov">
           <div class="mapbox"><div id="wmap"></div><div id="mapFb" class="mapfb">Weltkarte wird geladen …</div></div>
           <div class="maplist" id="mapList"></div>
+        </div>
+        <div id="minimap" class="minimap hidden" aria-label="Minimap">
+          <div class="mmhead"><span class="grow" id="mmTitle">Minimap</span>
+            <button class="iconbtn sm" id="mmBig" title="Größer / kleiner" aria-label="Minimap größer oder kleiner">${ic('expand')}</button>
+            <button class="iconbtn sm" id="mmMin" title="Ein- / ausklappen" aria-label="Minimap ein- oder ausklappen">${ic('down')}</button></div>
+          <iframe id="mmFrame" title="Minimap" referrerpolicy="no-referrer-when-downgrade" loading="lazy"></iframe>
         </div>
       </div>
       <div class="vhint"><span class="grow" id="curLabel"></span>
@@ -3737,6 +3783,9 @@ MOUNT.game = () => {
   $('#locChips').onclick = pickLoc; $('#mapList').onclick = pickLoc;
   $('#reloadBtn').onclick = () => { if (S.curLoc) showLoc(S.curLoc, true); };
   $('#tpBtn').onclick = teleport;
+  S.mmMin = store.get('mmMin', false); S.mmBig = store.get('mmBig', false);
+  $('#mmMin').onclick = () => { S.mmMin = !S.mmMin; store.set('mmMin', S.mmMin); updateMinimap(); };
+  $('#mmBig').onclick = () => { S.mmBig = !S.mmBig; store.set('mmBig', S.mmBig); if (S.mmMin) { S.mmMin = false; store.set('mmMin', false); } updateMinimap(); };
   $('#homeBtn').onclick = () => { if (!S.curLoc) return; delete S.tp[S.curLoc]; showLoc(S.curLoc, true); renderLocUI(); toast('🏠 Zurück am Startpunkt'); };
   $('#svAccept').onclick = acceptSV;
   $('#board').onclick = e => { const b = e.target.closest('.cell'); if (b && !b.disabled) openCapture(+b.dataset.cell); };
